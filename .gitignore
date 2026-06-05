@@ -1,0 +1,27 @@
+# Project-local Claude Code settings (auto-managed by Claude Code)
+.claude/
+
+# Node.js
+node_modules/
+
+# Backup files
+*.bak
+
+# Runtime and cache files from ~/.claude/
+*.jsonl
+.caveman-active
+.last-cleanup
+stats-cache.json
+mcp-needs-auth-cache.json
+file-history/
+telemetry/
+sessions/
+paste-cache/
+shell-snapshots/
+backups/
+session-env/
+daemon/
+plans/
+projects/
+plugins/
+cache/
