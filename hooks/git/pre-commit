@@ -1,0 +1,59 @@
+#!/bin/sh
+
+user_name=$(git config --local --get user.name)
+user_email=$(git config --local --get user.email)
+
+if [ -z "$user_name" ] || [ -z "$user_email" ]; then
+  echo "Error: user.name and user.email must be set locally (in this repository)."
+  echo "Please run:"
+  echo "  git config --local user.name \"Your Name\""
+  echo "  git config --local user.email \"you@example.com\""
+  exit 1
+fi
+
+set -euo pipefail
+
+# ── Protected branches ─────────────────────────────────────────────
+FORBIDDEN_BRANCHES="^(main|master|dev|develop)$"
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+if [[ "$CURRENT_BRANCH" =~ $FORBIDDEN_BRANCHES ]]; then
+    echo "error: direct commit to '$CURRENT_BRANCH' is not allowed."
+    echo "       create a feature branch: git checkout -b feature/my-change"
+    exit 1
+fi
+
+# ── clang-format staged files ──────────────────────────────────────
+EXTENSIONS="\.([ch]|[ch]pp|[ch]xx|cc|hh)$"
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM \
+               | grep -E "$EXTENSIONS" || true)
+
+if [[ -z "$STAGED_FILES" ]]; then
+    exit 0
+fi
+
+if ! command -v clang-format &>/dev/null; then
+    echo "warning: clang-format not found, skipping formatting."
+    exit 0
+fi
+
+echo "clang-format: formatting staged C/C++ files..."
+
+REFORMATTED=()
+while IFS= read -r FILE; do
+    [[ -f "$FILE" ]] || continue
+    BEFORE=$(git show ":$FILE" | md5sum)
+    clang-format -i "$FILE"
+    AFTER=$(md5sum < "$FILE")
+    if [[ "$BEFORE" != "$AFTER" ]]; then
+        git add "$FILE"
+        REFORMATTED+=("$FILE")
+    fi
+done <<< "$STAGED_FILES"
+
+if (( ${#REFORMATTED[@]} > 0 )); then
+    printf "  reformatted: %s\n" "${REFORMATTED[@]}"
+fi
+
+exit 0
