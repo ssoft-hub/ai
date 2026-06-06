@@ -34,6 +34,17 @@
       }
     ]
   },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash(*)",
+      "WebFetch(*)"
+    ]
+  },
   "enabledPlugins": {
     "code-review@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
