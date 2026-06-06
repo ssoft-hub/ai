@@ -33,14 +33,20 @@ function copyDir(srcDir, destDir, exclude = new Set()) {
   }
 }
 
-function copySettings() {
-  const src = path.join(repoDir, 'settings.json');
-  const dest = path.join(claudeDir, 'settings.json');
+function copyIfMissing(src, dest) {
   if (fs.existsSync(dest)) {
     warn(`${dest} already exists — skipping (merge manually or delete and re-run)`);
     return;
   }
   copyFile(src, dest);
+}
+
+function copySettings() {
+  copyIfMissing(path.join(repoDir, 'settings.json'), path.join(claudeDir, 'settings.json'));
+}
+
+function copyCLAUDEmd() {
+  copyIfMissing(path.join(repoDir, 'config', 'CLAUDE.md'), path.join(claudeDir, 'CLAUDE.md'));
 }
 
 log(`Installing to: ${claudeDir}${DRY_RUN ? ' (dry run)' : ''}\n`);
@@ -65,6 +71,9 @@ if (!fs.existsSync(skillsDir)) {
 
 log('\nsettings.json');
 copySettings();
+
+log('\nCLAUDE.md');
+copyCLAUDEmd();
 
 log('\ngit hooks');
 const preCommitSrc = path.join(repoDir, 'hooks', 'git', 'pre-commit');
