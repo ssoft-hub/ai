@@ -74,7 +74,7 @@ npm test
 Uses node's built-in `node:test` runner. Covers safety regexes, shell-escape functions,
 and install/uninstall round-trip in a temporary `CLAUDE_CONFIG_DIR`.
 
-See [install.js](install.js) for options and dry-run mode.
+See [install.js](install.js) for details.
 
 ## Manual setup
 
