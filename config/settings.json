@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{spawnSync}=require('child_process'),p=require('path'),o=require('os'),d=process.env.CLAUDE_CONFIG_DIR||p.join(o.homedir(),'.claude');spawnSync('node',[p.join(d,'hooks','PreToolUse.js')],{stdio:'inherit'})\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{spawnSync}=require('child_process'),p=require('path'),o=require('os'),d=process.env.CLAUDE_CONFIG_DIR||p.join(o.homedir(),'.claude');spawnSync('node',[p.join(d,'hooks','PostToolUse.js')],{stdio:'inherit'})\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{spawnSync}=require('child_process'),p=require('path'),o=require('os'),d=process.env.CLAUDE_CONFIG_DIR||p.join(o.homedir(),'.claude');spawnSync('node',[p.join(d,'hooks','Stop.js')],{stdio:'inherit'})\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{spawnSync}=require('child_process'),p=require('path'),o=require('os'),d=process.env.CLAUDE_CONFIG_DIR||p.join(o.homedir(),'.claude');spawnSync('node',[p.join(d,'hooks','UserPromptSubmit.js')],{stdio:'inherit'})\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash(*)",
+      "PowerShell(*)",
+      "WebFetch(*)",
+      "WebSearch(*)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(winget *)",
+      "Bash(choco *)",
+      "Bash(npm install -g *)",
+      "Bash(pip install *)",
+      "PowerShell(winget *)",
+      "PowerShell(choco *)",
+      "PowerShell(npm install -g *)",
+      "PowerShell(pip install *)"
+    ]
+  }
+}
