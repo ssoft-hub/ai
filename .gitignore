@@ -1,0 +1,9 @@
+# Project-local Claude Code settings (auto-managed by Claude Code)
+.claude/
+
+# Node.js
+node_modules/
+
+# Temporary and backup files
+*.bak
+*.tmp
