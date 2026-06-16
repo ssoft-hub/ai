@@ -32,6 +32,7 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | Skill | Description |
 |-------|-------------|
 | `api-design` | C++ public API structure and hygiene |
+| `architecture` | System/module architecture design, ADRs, tradeoffs |
 | `changelog` | Keep a Changelog format |
 | `commit-rules` | Conventional Commits format |
 | `cpp-coding` | C++ implementation conventions |
@@ -40,8 +41,11 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `doxygen` | Doxygen tag coverage for public headers |
 | `editing` | File editing workflow (re-read before edit) |
 | `hook-scripts` | Writing Claude Code hooks and tools |
+| `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |
 | `pr-rules` | PR title, description, merge strategy |
+| `project-planning` | Scoping, estimation, milestones, risk, status updates |
 | `release` | Semver release workflow |
+| `requirements` | Requirements gathering, user stories, acceptance criteria |
 | `submodule-sync` | Git submodule sync discipline |
 
 ## Installation
