@@ -23,3 +23,7 @@ When preparing a release, bumping version, or tagging → apply `release` skill.
 When writing or modifying hook scripts in hooks/ or tools/ → apply `hook-scripts` skill.
 When editing any file → apply `editing` skill.
 When syncing git submodules → apply `submodule-sync` skill.
+When writing or reviewing tests under `test/*.test.js` (node:test) → apply `node-testing` skill.
+When eliciting requirements, writing user stories, or defining acceptance criteria → apply `requirements` skill.
+When designing system/module architecture, evaluating tradeoffs, or writing an ADR → apply `architecture` skill.
+When scoping work, estimating, sequencing milestones, or writing a project plan/status update → apply `project-planning` skill.
