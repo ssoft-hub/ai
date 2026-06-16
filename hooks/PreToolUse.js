@@ -7,9 +7,11 @@ const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.cla
 const toolsDir = path.join(configDir, 'tools');
 
 const DISPATCH = {
-  Bash:  ['bash-safety.js'],
-  Edit:  ['secret-guard.js'],
-  Write: ['secret-guard.js'],
+  Bash:         ['bash-safety.js'],
+  Edit:         ['secret-guard.js'],
+  Write:        ['secret-guard.js'],
+  MultiEdit:    ['secret-guard.js'],
+  NotebookEdit: ['secret-guard.js'],
 };
 
 let raw = '';

@@ -20,6 +20,14 @@ const WARN = [
   { name: 'JWT token',                 re: /\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/ },
 ];
 
+function extractContent(toolInput) {
+  if (!toolInput) return '';
+  if (Array.isArray(toolInput.edits)) {
+    return toolInput.edits.map(e => e?.new_string ?? '').join('\n');
+  }
+  return toolInput.new_string ?? toolInput.new_source ?? toolInput.content ?? '';
+}
+
 function check(content, filePath) {
   if (filePath && BINARY_EXTS.has(path.extname(filePath).toLowerCase())) return { action: 'pass' };
   if (!content) return { action: 'pass' };
@@ -36,8 +44,8 @@ if (require.main === module) {
     let data;
     try { data = JSON.parse(raw); } catch { process.exit(0); }
 
-    const filePath = data.tool_input?.file_path ?? data.tool_input?.path ?? '';
-    const content = data.tool_input?.new_string ?? data.tool_input?.content ?? '';
+    const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path ?? '';
+    const content = extractContent(data.tool_input);
 
     const r = check(content, filePath);
     if (r.action === 'block') {
@@ -60,4 +68,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { BINARY_EXTS, BLOCK, WARN, check };
+module.exports = { BINARY_EXTS, BLOCK, WARN, check, extractContent };

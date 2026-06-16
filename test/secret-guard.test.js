@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { check } = require('../tools/secret-guard');
+const { check, extractContent } = require('../tools/secret-guard');
 
 test('blocks RSA private key', () => {
   const r = check('-----BEGIN RSA PRIVATE KEY-----\nMII...\n-----END RSA PRIVATE KEY-----', 'key.pem');
@@ -79,4 +79,41 @@ test('passes empty content', () => {
 
 test('passes innocuous text', () => {
   assert.strictEqual(check('hello world', 'cfg').action, 'pass');
+});
+
+test('extractContent reads Edit/Write new_string', () => {
+  assert.strictEqual(extractContent({ new_string: 'hello' }), 'hello');
+});
+
+test('extractContent reads NotebookEdit new_source', () => {
+  assert.strictEqual(extractContent({ new_source: 'print(1)' }), 'print(1)');
+});
+
+test('extractContent reads Write content', () => {
+  assert.strictEqual(extractContent({ content: 'hello' }), 'hello');
+});
+
+test('extractContent joins MultiEdit edits[].new_string', () => {
+  const toolInput = { edits: [{ new_string: 'foo' }, { new_string: 'bar' }] };
+  assert.strictEqual(extractContent(toolInput), 'foo\nbar');
+});
+
+test('extractContent tolerates missing new_string in an edit', () => {
+  const toolInput = { edits: [{ old_string: 'x' }, { new_string: 'bar' }] };
+  assert.strictEqual(extractContent(toolInput), '\nbar');
+});
+
+test('extractContent returns empty string for null/undefined tool_input', () => {
+  assert.strictEqual(extractContent(null), '');
+  assert.strictEqual(extractContent(undefined), '');
+});
+
+test('detects AWS key inside MultiEdit edits array', () => {
+  const content = extractContent({ edits: [{ new_string: 'safe' }, { new_string: 'AKIAIOSFODNN7EXAMPLE' }] });
+  assert.strictEqual(check(content, 'config.js').action, 'block');
+});
+
+test('detects private key inside NotebookEdit new_source', () => {
+  const content = extractContent({ new_source: '-----BEGIN RSA PRIVATE KEY-----' });
+  assert.strictEqual(check(content, 'notebook.ipynb').action, 'block');
 });
