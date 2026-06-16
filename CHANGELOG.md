@@ -13,6 +13,11 @@
 - Portable `config/settings.json` using `CLAUDE_CONFIG_DIR` / `os.homedir()` — no hardcoded user paths
 - `install.js` bootstrap with JSON-merge for `~/.claude/settings.json` — existing machine-specific settings preserved
 - `templates/SKILL.md` template for consistent skill authoring
+- Skills: `architecture` (ADRs, design tradeoffs), `node-testing` (`test/*.test.js` conventions), `project-planning` (scoping, estimation, milestones), `requirements` (user stories, acceptance criteria)
+
+### Changed
+
+- `api-design` skill: added rationale behind structure rules and a new wrong/right example for the "no void*" rule
 
 ### CI
 
