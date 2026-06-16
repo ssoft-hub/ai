@@ -27,6 +27,7 @@ No hardcoded user paths anywhere. No npm dependencies.
 1. Create `tools/<name>.js` — reads stdin JSON, writes to stdout (warn) or stderr+exit(2) (block)
 2. Add it to the appropriate dispatcher in `hooks/PreToolUse.js` or `hooks/PostToolUse.js`
 3. Export pure logic (regexes, helpers) and add tests under `test/<name>.test.js`
+   (see `skills/node-testing/SKILL.md` for conventions: flat `test()`, fixtures, `CLAUDE_CONFIG_DIR` isolation)
 4. Run `npm test`
 
 See `skills/hook-scripts/SKILL.md` for full hook development conventions.
