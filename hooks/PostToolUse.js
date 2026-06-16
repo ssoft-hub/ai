@@ -18,7 +18,7 @@ process.stdin.on('end', () => {
 
   if (!EDIT_TOOLS.has(data.tool_name)) process.exit(0);
 
-  const filePath = data.tool_input?.file_path ?? data.tool_input?.path;
+  const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path;
   if (!filePath || !CPP_EXTS.has(path.extname(filePath).toLowerCase())) process.exit(0);
 
   for (const tool of LINT_TOOLS) {
