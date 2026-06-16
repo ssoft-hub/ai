@@ -14,10 +14,15 @@
 - `install.js` bootstrap with JSON-merge for `~/.claude/settings.json` — existing machine-specific settings preserved
 - `templates/SKILL.md` template for consistent skill authoring
 - Skills: `architecture` (ADRs, design tradeoffs), `node-testing` (`test/*.test.js` conventions), `project-planning` (scoping, estimation, milestones), `requirements` (user stories, acceptance criteria)
+- `commit-trailer-guard` tool: blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
+- `SessionStart` hook: warn-only `submodule-status-check` (flags ahead/uninitialized/conflicted submodules) and `claude-md-skills-sync-check` (flags skills missing from CLAUDE.md's auto-apply list)
+- `bg-agent-counter` tool: tracks pending background agents; `Stop` notification deferred until all `run_in_background` agents complete, preventing premature "Task complete" toasts
 
 ### Changed
 
 - `api-design` skill: added rationale behind structure rules and a new wrong/right example for the "no void*" rule
+- `skills-reminder` now generates its prompt from `skills/*/SKILL.md` frontmatter at runtime instead of a hardcoded list, so new skills appear automatically
+- `secret-guard` now scans `MultiEdit` and `NotebookEdit` content, not just `Edit`/`Write`
 
 ### CI
 
