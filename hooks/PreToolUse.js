@@ -18,9 +18,6 @@ let raw = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', c => { raw += c; });
 process.stdin.on('end', () => {
-  if (process.env.CLAUDE_HOOK_RUNNING) process.exit(0);
-  process.env.CLAUDE_HOOK_RUNNING = '1';
-
   let data;
   try { data = JSON.parse(raw); } catch { process.exit(0); }
 
