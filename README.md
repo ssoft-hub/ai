@@ -1,5 +1,7 @@
 # claude-config
 
+[![CI](https://github.com/ssoft-hub/ai/actions/workflows/ci.yml/badge.svg)](https://github.com/ssoft-hub/ai/actions/workflows/ci.yml)
+
 Personal Claude Code configuration — hooks, tools, and skills.
 
 ## Contents
