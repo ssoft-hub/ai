@@ -7,6 +7,7 @@ const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.cla
 const toolsDir = path.join(configDir, 'tools');
 
 const DISPATCH = {
+  Agent:        ['bg-agent-counter.js'],
   Bash:         ['bash-safety.js', 'commit-trailer-guard.js'],
   Edit:         ['secret-guard.js'],
   Write:        ['secret-guard.js'],
