@@ -18,11 +18,8 @@ process.stdin.on('end', () => {
 
   if (!EDIT_TOOLS.has(data.tool_name)) process.exit(0);
 
-  const filePath = data.tool_input?.file_path ?? data.tool_input?.path;
+  const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path;
   if (!filePath || !CPP_EXTS.has(path.extname(filePath).toLowerCase())) process.exit(0);
-
-  if (process.env.CLAUDE_HOOK_RUNNING) process.exit(0);
-  process.env.CLAUDE_HOOK_RUNNING = '1';
 
   for (const tool of LINT_TOOLS) {
     const r = spawnSync('node', [path.join(toolsDir, tool), filePath], { encoding: 'utf8', stdio: 'pipe', timeout: 30000 });

@@ -7,18 +7,18 @@ const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.cla
 const toolsDir = path.join(configDir, 'tools');
 
 const DISPATCH = {
-  Bash:  ['bash-safety.js'],
-  Edit:  ['secret-guard.js'],
-  Write: ['secret-guard.js'],
+  Agent:        ['bg-agent-counter.js'],
+  Bash:         ['bash-safety.js', 'commit-trailer-guard.js'],
+  Edit:         ['secret-guard.js'],
+  Write:        ['secret-guard.js'],
+  MultiEdit:    ['secret-guard.js'],
+  NotebookEdit: ['secret-guard.js'],
 };
 
 let raw = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', c => { raw += c; });
 process.stdin.on('end', () => {
-  if (process.env.CLAUDE_HOOK_RUNNING) process.exit(0);
-  process.env.CLAUDE_HOOK_RUNNING = '1';
-
   let data;
   try { data = JSON.parse(raw); } catch { process.exit(0); }
 

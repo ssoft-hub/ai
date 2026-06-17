@@ -38,7 +38,11 @@ See `skills/hook-scripts/SKILL.md` for full hook development conventions.
 2. Fill in frontmatter (name, description, tags)
 3. Write rules sections following the template structure
 4. Add an entry to the skill table in `README.md`
-5. Run `node install.js` to deploy
+5. Add the skill's trigger line to `config/CLAUDE.md`'s "Skills — auto-apply" section
+   (this file is static prose, not regenerated — `tools/skills-reminder.js` reads
+   `skills/` directly so it never goes stale, but this file must be updated by hand;
+   `tools/claude-md-skills-sync-check.js` warns at session start if you forget)
+6. Run `node install.js` to deploy
 
 ## Installation
 
