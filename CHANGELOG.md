@@ -13,3 +13,7 @@
 - Portable `config/settings.json` using `CLAUDE_CONFIG_DIR` / `os.homedir()` — no hardcoded user paths
 - `install.js` bootstrap with JSON-merge for `~/.claude/settings.json` — existing machine-specific settings preserved
 - `templates/SKILL.md` template for consistent skill authoring
+
+### CI
+
+- GitHub Actions workflow running `npm test` on Node 18, 20, 22 on every push and PR to `main`
