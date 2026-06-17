@@ -25,8 +25,8 @@ Personal Claude Code configuration — hooks, tools, and skills.
 - `clang-tidy.js` — runs static analysis (uses `compile_commands.json` when found)
 - `cppcheck.js` — runs `cppcheck --enable=warning,style,performance,portability`
 
-**`Stop`** — fires when Claude Code session ends:
-- `stop-notify.js` — desktop notification (Windows toast / macOS notification / Linux notify-send)
+**`Stop`** — fires when Claude Code finishes a response turn:
+- `stop-notify.js` — desktop notification (Windows toast / macOS notification / Linux notify-send); deferred until all background agents (`run_in_background: true`) have completed
 
 **`SessionStart`** — fires once when a session begins, warn-only:
 - `submodule-status-check.js` — warns if any git submodule is ahead/uninitialized/conflicted
