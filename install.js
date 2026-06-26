@@ -2,6 +2,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { mergeSettings, additionsFromRepo, subtractAdditions } = require('./lib/settings');
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const SKIP_GIT = process.argv.includes('--no-git-hook');
@@ -20,8 +21,29 @@ if (fs.existsSync(manifestPath)) {
   catch { warn(`existing manifest unreadable — overwriting: ${manifestPath}`); }
 }
 
+// Every dest path written this run, so upgrade can prune files a previous
+// install created but the current repo no longer ships.
+const written = new Set();
+
 function isTracked(dest) {
   return manifest.createdFiles.includes(dest) || manifest.backups.some(b => b.dest === dest);
+}
+
+function isInside(p, stopAt) {
+  const rel = path.relative(stopAt, p);
+  return rel.length > 0 && !rel.startsWith('..') && !path.isAbsolute(rel);
+}
+
+function pruneEmptyDirs(start, stopAt) {
+  if (DRY_RUN) return;
+  let dir = start;
+  while (isInside(dir, stopAt) && fs.existsSync(dir)) {
+    try {
+      if (fs.readdirSync(dir).length) break;
+      fs.rmdirSync(dir);
+    } catch { break; }
+    dir = path.dirname(dir);
+  }
 }
 
 function backupPathFor(dest) {
@@ -50,6 +72,7 @@ function copyFile(src, dest) {
     fs.copyFileSync(src, dest);
   }
   if (wasMissing && !isTracked(dest)) manifest.createdFiles.push(dest);
+  written.add(dest);
   log(`  ${logPrefix} ${path.relative(repoDir, src)} → ${dest}`);
 }
 
@@ -64,88 +87,11 @@ function copyDir(srcDir, destDir, exclude = new Set()) {
   }
 }
 
-function mergeUnique(existing, incoming) {
-  return [...new Set([...existing, ...incoming])];
-}
-
-function mergeHookEvent(existing, incoming) {
-  const existingCmds = new Set();
-  for (const entry of existing)
-    for (const h of (entry.hooks || []))
-      if (h.command) existingCmds.add(h.command);
-
-  const result = [...existing];
-  const addedCommands = [];
-  for (const entry of incoming) {
-    const newHooks = (entry.hooks || []).filter(h => !existingCmds.has(h.command));
-    if (newHooks.length) {
-      result.push({ ...entry, hooks: newHooks });
-      for (const h of newHooks) if (h.command) addedCommands.push(h.command);
-    }
-  }
-  return { result, addedCommands };
-}
-
-// Merge repo hooks/permissions into existing, recording the exact items added
-// (hook command strings per event, permission entries per key). Uninstall later
-// subtracts precisely these, so post-install changes by other tools survive.
-function mergeSettings(existing, repo) {
-  const out = structuredClone(existing);
-  const additions = { hooks: {}, permissions: {} };
-
-  if (repo.hooks) {
-    out.hooks = out.hooks || {};
-    for (const [ev, entries] of Object.entries(repo.hooks)) {
-      const { result, addedCommands } = mergeHookEvent(out.hooks[ev] || [], entries);
-      out.hooks[ev] = result;
-      if (addedCommands.length) additions.hooks[ev] = addedCommands;
-    }
-  }
-
-  if (repo.permissions) {
-    out.permissions = out.permissions || {};
-    for (const key of ['allow', 'ask', 'deny']) {
-      if (!repo.permissions[key]) continue;
-      const existingArr = out.permissions[key] || [];
-      const existingSet = new Set(existingArr);
-      const addedPerms = repo.permissions[key].filter(p => !existingSet.has(p));
-      out.permissions[key] = mergeUnique(existingArr, repo.permissions[key]);
-      if (addedPerms.length) additions.permissions[key] = addedPerms;
-    }
-  }
-
-  return { out, additions };
-}
-
-// Additions when settings.json is created from scratch: everything the repo
-// settings contribute (the whole file is install-owned).
-function additionsFromRepo(repo) {
-  const additions = { hooks: {}, permissions: {} };
-  for (const [ev, entries] of Object.entries(repo.hooks || {})) {
-    const cmds = [];
-    for (const entry of entries)
-      for (const h of (entry.hooks || []))
-        if (h.command) cmds.push(h.command);
-    if (cmds.length) additions.hooks[ev] = cmds;
-  }
-  for (const key of ['allow', 'ask', 'deny'])
-    if (repo.permissions?.[key]?.length) additions.permissions[key] = [...repo.permissions[key]];
-  return additions;
-}
-
-// Record (or accumulate across reinstalls) what install added to settings.json.
-// The earliest `preexisted` flag wins; additions are unioned so a reinstall with
-// a newer repo settings still registers any extra items for removal.
+// Record what install currently owns in settings.json. Because installSettings
+// strips the previous install's additions before re-merging, `additions` always
+// describes current ownership exactly — so this replaces, never accumulates.
 function recordSettings(dest, preexisted, additions) {
-  if (!manifest.settings || manifest.settings.dest !== dest) {
-    manifest.settings = { dest, preexisted, additions };
-    return;
-  }
-  const s = manifest.settings;
-  for (const [ev, cmds] of Object.entries(additions.hooks || {}))
-    s.additions.hooks[ev] = [...new Set([...(s.additions.hooks[ev] || []), ...cmds])];
-  for (const [key, vals] of Object.entries(additions.permissions || {}))
-    s.additions.permissions[key] = [...new Set([...(s.additions.permissions[key] || []), ...vals])];
+  manifest.settings = { dest, preexisted, additions };
 }
 
 function installSettings() {
@@ -153,24 +99,33 @@ function installSettings() {
   if (!fs.existsSync(src)) { warn(`source not found: ${src}`); return; }
   const dest = path.join(claudeDir, 'settings.json');
   const repo = JSON.parse(fs.readFileSync(src, 'utf8'));
+  written.add(dest);
 
   // settings.json is merged, not snapshot-replaced: uninstall reverts by
   // subtracting exactly what was added, so no backup is taken here.
+  const prior = manifest.settings?.dest === dest ? manifest.settings : null;
+
   if (!fs.existsSync(dest)) {
     if (!DRY_RUN) {
       fs.mkdirSync(path.dirname(dest), { recursive: true });
       fs.copyFileSync(src, dest);
     }
-    recordSettings(dest, false, additionsFromRepo(repo));
+    recordSettings(dest, prior ? prior.preexisted : false, additionsFromRepo(repo));
     log(`  ${logPrefix} config/settings.json → ${dest} (created)`);
     return;
   }
+
   let existing;
   try { existing = JSON.parse(fs.readFileSync(dest, 'utf8')); }
   catch { warn(`${dest} is not valid JSON — skipping merge`); return; }
-  const { out: merged, additions } = mergeSettings(existing, repo);
+
+  // On upgrade, strip what the previous install added before re-merging the
+  // current repo settings. This drops entries that drifted (e.g. a changed hook
+  // command) or were removed upstream, instead of leaving stale duplicates.
+  const base = prior ? subtractAdditions(existing, prior.additions) : existing;
+  const { out: merged, additions } = mergeSettings(base, repo);
   if (!DRY_RUN) fs.writeFileSync(dest, JSON.stringify(merged, null, 2) + '\n');
-  recordSettings(dest, true, additions);
+  recordSettings(dest, prior ? prior.preexisted : true, additions);
   log(`  ${logPrefix} config/settings.json → ${dest} (merged)`);
   for (const [ev, cmds] of Object.entries(additions.hooks))
     log(`      added ${cmds.length} hook${cmds.length === 1 ? '' : 's'} to ${ev}`);
@@ -185,6 +140,7 @@ function installCLAUDEmd() {
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.copyFileSync(src, dest);
   }
+  written.add(dest);
   log(`  ${logPrefix} config/CLAUDE.md → ${dest}`);
 }
 
@@ -236,6 +192,26 @@ if (!SKIP_GIT) {
   installGitHook();
 }
 
+// Upgrade hygiene: remove files a previous install created under claudeDir that
+// the current repo no longer ships (renamed/deleted hooks, tools, skills).
+// Scoped to claudeDir so the git pre-commit hook (outside it) is never touched.
+log('\npruning files no longer shipped:');
+const orphans = manifest.createdFiles.filter(
+  f => isInside(f, claudeDir) && !written.has(f) && fs.existsSync(f),
+);
+for (const f of orphans) {
+  if (!DRY_RUN) fs.unlinkSync(f);
+  log(`  ${logPrefix} removed ${f}`);
+}
+if (orphans.length) {
+  const orphanSet = new Set(orphans);
+  manifest.createdFiles = manifest.createdFiles.filter(f => !orphanSet.has(f));
+  for (const dir of new Set(orphans.map(f => path.dirname(f)))) pruneEmptyDirs(dir, claudeDir);
+} else {
+  log(`  ${logPrefix} (none)`);
+}
+
+manifest.updatedAt = new Date().toISOString();
 if (!DRY_RUN) fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 log(`\nManifest: ${manifestPath}`);
 log('Done.');

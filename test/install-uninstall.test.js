@@ -203,3 +203,71 @@ test('uninstall on dir with no manifest is a no-op', () => {
     assert.deepStrictEqual(fs.readdirSync(dir), []);
   } finally { rmTmp(dir); }
 });
+
+test('upgrade prunes a file a previous install created but no longer ships', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    // A file shipped by an earlier version, still tracked in the manifest.
+    const stale = path.join(dir, 'tools', 'obsolete.js');
+    fs.writeFileSync(stale, '// removed upstream');
+    const mpath = path.join(dir, '.claude-config-manifest.json');
+    const m = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    m.createdFiles.push(stale);
+    fs.writeFileSync(mpath, JSON.stringify(m, null, 2) + '\n');
+
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.ok(!fs.existsSync(stale), 'stale file removed on upgrade');
+    const m2 = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    assert.ok(!m2.createdFiles.includes(stale), 'stale file dropped from manifest');
+    assert.ok(fs.existsSync(path.join(dir, 'tools', 'bash-safety.js')), 'still-shipped file kept');
+  } finally { rmTmp(dir); }
+});
+
+test('upgrade replaces a drifted hook command instead of duplicating it', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    const settingsPath = path.join(dir, 'settings.json');
+    const mpath = path.join(dir, '.claude-config-manifest.json');
+
+    const s = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    const currentCmd = s.hooks.PreToolUse[0].hooks[0].command;
+    const oldCmd = 'node -e "OLD_LAUNCHER"';
+    // Rewrite both the file and the manifest as if the previous install used oldCmd.
+    s.hooks.PreToolUse = [{ hooks: [{ type: 'command', command: oldCmd }] }];
+    fs.writeFileSync(settingsPath, JSON.stringify(s, null, 2) + '\n');
+    const m = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    m.settings.additions.hooks.PreToolUse = [oldCmd];
+    fs.writeFileSync(mpath, JSON.stringify(m, null, 2) + '\n');
+
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+
+    const after = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    const cmds = after.hooks.PreToolUse.flatMap(e => e.hooks.map(h => h.command));
+    assert.deepStrictEqual(cmds, [currentCmd], 'drifted command replaced, not duplicated');
+  } finally { rmTmp(dir); }
+});
+
+test('reinstall does not duplicate hook entries', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    runInstall(dir);
+    const s = JSON.parse(fs.readFileSync(path.join(dir, 'settings.json'), 'utf8'));
+    for (const [ev, entries] of Object.entries(s.hooks))
+      assert.strictEqual(entries.length, 1, `${ev} has a single entry after reinstall`);
+  } finally { rmTmp(dir); }
+});
+
+test('manifest records installedAt and updatedAt', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    const m = JSON.parse(fs.readFileSync(path.join(dir, '.claude-config-manifest.json'), 'utf8'));
+    assert.ok(m.installedAt, 'installedAt recorded');
+    assert.ok(m.updatedAt, 'updatedAt recorded');
+  } finally { rmTmp(dir); }
+});
