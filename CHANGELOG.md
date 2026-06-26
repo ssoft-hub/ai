@@ -23,6 +23,7 @@
 - `api-design` skill: added rationale behind structure rules and a new wrong/right example for the "no void*" rule
 - `skills-reminder` now generates its prompt from `skills/*/SKILL.md` frontmatter at runtime instead of a hardcoded list, so new skills appear automatically
 - `secret-guard` now scans `MultiEdit` and `NotebookEdit` content, not just `Edit`/`Write`
+- C++ lint tools (`clang-format`, `clang-tidy`, `cppcheck`) now run only when their config file (`.clang-format` / `.clang-tidy` / `.cppcheck`) is present in the edited file's repository, never inheriting one from a parent repo — eliminates lint noise in unconfigured projects. `.cppcheck` is passed to cppcheck as `--suppressions-list`
 
 ### CI
 
