@@ -8,6 +8,7 @@ function hasTool(name) {
 }
 
 const file = process.argv[2];
+const suppressions = process.argv[3];
 if (!file || !fs.existsSync(file)) process.exit(0);
 
 if (!hasTool('cppcheck')) {
@@ -17,10 +18,14 @@ if (!hasTool('cppcheck')) {
 
 const args = [
   '--enable=warning,style,performance,portability',
+  '--std=c++20',
+  '--language=c++',
   '--inline-suppr',
-  '--quiet',
-  file,
+  '--error-exitcode=1',
+  '-UDOXYGEN',
 ];
+if (suppressions) args.push(`--suppressions-list=${suppressions}`);
+args.push(file);
 
 const r = spawnSync('cppcheck', args, { encoding: 'utf8', stdio: 'pipe', timeout: 30000 });
 if (r.stdout) process.stdout.write(r.stdout);

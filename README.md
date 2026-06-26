@@ -20,10 +20,10 @@ Personal Claude Code configuration — hooks, tools, and skills.
 - `commit-trailer-guard.js` — blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) containing private keys, AWS keys, GitHub PATs; warns on probable credentials
 
-**`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit` on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
-- `clang-format.js` — formats in-place (skips silently if `clang-format` not in PATH)
-- `clang-tidy.js` — runs static analysis (uses `compile_commands.json` when found)
-- `cppcheck.js` — runs `cppcheck --enable=warning,style,performance,portability`
+**`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit` on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`). Each tool runs **only when its config file is present in this repository** (searched from the edited file up to the git root, never into a parent repo); otherwise it is skipped silently:
+- `clang-format.js` — formats in-place; requires `.clang-format` (skips silently if `clang-format` not in PATH)
+- `clang-tidy.js` — runs static analysis; requires `.clang-tidy` (uses `compile_commands.json` when found)
+- `cppcheck.js` — runs `cppcheck --enable=warning,style,performance,portability --std=c++20 --error-exitcode=1 …`; requires `.cppcheck`, passed as `--suppressions-list`
 
 **`Stop`** — fires when Claude Code finishes a response turn:
 - `stop-notify.js` — desktop notification (Windows toast / macOS notification / Linux notify-send); deferred until all background agents (`run_in_background: true`) have completed
