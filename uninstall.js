@@ -2,6 +2,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { subtractAdditions, isEffectivelyEmpty } = require('./lib/settings');
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -40,28 +41,11 @@ function revertSettings(record) {
   try { cur = JSON.parse(fs.readFileSync(dest, 'utf8')); }
   catch { warn(`${dest} is not valid JSON — leaving as-is`); return; }
 
-  for (const [ev, cmds] of Object.entries(additions.hooks || {})) {
-    if (!cur.hooks?.[ev]) continue;
-    const rm = new Set(cmds);
-    cur.hooks[ev] = cur.hooks[ev]
-      .map(entry => ({ ...entry, hooks: (entry.hooks || []).filter(h => !rm.has(h.command)) }))
-      .filter(entry => (entry.hooks || []).length > 0);
-    if (cur.hooks[ev].length === 0) delete cur.hooks[ev];
-  }
-  if (cur.hooks && Object.keys(cur.hooks).length === 0) delete cur.hooks;
-
-  for (const [key, vals] of Object.entries(additions.permissions || {})) {
-    if (!cur.permissions?.[key]) continue;
-    const rm = new Set(vals);
-    cur.permissions[key] = cur.permissions[key].filter(p => !rm.has(p));
-    if (cur.permissions[key].length === 0) delete cur.permissions[key];
-  }
-  if (cur.permissions && Object.keys(cur.permissions).length === 0) delete cur.permissions;
+  subtractAdditions(cur, additions);
 
   // Delete only a file install itself created that has nothing left but $schema;
   // a preexisting file (or one carrying foreign keys) is always rewritten, never removed.
-  const meaningful = Object.keys(cur).filter(k => k !== '$schema');
-  if (meaningful.length === 0 && !preexisted) {
+  if (isEffectivelyEmpty(cur) && !preexisted) {
     if (!DRY_RUN) fs.unlinkSync(dest);
     log(`  ${DRY_RUN ? '[dry]' : '    '} removed ${dest}`);
   } else {

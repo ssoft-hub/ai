@@ -25,6 +25,7 @@
 - `secret-guard` now scans `MultiEdit` and `NotebookEdit` content, not just `Edit`/`Write`
 - C++ lint tools (`clang-format`, `clang-tidy`, `cppcheck`) now run only when their config file (`.clang-format` / `.clang-tidy` / `.cppcheck`) is present in the edited file's repository, never inheriting one from a parent repo — eliminates lint noise in unconfigured projects. `.cppcheck` is passed to cppcheck as `--suppressions-list`
 - `uninstall` now reverts `settings.json` by subtracting only the hooks and permissions `install` added, instead of restoring a snapshot taken at install time. Settings written to the file afterwards by other tools or by hand are preserved; `install` records the exact additions in the manifest (no more `settings.json` backup)
+- Re-running `install` now performs a clean upgrade: files a previous install created but the current repo no longer ships are pruned, and the `settings.json` merge is re-synced so a hook whose launcher command changed is replaced instead of duplicated. The manifest now also records `updatedAt`. Shared merge/subtract logic extracted to `lib/settings.js` with direct unit tests
 
 ### CI
 

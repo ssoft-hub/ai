@@ -75,6 +75,11 @@ removed, backed-up files (`CLAUDE.md`, `pre-commit`) are restored, and `settings
 reverted by **subtracting only the entries install added** — so hooks or permissions added
 to it afterwards by other tools or by hand are kept intact.
 
+Re-running `install.js` performs an in-place **upgrade**: files are refreshed, files a
+previous install created but the current repo no longer ships are pruned, and the
+`settings.json` merge is re-synced — a hook whose launcher command changed is replaced
+rather than duplicated. The manifest tracks `installedAt` and `updatedAt`.
+
 ```
 node install.js --dry-run      # preview without writing
 node install.js --no-git-hook  # skip .git/hooks/pre-commit copy
