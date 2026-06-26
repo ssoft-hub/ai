@@ -69,8 +69,11 @@ into `~/.claude/settings.json` (existing machine-specific settings are preserved
 `CLAUDE.md` and `.git/hooks/pre-commit` are overwritten with backups.
 
 `install.js` writes a manifest at `~/.claude/.claude-config-manifest.json` recording every
-created file and every backup. `uninstall.js` reads the manifest and restores the exact
-pre-install state byte-for-byte.
+created file, every backup, and exactly which hooks and permissions it merged into
+`settings.json`. `uninstall.js` reads the manifest and reverses each: created files are
+removed, backed-up files (`CLAUDE.md`, `pre-commit`) are restored, and `settings.json` is
+reverted by **subtracting only the entries install added** — so hooks or permissions added
+to it afterwards by other tools or by hand are kept intact.
 
 ```
 node install.js --dry-run      # preview without writing

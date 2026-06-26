@@ -75,35 +75,77 @@ function mergeHookEvent(existing, incoming) {
       if (h.command) existingCmds.add(h.command);
 
   const result = [...existing];
-  let added = 0;
+  const addedCommands = [];
   for (const entry of incoming) {
     const newHooks = (entry.hooks || []).filter(h => !existingCmds.has(h.command));
-    if (newHooks.length) { result.push({ ...entry, hooks: newHooks }); added += newHooks.length; }
+    if (newHooks.length) {
+      result.push({ ...entry, hooks: newHooks });
+      for (const h of newHooks) if (h.command) addedCommands.push(h.command);
+    }
   }
-  return { result, added };
+  return { result, addedCommands };
 }
 
+// Merge repo hooks/permissions into existing, recording the exact items added
+// (hook command strings per event, permission entries per key). Uninstall later
+// subtracts precisely these, so post-install changes by other tools survive.
 function mergeSettings(existing, repo) {
   const out = structuredClone(existing);
-  const additions = {};
+  const additions = { hooks: {}, permissions: {} };
 
   if (repo.hooks) {
     out.hooks = out.hooks || {};
     for (const [ev, entries] of Object.entries(repo.hooks)) {
-      const { result, added } = mergeHookEvent(out.hooks[ev] || [], entries);
+      const { result, addedCommands } = mergeHookEvent(out.hooks[ev] || [], entries);
       out.hooks[ev] = result;
-      if (added) additions[ev] = added;
+      if (addedCommands.length) additions.hooks[ev] = addedCommands;
     }
   }
 
   if (repo.permissions) {
     out.permissions = out.permissions || {};
-    for (const key of ['allow', 'ask', 'deny'])
-      if (repo.permissions[key])
-        out.permissions[key] = mergeUnique(out.permissions[key] || [], repo.permissions[key]);
+    for (const key of ['allow', 'ask', 'deny']) {
+      if (!repo.permissions[key]) continue;
+      const existingArr = out.permissions[key] || [];
+      const existingSet = new Set(existingArr);
+      const addedPerms = repo.permissions[key].filter(p => !existingSet.has(p));
+      out.permissions[key] = mergeUnique(existingArr, repo.permissions[key]);
+      if (addedPerms.length) additions.permissions[key] = addedPerms;
+    }
   }
 
   return { out, additions };
+}
+
+// Additions when settings.json is created from scratch: everything the repo
+// settings contribute (the whole file is install-owned).
+function additionsFromRepo(repo) {
+  const additions = { hooks: {}, permissions: {} };
+  for (const [ev, entries] of Object.entries(repo.hooks || {})) {
+    const cmds = [];
+    for (const entry of entries)
+      for (const h of (entry.hooks || []))
+        if (h.command) cmds.push(h.command);
+    if (cmds.length) additions.hooks[ev] = cmds;
+  }
+  for (const key of ['allow', 'ask', 'deny'])
+    if (repo.permissions?.[key]?.length) additions.permissions[key] = [...repo.permissions[key]];
+  return additions;
+}
+
+// Record (or accumulate across reinstalls) what install added to settings.json.
+// The earliest `preexisted` flag wins; additions are unioned so a reinstall with
+// a newer repo settings still registers any extra items for removal.
+function recordSettings(dest, preexisted, additions) {
+  if (!manifest.settings || manifest.settings.dest !== dest) {
+    manifest.settings = { dest, preexisted, additions };
+    return;
+  }
+  const s = manifest.settings;
+  for (const [ev, cmds] of Object.entries(additions.hooks || {}))
+    s.additions.hooks[ev] = [...new Set([...(s.additions.hooks[ev] || []), ...cmds])];
+  for (const [key, vals] of Object.entries(additions.permissions || {}))
+    s.additions.permissions[key] = [...new Set([...(s.additions.permissions[key] || []), ...vals])];
 }
 
 function installSettings() {
@@ -112,13 +154,14 @@ function installSettings() {
   const dest = path.join(claudeDir, 'settings.json');
   const repo = JSON.parse(fs.readFileSync(src, 'utf8'));
 
-  backupBeforeWrite(dest);
-
+  // settings.json is merged, not snapshot-replaced: uninstall reverts by
+  // subtracting exactly what was added, so no backup is taken here.
   if (!fs.existsSync(dest)) {
     if (!DRY_RUN) {
       fs.mkdirSync(path.dirname(dest), { recursive: true });
       fs.copyFileSync(src, dest);
     }
+    recordSettings(dest, false, additionsFromRepo(repo));
     log(`  ${logPrefix} config/settings.json → ${dest} (created)`);
     return;
   }
@@ -127,9 +170,10 @@ function installSettings() {
   catch { warn(`${dest} is not valid JSON — skipping merge`); return; }
   const { out: merged, additions } = mergeSettings(existing, repo);
   if (!DRY_RUN) fs.writeFileSync(dest, JSON.stringify(merged, null, 2) + '\n');
+  recordSettings(dest, true, additions);
   log(`  ${logPrefix} config/settings.json → ${dest} (merged)`);
-  for (const [ev, n] of Object.entries(additions))
-    log(`      added ${n} hook${n === 1 ? '' : 's'} to ${ev}`);
+  for (const [ev, cmds] of Object.entries(additions.hooks))
+    log(`      added ${cmds.length} hook${cmds.length === 1 ? '' : 's'} to ${ev}`);
 }
 
 function installCLAUDEmd() {

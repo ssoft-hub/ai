@@ -24,6 +24,7 @@
 - `skills-reminder` now generates its prompt from `skills/*/SKILL.md` frontmatter at runtime instead of a hardcoded list, so new skills appear automatically
 - `secret-guard` now scans `MultiEdit` and `NotebookEdit` content, not just `Edit`/`Write`
 - C++ lint tools (`clang-format`, `clang-tidy`, `cppcheck`) now run only when their config file (`.clang-format` / `.clang-tidy` / `.cppcheck`) is present in the edited file's repository, never inheriting one from a parent repo — eliminates lint noise in unconfigured projects. `.cppcheck` is passed to cppcheck as `--suppressions-list`
+- `uninstall` now reverts `settings.json` by subtracting only the hooks and permissions `install` added, instead of restoring a snapshot taken at install time. Settings written to the file afterwards by other tools or by hand are preserved; `install` records the exact additions in the manifest (no more `settings.json` backup)
 
 ### CI
 

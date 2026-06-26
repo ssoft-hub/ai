@@ -62,7 +62,7 @@ test('uninstall removes everything when nothing was preexisting', () => {
   } finally { rmTmp(dir); }
 });
 
-test('install+uninstall restores preexisting settings.json byte-for-byte', () => {
+test('install+uninstall reverts a preexisting settings.json to its prior content', () => {
   const dir = mkTmp();
   try {
     const settingsPath = path.join(dir, 'settings.json');
@@ -71,8 +71,7 @@ test('install+uninstall restores preexisting settings.json byte-for-byte', () =>
       customField: 'preserved',
       hooks: { PreToolUse: [{ hooks: [{ type: 'command', command: 'user-hook' }] }] },
     };
-    const originalText = JSON.stringify(original, null, 2);
-    fs.writeFileSync(settingsPath, originalText);
+    fs.writeFileSync(settingsPath, JSON.stringify(original, null, 2));
 
     const ri = runInstall(dir);
     assert.strictEqual(ri.status, 0, ri.stderr);
@@ -85,8 +84,38 @@ test('install+uninstall restores preexisting settings.json byte-for-byte', () =>
     const ru = runUninstall(dir);
     assert.strictEqual(ru.status, 0, ru.stderr);
 
-    const restoredText = fs.readFileSync(settingsPath, 'utf8');
-    assert.strictEqual(restoredText, originalText, 'settings.json restored byte-for-byte');
+    // Reverting the merge yields the original content (the user's hook and
+    // permissions remain; install's additions are gone).
+    assert.deepStrictEqual(JSON.parse(fs.readFileSync(settingsPath, 'utf8')), original);
+  } finally { rmTmp(dir); }
+});
+
+test('uninstall preserves settings added by other tools after install', () => {
+  const dir = mkTmp();
+  try {
+    const ri = runInstall(dir); // creates settings.json from scratch
+    assert.strictEqual(ri.status, 0, ri.stderr);
+
+    const settingsPath = path.join(dir, 'settings.json');
+    const s = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    // A second tool extends the shared settings.json after our install.
+    s.hooks.PreCompact = [{ hooks: [{ type: 'command', command: 'other-tool-hook' }] }];
+    s.permissions.allow.push('Bash(othertool *)');
+    s.mcpServers = { foo: { command: 'foo' } };
+    fs.writeFileSync(settingsPath, JSON.stringify(s, null, 2) + '\n');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+
+    assert.ok(fs.existsSync(settingsPath), 'file kept because foreign settings remain');
+    const after = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    // Foreign additions survive…
+    assert.deepStrictEqual(after.hooks.PreCompact, s.hooks.PreCompact, 'foreign hook kept');
+    assert.ok(after.permissions.allow.includes('Bash(othertool *)'), 'foreign permission kept');
+    assert.deepStrictEqual(after.mcpServers, { foo: { command: 'foo' } }, 'foreign top-level key kept');
+    // …while install's own hooks and permissions are removed.
+    assert.ok(!after.hooks.PreToolUse, 'install PreToolUse removed');
+    assert.ok(!after.permissions.allow.includes('Bash(*)'), 'install permission removed');
   } finally { rmTmp(dir); }
 });
 
@@ -136,22 +165,23 @@ test('install preserves user defaultMode when repo settings has none', () => {
   } finally { rmTmp(dir); }
 });
 
-test('reinstall does not double-backup', () => {
+test('reinstall records settings additions once and uninstall reverts them', () => {
   const dir = mkTmp();
   try {
     const settingsPath = path.join(dir, 'settings.json');
-    const original = JSON.stringify({ permissions: { allow: ['Bash(echo)'] } }, null, 2);
-    fs.writeFileSync(settingsPath, original);
+    const original = { permissions: { allow: ['Bash(echo)'] } };
+    fs.writeFileSync(settingsPath, JSON.stringify(original, null, 2));
 
     runInstall(dir);
     runInstall(dir);
 
     const manifest = JSON.parse(fs.readFileSync(path.join(dir, '.claude-config-manifest.json'), 'utf8'));
-    const settingsBackups = manifest.backups.filter(b => b.dest === settingsPath);
-    assert.strictEqual(settingsBackups.length, 1, 'only one backup for settings.json across reinstalls');
+    assert.ok(manifest.settings, 'settings additions recorded');
+    assert.strictEqual(manifest.settings.preexisted, true, 'earliest preexisted flag kept');
+    assert.ok(!manifest.backups.some(b => b.dest === settingsPath), 'settings.json is not snapshot-backed-up');
 
     runUninstall(dir);
-    assert.strictEqual(fs.readFileSync(settingsPath, 'utf8'), original, 'restored original after double install');
+    assert.deepStrictEqual(JSON.parse(fs.readFileSync(settingsPath, 'utf8')), original, 'reverted to original after double install');
   } finally { rmTmp(dir); }
 });
 
