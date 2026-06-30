@@ -17,9 +17,12 @@
 - `commit-trailer-guard` tool: blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `SessionStart` hook: warn-only `submodule-status-check` (flags ahead/uninitialized/conflicted submodules) and `claude-md-skills-sync-check` (flags skills missing from CLAUDE.md's auto-apply list)
 - `bg-agent-counter` tool: tracks pending background agents; `Stop` notification deferred until all `run_in_background` agents complete, preventing premature "Task complete" toasts
+- `issue-rules` skill: title format (`Type(scope): Subject`), description templates for features and bugs (Goal, Acceptance criteria, Test plan), labels, priority levels (P0–P3), and lifecycle states
 
 ### Changed
 
+- `commit-rules` skill: added Branch Naming section — `<user>/<type>/<TRACKER-N>/<subject>` format, TRACKER-N omitted when no issue exists
+- `pr-rules` skill: added Workflow section (issue → branch → commits → PR → merge); PR title now uses tracker ID in place of `Type(scope)` when a tracked issue exists; subject starts with uppercase in all variants
 - `api-design` skill: added rationale behind structure rules and a new wrong/right example for the "no void*" rule
 - `skills-reminder` now generates its prompt from `skills/*/SKILL.md` frontmatter at runtime instead of a hardcoded list, so new skills appear automatically
 - `secret-guard` now scans `MultiEdit` and `NotebookEdit` content, not just `Edit`/`Write`

@@ -42,13 +42,14 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `api-design` | C++ public API structure and hygiene |
 | `architecture` | System/module architecture design, ADRs, tradeoffs |
 | `changelog` | Keep a Changelog format |
-| `commit-rules` | Conventional Commits format |
+| `commit-rules` | Conventional Commits format and branch naming |
 | `cpp-coding` | C++ implementation conventions |
 | `cpp-testing` | Unit test structure (AAA, naming, coverage) |
 | `ddd` | Domain-Driven Design patterns in C++ |
 | `doxygen` | Doxygen tag coverage for public headers |
 | `editing` | File editing workflow (re-read before edit) |
 | `hook-scripts` | Writing Claude Code hooks and tools |
+| `issue-rules` | Tracker issue title, description, labels, priority, lifecycle |
 | `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |
 | `pr-rules` | PR title, description, merge strategy |
 | `project-planning` | Scoping, estimation, milestones, risk, status updates |
