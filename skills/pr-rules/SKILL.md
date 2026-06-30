@@ -20,13 +20,54 @@ Project-local rules win. If the repository's `AGENTS.md` or a project skill defi
 
 ---
 
+## Workflow
+
+End-to-end flow from issue to merged PR.
+
+**1. Issue** — create in tracker (`issue-rules`):
+```
+Feat(hash): Add SipHash-2-4 keyed 64-bit hash   ← title
+PROJ-42                                           ← assigned ID
+```
+
+**2. Branch** — name before first commit (`commit-rules` → Branch Naming):
+```
+<user>/feat/PROJ-42/add-siphash
+```
+
+**3. Commits** — on the branch (`commit-rules`):
+```
+feat(hash): add SipHash-2-4 keyed 64-bit hash
+
+SipHash provides hash-flooding resistance missing in fnv1a/djb2.
+Implements SipHash-2-4 with a 128-bit key passed as two uint64_t.
+```
+
+**4. PR** — open when branch is ready (this skill):
+```
+PROJ-42: Add SipHash-2-4 keyed 64-bit hash
+```
+Description: `## Summary` + `## Implementation` + `## Test plan`.
+
+**5. Merge commit** — after review passes (this skill → Merge Strategy):
+`Merge PR #<n>: <pr title>` with a body. See Merge Strategy for the full rule.
+
+---
+
 ## PR Title
 
-Conventional Commits format, uppercase first letter, ≤ 120 characters:
+Type and subject both start with uppercase, ≤ 120 characters. Format depends on whether the PR resolves a tracked issue:
 
+**With issue** — tracker ID replaces `Type(scope)`:
 ```
-Feat(hash): add SipHash-2-4 keyed 64-bit hash
-Fix(wrapper): correct noexcept propagation through executor chain
+PROJ-42: Add SipHash-2-4 keyed 64-bit hash
+GH-7: Correct noexcept propagation through executor chain
+```
+
+**Without issue** — Conventional Commits format:
+```
+Feat(hash): Add SipHash-2-4 keyed 64-bit hash
+Fix(wrapper): Correct noexcept propagation through executor chain
 ```
 
 ---
@@ -71,7 +112,7 @@ All three sections are required. A PR with no test plan is not ready to review.
 
 1. **Rebase before merge.** `git rebase <target>` first; merge only when the branch sits on the current target tip.
 2. **`--no-ff` only.** No fast-forward merge. No squash merge.
-3. **Merge subject:** `Merge PR #<pr-number>: <pr subject>` — copy the PR subject verbatim. Do not re-prefix with `type(scope):` (the PR title already carries it; re-prefixing duplicates the type in the merged log).
+3. **Merge subject:** `Merge PR #<pr-number>: <pr subject>` — copy the PR subject verbatim. Do not re-prefix with `type(scope):` (the PR title already carries it; re-prefixing duplicates the type in the merged log). When the PR title starts with a tracker ID, `#<pr-number>` and `TRACKER-N` are distinct identifiers — both appear and that is correct (`Merge PR #7: PROJ-42: Add SipHash…`).
 4. **Merge subject length:** ≤ 120 characters (same limit as PR title; supersedes the 72-char rule in `commit-rules` for merge commits only).
 5. **Merge body required** — same rule as ordinary commits (`commit-rules`). Body explains what was integrated and why; never empty.
 6. **Trailers:** same ban as `commit-rules` — no AI-attribution. `Co-authored-by` injected by GitHub when committer differs from author is allowed.

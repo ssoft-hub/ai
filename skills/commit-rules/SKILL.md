@@ -1,7 +1,7 @@
 ---
 name: commit-rules
 version: "1.0.0"
-description: Apply when writing or reviewing commit messages
+description: Apply when writing or reviewing commit messages or naming branches
 license: Unlicense
 metadata:
   author: ssoft
@@ -78,6 +78,24 @@ feat(hash): add SipHash-2-4 keyed 64-bit hash
 SipHash provides hash-flooding resistance missing in fnv1a/djb2.
 Implements the reference SipHash-2-4 algorithm with a 128-bit key.
 Key is passed as two uint64_t values to avoid struct padding issues.
+```
+
+---
+
+## Branch Naming
+
+```
+<user>/<type>/<TRACKER-N>/<subject>
+```
+
+- **user** — git username (always; marks personal branches).
+- **type** — same values as commit types (`feat`, `fix`, `chore`, …).
+- **TRACKER-N** — issue identifier from the tracker (`PROJ-42`, `GH-7`, …). Omit the segment entirely when there is no tracked issue.
+- **subject** — kebab-case, imperative, concise.
+
+```
+<user>/feat/PROJ-42/add-siphash
+<user>/chore/update-submodule-refs
 ```
 
 ---
