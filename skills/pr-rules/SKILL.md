@@ -22,13 +22,17 @@ Project-local rules win. If the repository's `AGENTS.md` or a project skill defi
 
 ## Workflow
 
-End-to-end flow from issue to merged PR.
+End-to-end order of actions from a new task to a merged, closed issue. Steps run in order — do not open a PR before step 1 is satisfied, do not merge before step 5 is satisfied.
 
-**1. Issue** — create in tracker (`issue-rules`):
+**1. Scope and issue** — before any code change:
+- Identify the repository the change belongs to (root repo or a submodule); the issue is created and tracked there, not in the root repo.
+- Search the tracker for an existing issue covering the task. If found, check it has a test plan and, for features, acceptance criteria (`issue-rules` → Description Template); if incomplete for this task, update the issue before writing code.
+- If no issue exists, create one in that repository (`issue-rules`):
 ```
 Feat(hash): Add SipHash-2-4 keyed 64-bit hash   ← title
 PROJ-42                                           ← assigned ID
 ```
+An issue without a test plan (and, for features, acceptance criteria) is not ready to implement against.
 
 **2. Branch** — name before first commit (`commit-rules` → Branch Naming):
 ```
@@ -49,8 +53,12 @@ PROJ-42: Add SipHash-2-4 keyed 64-bit hash
 ```
 Description: `## Summary` + `## Implementation` + `## Test plan`.
 
-**5. Merge commit** — after review passes (this skill → Merge Strategy):
+**5. Pre-merge issue check** — before merging (this skill → Pre-Merge Checklist): reconcile every checkbox in the linked issue against what the PR actually delivers, and comment on the issue which items it resolves.
+
+**6. Merge commit** — after review passes and step 5 clears (this skill → Merge Strategy):
 `Merge PR #<n>: <pr title>` with a body. See Merge Strategy for the full rule.
+
+**7. Close issue** — only when every checklist checkbox in the issue is checked (`issue-rules` → Lifecycle). If items remain, leave the issue open and note the follow-up PR/MR in a comment instead of closing.
 
 ---
 
@@ -104,20 +112,34 @@ All three sections are required. A PR with no test plan is not ready to review.
 
 ---
 
+## Pre-Merge Checklist
+
+Gates the merge itself — distinct from the Pre-Open Checklist above, which gates opening the PR. Run this against the issue linked in the PR title, not just the PR description.
+
+- [ ] Every checklist checkbox in the issue reflects actual current state, not the state at issue-creation time
+- [ ] Each checkbox now checked is verifiable from what shipped in this PR or an earlier merged PR
+- [ ] Every unchecked item either is out of scope for this PR or has a linked follow-up PR/MR
+- [ ] A comment is added to the issue recording which PR/MR resolves which item (`issue-rules` → Progress Comments)
+
+**Merge gate:** merge only if every item in the issue is checked, or the remaining unchecked items already have a follow-up PR/MR linked in an issue comment. An issue with unchecked items and no plan to address them blocks the merge.
+
+---
+
 ## Merge Strategy
 
 **Rebase, then merge with `--no-ff`** — explicit merge commit per topic; linear first-parent history on protected branches.
 
 ### Rules
 
-1. **Rebase before merge.** `git rebase <target>` first; merge only when the branch sits on the current target tip.
-2. **`--no-ff` only.** No fast-forward merge. No squash merge.
-3. **Merge subject:** `Merge PR #<pr-number>: <pr subject>` — copy the PR subject verbatim. Do not re-prefix with `type(scope):` (the PR title already carries it; re-prefixing duplicates the type in the merged log). When the PR title starts with a tracker ID, `#<pr-number>` and `TRACKER-N` are distinct identifiers — both appear and that is correct (`Merge PR #7: PROJ-42: Add SipHash…`).
-4. **Merge subject length:** ≤ 120 characters (same limit as PR title; supersedes the 72-char rule in `commit-rules` for merge commits only).
-5. **Merge body required** — same rule as ordinary commits (`commit-rules`). Body explains what was integrated and why; never empty.
-6. **Trailers:** same ban as `commit-rules` — no AI-attribution. `Co-authored-by` injected by GitHub when committer differs from author is allowed.
-7. **Cleanup before opening the PR.** Squash fixups via `git commit --fixup=<hash>` + `git rebase -i --autosquash` (per `commit-rules`). Never at merge time.
-8. **Rewrite squashed commit bodies** to reflect the final state (see `commit-rules`).
+1. **Issue gate.** Merge only after the Pre-Merge Checklist above passes.
+2. **Rebase before merge.** `git rebase <target>` first; merge only when the branch sits on the current target tip.
+3. **`--no-ff` only.** No fast-forward merge. No squash merge.
+4. **Merge subject:** `Merge PR #<pr-number>: <pr subject>` — copy the PR subject verbatim. Do not re-prefix with `type(scope):` (the PR title already carries it; re-prefixing duplicates the type in the merged log). When the PR title starts with a tracker ID, `#<pr-number>` and `TRACKER-N` are distinct identifiers — both appear and that is correct (`Merge PR #7: PROJ-42: Add SipHash…`).
+5. **Merge subject length:** ≤ 120 characters (same limit as PR title; supersedes the 72-char rule in `commit-rules` for merge commits only).
+6. **Merge body required** — same rule as ordinary commits (`commit-rules`). Body explains what was integrated and why; never empty.
+7. **Trailers:** same ban as `commit-rules` — no AI-attribution. `Co-authored-by` injected by GitHub when committer differs from author is allowed.
+8. **Cleanup before opening the PR.** Squash fixups via `git commit --fixup=<hash>` + `git rebase -i --autosquash` (per `commit-rules`). Never at merge time.
+9. **Rewrite squashed commit bodies** to reflect the final state (see `commit-rules`).
 
 ### Rationale
 
