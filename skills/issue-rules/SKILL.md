@@ -112,6 +112,8 @@ Apply at most one type label (matches the title Type). Additional labels are ort
 | `good first issue` | Self-contained, low risk |
 | `needs-design` | Requires ADR or design doc before implementation |
 
+Set labels when the issue is created, not after. Revisit them when scope changes — add `blocked` once a dependency appears, remove it once resolved. The PR carries the same type label (+ `breaking` if applicable) — see `pr-rules` → Pre-Open Checklist.
+
 ---
 
 ## Priority

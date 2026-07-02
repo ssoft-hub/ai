@@ -27,6 +27,7 @@ End-to-end order of actions from a new task to a merged, closed issue. Steps run
 **1. Scope and issue** — before any code change:
 - Identify the repository the change belongs to (root repo or a submodule); the issue is created and tracked there, not in the root repo.
 - Search the tracker for an existing issue covering the task. If found, check it has a test plan and, for features, acceptance criteria (`issue-rules` → Description Template); if incomplete for this task, update the issue before writing code.
+- Apply labels — type label matches the title Type, plus any orthogonal labels that apply (`issue-rules` → Labels).
 - If no issue exists, create one in that repository (`issue-rules`):
 ```
 Feat(hash): Add SipHash-2-4 keyed 64-bit hash   ← title
@@ -104,6 +105,7 @@ All three sections are required. A PR with no test plan is not ready to review.
 ## Pre-Open Checklist
 
 - [ ] CI green on all targets declared in the project
+- [ ] PR carries the issue's type label (+ `breaking` if applicable) — see `issue-rules` → Labels
 - [ ] `CHANGELOG.md` updated — every user-visible change documented
 - [ ] `git submodule status` — no `+` prefix on any module
 - [ ] Every commit in the branch builds independently (no broken intermediate state)

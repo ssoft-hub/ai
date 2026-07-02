@@ -31,6 +31,7 @@
 - Re-running `install` now performs a clean upgrade: files a previous install created but the current repo no longer ships are pruned, and the `settings.json` merge is re-synced so a hook whose launcher command changed is replaced instead of duplicated. The manifest now also records `updatedAt`. Shared merge/subtract logic extracted to `lib/settings.js` with direct unit tests
 - `pr-rules` skill: Workflow section now spells out the full order of actions (locate repo → find-or-create issue with a test plan and, for features, acceptance criteria → branch → commits → PR → pre-merge issue check → merge → conditional issue close); added a Pre-Merge Checklist that gates merge on the linked issue's checkbox state
 - `issue-rules` skill: `Done` lifecycle state now requires every checklist checkbox in the issue to be checked before closing; added a Progress Comments section requiring issue comments that record which PR/MR resolves which item
+- `pr-rules` Workflow now requires labels on the issue before implementation starts, and Pre-Open Checklist requires the PR to carry the issue's type label (+ `breaking` if applicable); `issue-rules` Labels section states when to set/revisit labels
 
 ### CI
 
