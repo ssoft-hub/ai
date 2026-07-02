@@ -112,6 +112,8 @@ Apply at most one type label (matches the title Type). Additional labels are ort
 | `good first issue` | Self-contained, low risk |
 | `needs-design` | Requires ADR or design doc before implementation |
 
+Set labels when the issue is created, not after. Revisit them when scope changes — add `blocked` once a dependency appears, remove it once resolved. The PR carries the same type label (+ `breaking` if applicable) — see `pr-rules` → Pre-Open Checklist.
+
 ---
 
 ## Priority
@@ -143,12 +145,24 @@ Open → In Progress → In Review → Done
 - **Open** — triaged, not started.
 - **In Progress** — branch exists (see `commit-rules` Branch Naming).
 - **In Review** — PR open.
-- **Done** — merged and deployed.
+- **Done** — merged and deployed, with every checklist checkbox in the issue checked (see `pr-rules` → Pre-Merge Checklist). If checkboxes remain after merge, stay **In Review** with a follow-up PR/MR linked — do not mark Done.
 - **Closed** — explicitly not going to be fixed; add a comment explaining why.
+
+---
+
+## Progress Comments
+
+Track implementation progress in comments, not only checkboxes:
+
+- When a PR/MR is opened against this issue, comment which checklist items it addresses.
+- When a PR/MR merges, comment which items it resolved and update the corresponding checkboxes to match.
+- When items remain open after a merge, comment that a follow-up PR/MR is needed, and link it once it exists.
+
+A reader should be able to reconstruct, from comments alone, which PR/MR implemented which requirement.
 
 ---
 
 ## Cross-References
 
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
-- `pr-rules` — PR title and description mirror the issue being resolved.
+- `pr-rules` — PR title and description mirror the issue being resolved; Pre-Merge Checklist gates merge on this issue's checkbox state.
