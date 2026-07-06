@@ -13,8 +13,11 @@ Local commits, local file edits within a git repo, and read operations do not re
 ## Skills — auto-apply
 
 When writing or reviewing C++ implementation code → apply `cpp-coding` skill.
+When writing, reviewing, or adding tests to C++ code → apply `cpp-testing` skill.
 When designing public API, adding public headers, or reviewing public interface → apply `api-design` skill.
+When choosing access specifiers or reviewing member visibility → apply `encapsulation` skill.
 When adding or modifying Doxygen comments on public headers → apply `doxygen` skill.
+When writing or reviewing non-Doxygen code comments → apply `comments` skill.
 When modelling domain objects, aggregates, or bounded contexts → apply `ddd` skill.
 When writing commit messages or naming branches → apply `commit-rules` skill.
 When creating or reviewing tracker issues → apply `issue-rules` skill.

@@ -18,6 +18,7 @@
 - `SessionStart` hook: warn-only `submodule-status-check` (flags ahead/uninitialized/conflicted submodules) and `claude-md-skills-sync-check` (flags skills missing from CLAUDE.md's auto-apply list)
 - `bg-agent-counter` tool: tracks pending background agents; `Stop` notification deferred until all `run_in_background` agents complete, preventing premature "Task complete" toasts
 - `issue-rules` skill: title format (`Type(scope): Subject`), description templates for features and bugs (Goal, Acceptance criteria, Test plan), labels, priority levels (P0–P3), and lifecycle states
+- Skills: `comments` (non-Doxygen comment style — brief, general, no fix narration), `encapsulation` (public/protected/private access-specifier discipline)
 
 ### Changed
 
