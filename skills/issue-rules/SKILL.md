@@ -103,16 +103,31 @@ OS, version, relevant config.
 
 ## Labels
 
-Apply at most one type label (matches the title Type). Additional labels are orthogonal:
+Every issue gets at most one **type** label, matching the title Type, when one applies:
 
-| Label | When |
-|-------|------|
-| `breaking` | Public API change |
-| `blocked` | Cannot proceed — link the blocker |
-| `good first issue` | Self-contained, low risk |
-| `needs-design` | Requires ADR or design doc before implementation |
+| Label | Title Types it covers |
+|-------|------------------------|
+| `Feature` | `Feat` |
+| `BUG` | `Fix` |
+| `Refactor` | `Refactor` |
 
-Set labels when the issue is created, not after. Revisit them when scope changes — add `blocked` once a dependency appears, remove it once resolved. The PR carries the same type label (+ `breaking` if applicable) — see `pr-rules` → Pre-Open Checklist.
+Title types other than these three (see the Types table above) carry no label — the title prefix alone is enough.
+
+Every issue also gets a few **topic** labels (2-4, not a tag cloud) — named after the
+actual subject matter (component, subsystem, domain concept), not drawn from a fixed
+list. Before creating one, check the tracker's existing labels (e.g. `gh label list`
+on GitHub) for one covering the same topic and reuse it; create a new topic label
+only the first time a topic has no match. Topic labels grow organically with the
+project.
+
+```
+Feat(threat-analysis): Add short-term conflict alert algorithm
+→ Feature, STCA, Safety Nets, Algorithm, ATCS
+```
+
+Set labels when the issue is created, not after. The PR carries the same labels — the
+type label if the issue has one, plus its topic labels — see `pr-rules` → Pre-Open
+Checklist.
 
 ---
 
