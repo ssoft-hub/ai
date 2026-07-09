@@ -6,8 +6,11 @@ const BLOCK = [
   { re: /format\s+[a-zA-Z]:/i, msg: 'disk format command' },
 ];
 
+const ASK = [
+  { re: /(?:^|[\n;&|])\s*git\s+push\b/i, msg: 'git push affects the shared remote — confirm before pushing' },
+];
+
 const WARN = [
-  { re: /git\s+push\b.*(?:--force\b|\s-f\b)/i, msg: 'git push --force/-f — overwrites remote history' },
   { re: /git\s+reset\s+--hard\b/i, msg: 'git reset --hard — discards uncommitted work' },
   { re: /git\s+checkout\s+--\s*\./i, msg: 'git checkout -- . — discards all working tree changes' },
   { re: /git\s+clean\s+-[a-zA-Z]*f/i, msg: 'git clean -f — deletes untracked files' },
@@ -21,6 +24,7 @@ const WARN = [
 
 function check(cmd) {
   for (const { re, msg } of BLOCK) if (re.test(cmd)) return { action: 'block', msg };
+  for (const { re, msg } of ASK) if (re.test(cmd)) return { action: 'ask', msg };
   const warnings = WARN.filter(({ re }) => re.test(cmd));
   return { action: warnings.length ? 'warn' : 'pass', warnings };
 }
@@ -41,6 +45,16 @@ if (require.main === module) {
       process.stderr.write(`Blocked: ${r.msg}\nCommand: ${cmd.slice(0, 200)}\n`);
       process.exit(2);
     }
+    if (r.action === 'ask') {
+      process.stdout.write(JSON.stringify({
+        hookSpecificOutput: {
+          hookEventName: 'PreToolUse',
+          permissionDecision: 'ask',
+          permissionDecisionReason: r.msg,
+        },
+      }));
+      process.exit(0);
+    }
     if (r.action === 'warn') {
       process.stdout.write(
         'bash-safety warning — destructive command detected:\n' +
@@ -52,4 +66,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { BLOCK, WARN, check };
+module.exports = { BLOCK, ASK, WARN, check };
