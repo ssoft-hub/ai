@@ -34,6 +34,7 @@
 - `issue-rules` skill: `Done` lifecycle state now requires every checklist checkbox in the issue to be checked before closing; added a Progress Comments section requiring issue comments that record which PR/MR resolves which item
 - `pr-rules` Workflow now requires labels on the issue before implementation starts, and Pre-Open Checklist requires the PR to carry the issue's type label (+ `breaking` if applicable); `issue-rules` Labels section states when to set/revisit labels
 - `bash-safety` now prompts for confirmation before any `git push` (PreToolUse `permissionDecision: ask`) rather than only warning on `--force`, so no push runs without an explicit yes — even under `bypassPermissions`, which the settings `ask` list cannot cover
+- `comments` skill: the default is now no comment — reserve comments for critical, non-obvious facts a reader would otherwise get wrong; added a red-flags self-check for the common "might help" / "let me explain this expression" rationalizations
 
 ### CI
 
