@@ -21,9 +21,9 @@ Doc comments on public headers → `doxygen` skill. This skill covers everything
 
 ## Philosophy
 
-Code documents itself. A comment is a fallback for what naming, structure, and types cannot express — not a first resort.
+Code documents itself. **The default is no comment.** Add one only when, without it, a careful reader would get a critical, non-obvious fact wrong — never to restate what the code already shows.
 
-- **Write a comment only when actually required** — first try to make the code self-explanatory (better names, extracted function, clearer types). If that succeeds, no comment is needed.
+- **Default to none** — first make the code self-explanatory (better names, extracted function, clearer types). "Might help the reader" is not enough; the bar is that they get it *wrong* without the line.
 - **Keep it short** — one line. No multi-line prose blocks outside Doxygen.
 - **General character, not case history** — state a timeless fact about the code (an invariant, a constraint, a non-obvious reason), not the story of how it got that way.
 
@@ -51,6 +51,12 @@ if (connection == nullptr) return;
 // Upstream API returns null once the connection is closed.
 if (connection == nullptr) return;
 ```
+
+## Red Flags — delete the comment
+
+- "This might help the next reader" — not enough; the bar is they get it *wrong* without it.
+- "This expression is non-obvious, I'll explain it" — if it needs prose, name it (extract a constant or function) instead.
+- "I'll note why I chose this approach" — that is commit-message material, not a code comment.
 
 ## Cross-References
 
