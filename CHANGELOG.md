@@ -33,6 +33,7 @@
 - `pr-rules` skill: Workflow section now spells out the full order of actions (locate repo → find-or-create issue with a test plan and, for features, acceptance criteria → branch → commits → PR → pre-merge issue check → merge → conditional issue close); added a Pre-Merge Checklist that gates merge on the linked issue's checkbox state
 - `issue-rules` skill: `Done` lifecycle state now requires every checklist checkbox in the issue to be checked before closing; added a Progress Comments section requiring issue comments that record which PR/MR resolves which item
 - `pr-rules` Workflow now requires labels on the issue before implementation starts, and Pre-Open Checklist requires the PR to carry the issue's type label (+ `breaking` if applicable); `issue-rules` Labels section states when to set/revisit labels
+- `bash-safety` now prompts for confirmation before any `git push` (PreToolUse `permissionDecision: ask`) rather than only warning on `--force`, so no push runs without an explicit yes — even under `bypassPermissions`, which the settings `ask` list cannot cover
 
 ### CI
 
