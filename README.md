@@ -84,6 +84,16 @@ points at the skills it applies — see `AGENTS.md` → "Adding an agent".
 | `security-auditor` | Security audit | `security-and-hardening` |
 | `release-manager` | Release | `changelog`, `release`, `shipping-and-launch` |
 
+## Commands
+
+Slash commands orchestrating the agents above into the idea-to-release pipeline.
+
+| Command | Orchestrates |
+|---------|---------------|
+| `/spec <idea>` | `spec-architect` — produces a specification (and ADR when warranted) |
+| `/build <task>` | `implementer` — implements one task by TDD from an existing spec |
+| `/ship [scope]` | `code-reviewer` + `security-auditor` in parallel → go/no-go → `release-manager` on go |
+
 ## Installation
 
 Requires Node.js (no npm packages needed).
