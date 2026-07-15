@@ -37,3 +37,6 @@ When implementing a feature or bug fix, before writing implementation code → a
 When code accepts external input, crosses a trust boundary, or handles secrets/credentials → apply `security-and-hardening` skill.
 When diagnosing or fixing a reported performance problem → apply `performance-optimization` skill.
 When adding logging, metrics, or tracing, or reviewing how a running system reports its own behaviour → apply `observability-and-instrumentation` skill.
+When designing or reviewing a CI/CD pipeline, build automation, or a quality gate → apply `ci-cd-and-automation` skill.
+When retiring a public API, planning a breaking change, or writing a migration guide → apply `deprecation-and-migration` skill.
+When preparing to ship a release to users, beyond version-bump mechanics → apply `shipping-and-launch` skill.

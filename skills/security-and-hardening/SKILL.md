@@ -21,6 +21,8 @@ skill is what to design for before those hooks would ever fire.
 - Memory-safety idioms that also happen to prevent whole classes of vulnerability
   (RAII, no naked `new`, no `void*`) → `cpp-coding` skill.
 - Security depth during review → `code-review-and-quality` skill (Security axis).
+- A vulnerability found in already-shipped code → `deprecation-and-migration` skill for
+  how to retire the unsafe path.
 
 ## Project Overrides
 
