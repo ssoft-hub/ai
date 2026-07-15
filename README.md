@@ -67,6 +67,7 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `shipping-and-launch` | Release readiness, staged rollout, rollback planning |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Red-green-refactor workflow, before writing implementation code |
+| `writing-style` | Prose register and vocabulary — no slang, no unnecessary borrowings, per language |
 
 ## Installation
 

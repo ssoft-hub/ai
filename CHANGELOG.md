@@ -22,6 +22,7 @@
 - Skills: `debugging` (root-cause investigation before proposing a fix), `code-review-and-quality` (review substance — correctness, readability, architecture, security, performance), `test-driven-development` (red-green-refactor workflow)
 - Skills: `security-and-hardening` (trust boundaries, input validation, secrets, least privilege), `performance-optimization` (profile-measure-optimize workflow), `observability-and-instrumentation` (logging, metrics, tracing)
 - Skills: `ci-cd-and-automation` (pipeline design and quality gates), `deprecation-and-migration` (retiring a public API, migration guides), `shipping-and-launch` (release readiness, staged rollout, rollback planning)
+- `writing-style` skill: technical register and vocabulary for documentation, issue/PR/commit text, and conversation, in any human language — no slang, no unnecessary borrowings from another language
 
 ### Changed
 

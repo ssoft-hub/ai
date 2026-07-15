@@ -40,3 +40,4 @@ When adding logging, metrics, or tracing, or reviewing how a running system repo
 When designing or reviewing a CI/CD pipeline, build automation, or a quality gate → apply `ci-cd-and-automation` skill.
 When retiring a public API, planning a breaking change, or writing a migration guide → apply `deprecation-and-migration` skill.
 When preparing to ship a release to users, beyond version-bump mechanics → apply `shipping-and-launch` skill.
+When writing documentation, issue/PR/commit text, or communicating with the user, in any human language → apply `writing-style` skill.
