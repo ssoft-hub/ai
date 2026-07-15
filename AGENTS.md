@@ -54,20 +54,48 @@ See `skills/hook-scripts/SKILL.md` for full hook development conventions.
 
 ## Adding an agent
 
-1. Create `agents/<name>.md` with YAML frontmatter (`name`, `description`, `tools`) and
-   the persona's system prompt as the body
-2. Name the skill(s) the persona must apply in the body, so it doesn't have to
-   rediscover them from scratch each invocation
-3. Add an entry to the agents table in `README.md`
-4. Run `node install.js` to deploy — copied to `~/.claude/agents/<name>.md`
+1. Copy `templates/AGENT.md` to `agents/<name>.md`
+2. Fill in frontmatter (`name`, `description`, `tools`) and the persona's system prompt
+3. Name the skill(s) the persona must apply in the body, so it doesn't have to
+   rediscover them from scratch each invocation, and state the boundary — what this
+   persona does not do, and which other persona picks that up
+4. Write the Composition section: when to invoke the persona directly, which command
+   invokes it otherwise, and the standing rule that it must not invoke another persona
+   itself — orchestration between personas belongs to commands only
+5. Add an entry to the agents table in `README.md`
+6. Run `node install.js` to deploy — copied to `~/.claude/agents/<name>.md`
 
 ## Adding a command
 
-1. Create `commands/<name>.md` — the body is the prompt template run for `/<name>`
-2. Keep a command's job to *orchestrating* existing skills/agents, not duplicating their
+1. Copy `templates/COMMAND.md` to `commands/<name>.md`
+2. Fill in frontmatter (`description`, `argument-hint`) and the orchestration prompt
+3. Keep a command's job to *orchestrating* existing skills/agents, not duplicating their
    rules inline
-3. Add an entry to the commands table in `README.md`
-4. Run `node install.js` to deploy — copied to `~/.claude/commands/<name>.md`
+4. Add an entry to the commands table in `README.md`
+5. Run `node install.js` to deploy — copied to `~/.claude/commands/<name>.md`
+
+## Idea-to-Release Pipeline
+
+The persona agents (`agents/`) and commands (`commands/`) compose the skill catalog
+into a pipeline carrying a task from idea to release:
+
+```
+idea → /spec (spec-architect) → /build (implementer) → /ship (code-reviewer + security-auditor → release-manager)
+```
+
+| Stage | Command | Agent(s) | Invoke the agent directly, without the command, when… |
+|-------|---------|----------|---------------------------------------------------------|
+| Spec | `/spec` | `spec-architect` | only a spec or ADR is needed, with no follow-on build |
+| Build | `/build` | `implementer` | resuming work on one task that already has a spec |
+| Review | (part of `/ship`) | `code-reviewer` | reviewing a diff that isn't ready to ship yet |
+| Security audit | (part of `/ship`) | `security-auditor` | auditing a change touching a trust boundary, outside a full ship pass |
+| Release | (part of `/ship`) | `release-manager` | cutting a release whose review/audit already happened elsewhere |
+
+Each command is a thin wrapper — see the corresponding `commands/<name>.md` for the
+exact handoff. Skills keep auto-applying contextually per `config/CLAUDE.md`'s "Skills
+— auto-apply" section regardless of which agent or command is active; an agent exists
+to bundle several skills under one persona for a specific pipeline stage, not to
+replace skill auto-apply.
 
 ## Installation
 

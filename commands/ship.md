@@ -1,6 +1,12 @@
 ---
 description: Run code-reviewer and security-auditor in parallel on the current change, merge into a go/no-go, then hand off to release-manager
 argument-hint: [optional scope, defaults to the current diff/branch]
+license: Unlicense
+metadata:
+  author: ssoft
+  tags:
+    - pipeline
+    - ship
 ---
 
 Scope: $ARGUMENTS (default to the current diff or branch if not specified).
