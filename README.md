@@ -23,8 +23,9 @@ pipeline of persona agents and commands built on top of them.
 - `commit-trailer-guard.js` — blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) containing private keys, AWS keys, GitHub PATs; warns on probable credentials
 
-**`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit` on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`). Each tool runs **only when its config file is present in this repository** (searched from the edited file up to the git root, never into a parent repo); otherwise it is skipped silently:
-- `clang-format.js` — formats in-place; requires `.clang-format` (skips silently if `clang-format` not in PATH)
+**`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit` on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
+- `comment-check.js` — runs unconditionally (no config file needed); reminds to check any newly added non-Doxygen comment against the `comments` skill
+- `clang-format.js` — formats in-place; requires `.clang-format` in this repository (searched from the edited file up to the git root, never into a parent repo) — skips silently if missing, or if `clang-format` isn't in PATH
 - `clang-tidy.js` — runs static analysis; requires `.clang-tidy` (uses `compile_commands.json` when found)
 - `cppcheck.js` — runs `cppcheck --enable=warning,style,performance,portability --std=c++20 --error-exitcode=1 …`; requires `.cppcheck`, passed as `--suppressions-list`
 
