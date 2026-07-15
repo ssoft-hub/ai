@@ -55,10 +55,13 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `hook-scripts` | Writing Claude Code hooks and tools |
 | `issue-rules` | Tracker issue title, description, labels, priority, lifecycle |
 | `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |
+| `observability-and-instrumentation` | Logging, metrics, tracing for production visibility |
+| `performance-optimization` | Profile-measure-optimize workflow for a reported performance problem |
 | `pr-rules` | PR title, description, merge strategy |
 | `project-planning` | Scoping, estimation, milestones, risk, status updates |
 | `release` | Semver release workflow |
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
+| `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Red-green-refactor workflow, before writing implementation code |
 

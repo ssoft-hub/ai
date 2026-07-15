@@ -18,6 +18,8 @@ around opening/merging the PR the review attaches to → `pr-rules` skill.
 
 - Public API shape and breaking-change review → `api-design` skill.
 - Access-specifier and encapsulation review → `encapsulation` skill.
+- Security-specific review depth (auth, input validation, secrets) → `security-and-hardening` skill.
+- Performance-specific review depth (complexity, allocations) → `performance-optimization` skill.
 
 ## Project Overrides
 
@@ -69,7 +71,7 @@ wrong):
 ## Security
 
 - Any input crossing a trust boundary (user input, network, file, subprocess argument)
-  gets checked before anything else in the diff.
+  gets checked against `security-and-hardening` before anything else in the diff.
 - Secrets, credentials, or tokens appearing in code, logs, or test fixtures block the
   review regardless of how minor the rest of the change is.
 
@@ -104,7 +106,7 @@ change that leaves dead code behind isn't finished, even if what it added is cor
 ## Performance
 
 - A change on a hot path (per-request, per-frame, per-iteration of a large loop) gets
-  checked for unnecessary allocation/copy before merge.
+  checked for unnecessary allocation/copy before merge — see `performance-optimization`.
 - Do not request a performance change on a cold path without measurement — an
   unmeasured "this could be faster" comment is a nitpick, not a blocker.
 

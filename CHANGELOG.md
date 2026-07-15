@@ -20,6 +20,7 @@
 - `issue-rules` skill: title format (`Type(scope): Subject`), description templates for features and bugs (Goal, Acceptance criteria, Test plan), labels, priority levels (P0–P3), and lifecycle states
 - Skills: `comments` (non-Doxygen comment style — brief, general, no fix narration), `encapsulation` (public/protected/private access-specifier discipline)
 - Skills: `debugging` (root-cause investigation before proposing a fix), `code-review-and-quality` (review substance — correctness, readability, architecture, security, performance), `test-driven-development` (red-green-refactor workflow)
+- Skills: `security-and-hardening` (trust boundaries, input validation, secrets, least privilege), `performance-optimization` (profile-measure-optimize workflow), `observability-and-instrumentation` (logging, metrics, tracing)
 
 ### Changed
 
