@@ -2,7 +2,8 @@
 
 [![CI](https://github.com/ssoft-hub/ai/actions/workflows/ci.yml/badge.svg)](https://github.com/ssoft-hub/ai/actions/workflows/ci.yml)
 
-Personal Claude Code configuration — hooks, tools, and skills.
+Personal Claude Code configuration — hooks, tools, skills, and an idea-to-release
+pipeline of persona agents and commands built on top of them.
 
 ## Contents
 
@@ -102,9 +103,11 @@ Requires Node.js (no npm packages needed).
 node install.js
 ```
 
-Copies `hooks/`, `tools/`, and `skills/` into `~/.claude/` and merges `config/settings.json`
-into `~/.claude/settings.json` (existing machine-specific settings are preserved).
-`CLAUDE.md` and `.git/hooks/pre-commit` are overwritten with backups.
+Copies `hooks/`, `tools/`, `skills/`, `agents/`, and `commands/` into `~/.claude/` and
+merges `config/settings.json` into `~/.claude/settings.json` (existing machine-specific
+settings are preserved). `agents/` and `commands/` are optional — installing without
+either is not an error. `CLAUDE.md` and `.git/hooks/pre-commit` are overwritten with
+backups.
 
 `install.js` writes a manifest at `~/.claude/.claude-config-manifest.json` recording every
 created file, every backup, and exactly which hooks and permissions it merged into
@@ -145,9 +148,11 @@ Copy the directories manually:
 Copy-Item -Recurse hooks $env:USERPROFILE\.claude\hooks
 Copy-Item -Recurse tools $env:USERPROFILE\.claude\tools
 Copy-Item -Recurse skills $env:USERPROFILE\.claude\skills
+Copy-Item -Recurse agents $env:USERPROFILE\.claude\agents
+Copy-Item -Recurse commands $env:USERPROFILE\.claude\commands
 
 # Linux / macOS
-cp -r hooks tools skills ~/.claude/
+cp -r hooks tools skills agents commands ~/.claude/
 ```
 
 Then copy or merge `settings.json` into `~/.claude/settings.json`.

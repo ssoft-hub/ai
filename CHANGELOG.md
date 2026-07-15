@@ -26,6 +26,8 @@
 - `install.js` support for `agents/*.md` → `~/.claude/agents/` and `commands/*.md` → `~/.claude/commands/` (both optional; a checkout without either installs cleanly)
 - Agents: `spec-architect`, `implementer`, `code-reviewer`, `security-auditor`, `release-manager` — persona subagents forming an idea-to-release pipeline, each scoped to one stage and pointed at the skills it applies
 - Commands: `/spec`, `/build`, `/ship` — orchestrate the persona agents into an idea-to-release pipeline; `/ship` fans `code-reviewer` and `security-auditor` out in parallel, merges into a go/no-go, and hands off to `release-manager` on go
+- `templates/AGENT.md` and `templates/COMMAND.md` for consistent agent/command authoring, matching `templates/SKILL.md`'s role for skills
+- `AGENTS.md`: "Idea-to-Release Pipeline" section describing the `/spec` → `/build` → `/ship` flow and when to invoke a persona agent directly instead of via its command
 
 ### Changed
 
