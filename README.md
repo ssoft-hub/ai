@@ -42,6 +42,7 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `api-design` | C++ public API structure and hygiene |
 | `architecture` | System/module architecture design, ADRs, tradeoffs |
 | `changelog` | Keep a Changelog format |
+| `ci-cd-and-automation` | CI/CD pipeline design and quality gates |
 | `code-review-and-quality` | Review substance — correctness, readability, architecture, security, performance |
 | `comments` | Non-Doxygen code comment style (brief, general, no fix narration) |
 | `commit-rules` | Conventional Commits format and branch naming |
@@ -49,6 +50,7 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `cpp-testing` | Unit test structure (AAA, naming, coverage) |
 | `ddd` | Domain-Driven Design patterns in C++ |
 | `debugging` | Root-cause investigation before proposing a fix |
+| `deprecation-and-migration` | Retiring a public API and writing a migration guide |
 | `doxygen` | Doxygen tag coverage for public headers |
 | `editing` | File editing workflow (re-read before edit) |
 | `encapsulation` | Access-specifier discipline (public/protected/private) |
@@ -62,6 +64,7 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `release` | Semver release workflow |
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
 | `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |
+| `shipping-and-launch` | Release readiness, staged rollout, rollback planning |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Red-green-refactor workflow, before writing implementation code |
 
