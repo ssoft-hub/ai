@@ -8,6 +8,8 @@ Configuration repository for Claude Code.
 hooks/      Event dispatcher scripts (PreToolUse, PostToolUse, Stop)
 tools/      Atomic tool scripts invoked by hooks
 skills/     Skill definitions loaded by /skill-name slash commands
+agents/     Persona subagent definitions (one markdown file per agent)
+commands/   Slash command definitions (one markdown file per command)
 settings.json   Portable global Claude Code configuration
 install.js  Bootstrap script — copies files to ~/.claude/
 ```
@@ -49,6 +51,23 @@ See `skills/hook-scripts/SKILL.md` for full hook development conventions.
    `skills/` directly so it never goes stale, but this file must be updated by hand;
    `tools/claude-md-skills-sync-check.js` warns at session start if you forget)
 6. Run `node install.js` to deploy
+
+## Adding an agent
+
+1. Create `agents/<name>.md` with YAML frontmatter (`name`, `description`, `tools`) and
+   the persona's system prompt as the body
+2. Name the skill(s) the persona must apply in the body, so it doesn't have to
+   rediscover them from scratch each invocation
+3. Add an entry to the agents table in `README.md`
+4. Run `node install.js` to deploy — copied to `~/.claude/agents/<name>.md`
+
+## Adding a command
+
+1. Create `commands/<name>.md` — the body is the prompt template run for `/<name>`
+2. Keep a command's job to *orchestrating* existing skills/agents, not duplicating their
+   rules inline
+3. Add an entry to the commands table in `README.md`
+4. Run `node install.js` to deploy — copied to `~/.claude/commands/<name>.md`
 
 ## Installation
 

@@ -50,6 +50,20 @@ test('install creates files and manifest on empty dir', () => {
   } finally { rmTmp(dir); }
 });
 
+test('install copies agents/ and commands/ when the repo ships them, skips gracefully otherwise', () => {
+  const dir = mkTmp();
+  const agentsDir = path.join(repoDir, 'agents');
+  const commandsDir = path.join(repoDir, 'commands');
+  const repoShipsAgents = fs.existsSync(agentsDir);
+  const repoShipsCommands = fs.existsSync(commandsDir);
+  try {
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, `install failed: ${r.stderr}`);
+    assert.strictEqual(fs.existsSync(path.join(dir, 'agents')), repoShipsAgents);
+    assert.strictEqual(fs.existsSync(path.join(dir, 'commands')), repoShipsCommands);
+  } finally { rmTmp(dir); }
+});
+
 test('uninstall removes everything when nothing was preexisting', () => {
   const dir = mkTmp();
   try {
