@@ -34,3 +34,6 @@ When scoping work, estimating, sequencing milestones, or writing a project plan/
 When investigating a bug, test failure, or unexpected behavior, before proposing a fix → apply `debugging` skill.
 When reviewing code changes for correctness, readability, architecture, security, or performance → apply `code-review-and-quality` skill.
 When implementing a feature or bug fix, before writing implementation code → apply `test-driven-development` skill.
+When code accepts external input, crosses a trust boundary, or handles secrets/credentials → apply `security-and-hardening` skill.
+When diagnosing or fixing a reported performance problem → apply `performance-optimization` skill.
+When adding logging, metrics, or tracing, or reviewing how a running system reports its own behaviour → apply `observability-and-instrumentation` skill.
