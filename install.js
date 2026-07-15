@@ -181,6 +181,18 @@ if (!fs.existsSync(skillsDir)) {
   }
 }
 
+// agents/ and commands/ are optional — unlike hooks/tools/skills, a fresh
+// checkout of this repo may not carry any yet, so absence isn't warned on.
+log('\nagents/');
+const agentsDir = path.join(repoDir, 'agents');
+if (fs.existsSync(agentsDir)) copyDir(agentsDir, path.join(claudeDir, 'agents'));
+else log(`  ${logPrefix} (none)`);
+
+log('\ncommands/');
+const commandsDir = path.join(repoDir, 'commands');
+if (fs.existsSync(commandsDir)) copyDir(commandsDir, path.join(claudeDir, 'commands'));
+else log(`  ${logPrefix} (none)`);
+
 log('\nsettings.json');
 installSettings();
 
