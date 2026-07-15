@@ -28,6 +28,7 @@
 - Commands: `/spec`, `/build`, `/ship` — orchestrate the persona agents into an idea-to-release pipeline; `/ship` fans `code-reviewer` and `security-auditor` out in parallel, merges into a go/no-go, and hands off to `release-manager` on go
 - `templates/AGENT.md` and `templates/COMMAND.md` for consistent agent/command authoring, matching `templates/SKILL.md`'s role for skills
 - `AGENTS.md`: "Idea-to-Release Pipeline" section describing the `/spec` → `/build` → `/ship` flow and when to invoke a persona agent directly instead of via its command
+- `comment-check` tool: `PostToolUse` reminder when an edit adds a new non-Doxygen comment to a C++ file, pointing back at the `comments` skill — runs unconditionally, unlike the lint tools which require a project config file
 
 ### Changed
 

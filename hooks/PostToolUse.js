@@ -61,6 +61,11 @@ process.stdin.on('end', () => {
   const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path;
   if (!filePath || !CPP_EXTS.has(path.extname(filePath).toLowerCase())) process.exit(0);
 
+  // Reminder for the `comments` skill, not an external linter — runs unconditionally,
+  // unlike the LINT tools below which require a project config file.
+  const cc = spawnSync('node', [path.join(toolsDir, 'comment-check.js')], { input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 10000 });
+  if (cc.stdout?.trim()) process.stdout.write(cc.stdout.trim() + '\n');
+
   const fileDir = path.dirname(path.resolve(filePath));
   const boundary = repoBoundary(fileDir);
 

@@ -21,6 +21,13 @@ function makeStubConfigDir() {
       `process.stdout.write('INVOKED ${name} ' + (process.argv[3] || '') + '\\n');\n`,
     );
   }
+  // The dispatcher also runs comment-check.js unconditionally (not gated by a config
+  // file like the lint tools above) — copy the real one so its stdin-reading exit
+  // path doesn't fail with "module not found" and pollute these assertions.
+  fs.copyFileSync(
+    path.join(__dirname, '..', 'tools', 'comment-check.js'),
+    path.join(toolsDir, 'comment-check.js'),
+  );
   return cfgDir;
 }
 
@@ -32,9 +39,9 @@ function makeRepo() {
   return repo;
 }
 
-function runDispatcher(cfgDir, filePath) {
+function runDispatcher(cfgDir, filePath, extraToolInput = {}) {
   const r = spawnSync('node', [DISPATCHER], {
-    input: JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: filePath } }),
+    input: JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: filePath, ...extraToolInput } }),
     encoding: 'utf8',
     env: { ...process.env, CLAUDE_CONFIG_DIR: cfgDir },
   });
@@ -99,5 +106,20 @@ test('config above the repo boundary (parent repo) is not used', () => {
     assert.strictEqual(out.trim(), '');
   } finally {
     cleanup(cfgDir, parent);
+  }
+});
+
+test('comment-check reminder surfaces through the dispatcher even with no lint config', () => {
+  const cfgDir = makeStubConfigDir();
+  const repo = makeRepo();
+  try {
+    const out = runDispatcher(cfgDir, path.join(repo, 'x.cpp'), {
+      old_string: 'int x = 5;',
+      new_string: 'int x = 5; // why 5',
+    });
+    assert.match(out, /comment-check reminder/);
+    assert.match(out, /why 5/);
+  } finally {
+    cleanup(cfgDir, repo);
   }
 });
