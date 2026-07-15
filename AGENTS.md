@@ -34,6 +34,12 @@ See `skills/hook-scripts/SKILL.md` for full hook development conventions.
 
 ## Adding a skill
 
+0. Pre-flight check, before creating any file:
+   - Confirm the concern isn't already covered by an existing skill here, or by a
+     separate plugin (e.g. Qt/QML belongs to `qt-development-skills`, not here).
+   - Confirm the new skill owns one clearly bounded concern with no overlap against
+     adjacent skills (e.g. `encapsulation` covers access-specifier rules;
+     `api-design` covers public surface shape — the two must not restate each other).
 1. Copy `templates/SKILL.md` to `skills/<name>/SKILL.md`
 2. Fill in frontmatter (name, description, tags)
 3. Write rules sections following the template structure
