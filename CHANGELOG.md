@@ -23,6 +23,8 @@
 - Skills: `security-and-hardening` (trust boundaries, input validation, secrets, least privilege), `performance-optimization` (profile-measure-optimize workflow), `observability-and-instrumentation` (logging, metrics, tracing)
 - Skills: `ci-cd-and-automation` (pipeline design and quality gates), `deprecation-and-migration` (retiring a public API, migration guides), `shipping-and-launch` (release readiness, staged rollout, rollback planning)
 - `writing-style` skill: technical register and vocabulary for documentation, issue/PR/commit text, and conversation, in any human language — no slang, no unnecessary borrowings from another language
+- `install.js` support for `agents/*.md` → `~/.claude/agents/` and `commands/*.md` → `~/.claude/commands/` (both optional; a checkout without either installs cleanly)
+- Agents: `spec-architect`, `implementer`, `code-reviewer`, `security-auditor`, `release-manager` — persona subagents forming an idea-to-release pipeline, each scoped to one stage and pointed at the skills it applies
 
 ### Changed
 

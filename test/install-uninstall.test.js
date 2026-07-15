@@ -64,6 +64,15 @@ test('install copies agents/ and commands/ when the repo ships them, skips grace
   } finally { rmTmp(dir); }
 });
 
+test('install deploys the spec-architect persona agent', () => {
+  const dir = mkTmp();
+  try {
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, `install failed: ${r.stderr}`);
+    assert.ok(fs.existsSync(path.join(dir, 'agents', 'spec-architect.md')));
+  } finally { rmTmp(dir); }
+});
+
 test('uninstall removes everything when nothing was preexisting', () => {
   const dir = mkTmp();
   try {

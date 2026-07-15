@@ -11,6 +11,8 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `hooks/`  | Claude Code event dispatchers (`PreToolUse`, `PostToolUse`, `Stop`, `SessionStart`, `UserPromptSubmit`) |
 | `tools/`  | Atomic tool scripts invoked by hooks |
 | `skills/` | Skill definitions (SKILL.md files loaded by `/skill-name`) |
+| `agents/` | Persona subagent definitions (one markdown file per agent) |
+| `commands/` | Slash command definitions (one markdown file per command) |
 | `config/settings.json` | Portable global configuration (hooks + permissions) |
 
 ## Hooks
@@ -68,6 +70,19 @@ Personal Claude Code configuration — hooks, tools, and skills.
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Red-green-refactor workflow, before writing implementation code |
 | `writing-style` | Prose register and vocabulary — no slang, no unnecessary borrowings, per language |
+
+## Agents
+
+Persona subagents forming an idea-to-release pipeline. Each is scoped to one stage and
+points at the skills it applies — see `AGENTS.md` → "Adding an agent".
+
+| Agent | Stage | Skills applied |
+|-------|-------|-----------------|
+| `spec-architect` | Idea → spec → architecture | `requirements`, `ddd`, `architecture`, `api-design` |
+| `implementer` | Implementation (TDD) | `test-driven-development`, `cpp-coding`, `ddd`, `encapsulation`, `cpp-testing` |
+| `code-reviewer` | Review | `code-review-and-quality`, `encapsulation`, `api-design`, `comments`, `doxygen` |
+| `security-auditor` | Security audit | `security-and-hardening` |
+| `release-manager` | Release | `changelog`, `release`, `shipping-and-launch` |
 
 ## Installation
 
