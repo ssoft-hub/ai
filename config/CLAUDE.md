@@ -31,3 +31,6 @@ When writing or reviewing tests under `test/*.test.js` (node:test) → apply `no
 When eliciting requirements, writing user stories, or defining acceptance criteria → apply `requirements` skill.
 When designing system/module architecture, evaluating tradeoffs, or writing an ADR → apply `architecture` skill.
 When scoping work, estimating, sequencing milestones, or writing a project plan/status update → apply `project-planning` skill.
+When investigating a bug, test failure, or unexpected behavior, before proposing a fix → apply `debugging` skill.
+When reviewing code changes for correctness, readability, architecture, security, or performance → apply `code-review-and-quality` skill.
+When implementing a feature or bug fix, before writing implementation code → apply `test-driven-development` skill.

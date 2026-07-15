@@ -19,6 +19,7 @@
 - `bg-agent-counter` tool: tracks pending background agents; `Stop` notification deferred until all `run_in_background` agents complete, preventing premature "Task complete" toasts
 - `issue-rules` skill: title format (`Type(scope): Subject`), description templates for features and bugs (Goal, Acceptance criteria, Test plan), labels, priority levels (P0–P3), and lifecycle states
 - Skills: `comments` (non-Doxygen comment style — brief, general, no fix narration), `encapsulation` (public/protected/private access-specifier discipline)
+- Skills: `debugging` (root-cause investigation before proposing a fix), `code-review-and-quality` (review substance — correctness, readability, architecture, security, performance), `test-driven-development` (red-green-refactor workflow)
 
 ### Changed
 
