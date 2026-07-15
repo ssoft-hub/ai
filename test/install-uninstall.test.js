@@ -73,6 +73,15 @@ test('install deploys the spec-architect persona agent', () => {
   } finally { rmTmp(dir); }
 });
 
+test('install deploys the ship command', () => {
+  const dir = mkTmp();
+  try {
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, `install failed: ${r.stderr}`);
+    assert.ok(fs.existsSync(path.join(dir, 'commands', 'ship.md')));
+  } finally { rmTmp(dir); }
+});
+
 test('uninstall removes everything when nothing was preexisting', () => {
   const dir = mkTmp();
   try {
