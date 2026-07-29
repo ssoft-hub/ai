@@ -102,6 +102,73 @@ All three sections are required. A PR with no test plan is not ready to review.
 
 ---
 
+## Review Comments
+
+Applies to inline review comments and their replies — a different artifact from the
+Description above: shorter-lived, one point at a time.
+
+### Findings
+
+Order:
+1. **The fact** — what the code does, naming the exact symbol. Not an impression
+   ("this looks fragile") — the concrete behaviour.
+2. **The consequence** — the scenario where it breaks, or the invariant it violates.
+   Skip only when the fact alone is self-evidently wrong.
+3. **The fix** — a specific change, or a couple of named alternatives ("either X or
+   Y"). A finding with no proposed direction is not actionable.
+
+Prefix with a bold, lowercase, colon-terminated severity label — `**blocking:**`,
+`**must-fix:**`, `**question:**`, `**note:**`, or whatever label set the project's
+existing review threads already use. Omit the label only when every finding in the
+review is the same severity and there's nothing to disambiguate.
+
+```markdown
+**must-fix:** `hashBytes()` reads `key[0..15]` unconditionally; a key shorter than
+16 bytes is undefined behaviour, and nothing on the call path checks the length
+before this point.
+
+Any caller passing a key from configuration can trigger it silently on a truncated
+value. Validate the length where the key is constructed and return an error, rather
+than trusting every call site to check it first.
+```
+
+Address the code, not the author — state what the code does and what follows from it
+("the division by 2 encodes a fixed switch topology" — not "you hardcoded the
+topology"). Recommend rather than command, even for a blocking finding — "worth
+validating", "better to return an error here" — severity is carried by the label, not
+by imperative phrasing.
+
+### Replies
+
+Open with a verb naming the resolution: fixed / reworked / done / agreed / removed /
+replaced. State the result first, explanation after — then, in one to a few
+sentences, what changed (naming the actual symbol) and, when one exists, the test
+that now covers it.
+
+```markdown
+Fixed: `SipHashKey` now validates its length in the constructor and returns
+`InvalidKeyLength` for anything but 16 bytes; call sites no longer need to check it
+themselves. Covered by `key_shorter_than_16_bytes_is_rejected`.
+```
+
+When disagreeing or clarifying instead of agreeing, give the actual reasoning
+specifically enough that the reviewer can check it — never dismiss a finding without
+an explanation. When the fix belongs to a separate task, say so and name it, or offer
+to file one; don't let a valid finding go unaddressed just because it's out of scope
+for this PR.
+
+### Register
+
+Full sentences, exact identifiers in backticks, no filler or hedging, no slang or
+unnecessary borrowed words — `writing-style` covers these general prose rules for
+every artifact, review comments included. Recommend-not-command and address-the-code
+tone (above) are specific to review feedback and live only in this section, not in
+`writing-style`. Use whichever severity-label vocabulary and language the project's
+existing review threads already use (`AGENTS.md` / project convention wins, per
+Project Overrides above).
+
+---
+
 ## Pre-Open Checklist
 
 - [ ] CI green on all targets declared in the project

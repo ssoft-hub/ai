@@ -20,7 +20,7 @@ written in, not its shape:
 - Code comment structure and when to write one → `comments` skill.
 - Public API documentation structure → `doxygen` skill.
 - Issue title/description structure → `issue-rules` skill.
-- PR title/description structure → `pr-rules` skill.
+- PR title/description structure, review comment/reply structure → `pr-rules` skill.
 - Commit message structure → `commit-rules` skill.
 
 ## Project Overrides
@@ -64,8 +64,8 @@ same defect, just facing the other way.
 
 The rule is symmetric: whichever language is being written, use that language's own
 established technical vocabulary rather than reaching for a borrowed shortcut. This
-applies equally to documentation, issue/PR bodies, commit message bodies, and
-conversational responses.
+applies equally to documentation, issue/PR bodies, commit message bodies, review
+comments and replies, and conversational responses.
 
 ## What This Does Not Cover
 
