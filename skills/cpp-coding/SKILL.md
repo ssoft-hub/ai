@@ -14,7 +14,7 @@ metadata:
 
 Apply when writing or reviewing C++ implementation code.
 
-Scope: project-level implementation conventions (not the C++ standard). Public API structure → `api-design`. Docs → `doxygen`. Naming, namespaces, file layout → project `AGENTS.md`.
+Scope: project-level implementation conventions (not the C++ standard). Public API structure → `api-design`. Docs → `doxygen`. Inline/implementation comments → `comments`. Naming, namespaces, file layout → project `AGENTS.md`.
 
 Reference: https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#s-philosophy
 

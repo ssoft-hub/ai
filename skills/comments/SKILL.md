@@ -15,7 +15,7 @@ metadata:
 
 Apply when writing or reviewing non-Doxygen code comments (inline notes, implementation comments).
 
-Doc comments on public headers → `doxygen` skill. This skill covers everything else: comments inside function bodies, `.cpp` files, private implementation.
+Doc comments on public headers → `doxygen` skill. This skill covers everything else: comments inside function bodies, `.cpp` files, private implementation. Implementation conventions (types, RAII, naming) → `cpp-coding` skill.
 
 ---
 
