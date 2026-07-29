@@ -118,9 +118,20 @@ Key is passed as two uint64_t values to avoid struct padding issues.
 When correcting an earlier commit on the same branch, use `--fixup` instead of a free-form commit:
 
 ```bash
-git commit --fixup=<hash>          # creates "fixup! <original subject>"
+git commit --fixup=<hash>          # code-only fix; target's message is left untouched
+git commit --fixup=amend:<hash>    # fix also changes what the message must say
+git commit --fixup=reword:<hash>   # message-only correction, no code change
 git rebase -i --autosquash <base>  # squashes fixups automatically before merge
 ```
+
+Plain `--fixup` never opens an editor: `rebase --autosquash` folds the code silently and
+keeps the target commit's original message exactly as it was, even when the fix makes
+that message no longer describe the code. Use `amend:` (or `reword:` for a message-only
+correction) whenever the fixup changes what the commit should say about itself — it
+opens the editor immediately, pre-filled with the target's message, and the edited
+result replaces the target's message during autosquash. `amend:`/`reword:` require
+git ≥ 2.32; on an older git, amend the target commit's message by hand after autosquash
+instead.
 
 Use `--fixup` when the change belongs to a specific earlier commit — reviewer sees the correction attached to its target, not floating. Use a normal commit only when the change is logically independent.
 
@@ -128,7 +139,13 @@ Use `--fixup` when the change belongs to a specific earlier commit — reviewer 
 
 Squash fixup commits before opening the PR — not at merge time.
 
-When squashing, rewrite the body to describe the actual final change — not the fixup history. The merged commit must read as if it was written that way from the start.
+Before running `rebase -i --autosquash`, check whether any fixup changes what its target
+commit's body claims. If so, that fixup must be `--fixup=amend:<hash>`, not plain
+`--fixup` — otherwise the merged commit keeps describing the pre-fix behaviour.
+
+After autosquash completes, re-read each final message (`git log -1 <hash>`) against the
+diff it now covers (`git show <hash>`) and amend anything that drifted. The merged
+commit must read as if it was written that way from the start.
 
 ## No Correction Commits Within a PR
 
