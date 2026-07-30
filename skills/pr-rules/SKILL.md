@@ -124,8 +124,10 @@ box means not yet verified, and the Pre-Open Checklist gates on that.
 
 ## Review Comments
 
-Applies to inline review comments and their replies — a different artifact from the
-Description above: shorter-lived, one point at a time.
+Applies to review feedback wherever it lands — inline comments and their replies on a
+PR, and the same feedback carried in a tracker or a message when that is where the
+review happens. A different artifact from the Description above: shorter-lived, one
+point at a time.
 
 ### Findings
 
@@ -177,6 +179,93 @@ an explanation. When the fix belongs to a separate task, say so and name it, or 
 to file one; don't let a valid finding go unaddressed just because it's out of scope
 for this PR.
 
+### Pending by Default
+
+Review feedback is outward-facing: publishing notifies the author and every watcher, and
+editing afterwards does not unsend it. An agent therefore does not publish its own review
+wording — on any platform, findings and replies alike, including replies to feedback on
+the agent's own PR.
+
+What that means depends on what the platform offers:
+
+- **A draft mechanism exists** — GitHub pending reviews, GitLab draft notes, Gerrit draft
+  comments: write into it and stop there. The human submits.
+- **None exists** — Jira and most trackers, chat, email: post nothing at all. The wording
+  goes into the reply to the human, who posts it or asks for it to be posted.
+
+Check for a draft or pending state in that platform's API before assuming which case
+applies. "No draft support" is something to state in the report, not licence to publish.
+
+The single exception is an explicit instruction naming the act on that artifact — "approve
+it", "post that reply now". The instruction is the submission. Nothing else authorises
+publishing, and an instruction given on one PR does not carry to the next one.
+
+The ban covers review feedback, not every comment. The issue comments and progress notes
+the Workflow requires (steps 1, 5 and 7; `issue-rules` → Progress Comments) are published
+as usual: recording which PR resolves which checklist item is not a review finding.
+
+**Report** at the end: that feedback is waiting, where it is, what it covers, and whether
+the draft was opened by this pass or reused. A draft nobody is told about is the same as
+no review.
+
+**GitHub.** Commands that publish on the spot are out:
+
+| Publishes immediately (do not use) | Use instead |
+|---|---|
+| `gh pr review --comment` / `--approve` / `--request-changes` | `addPullRequestReview` with no `event` field |
+| `gh pr comment` for review feedback | the pending review's `body` |
+| `POST /pulls/{n}/comments` with `in_reply_to` | `addPullRequestReviewThreadReply` into the pending review |
+
+Four things the CLI help does not cover — the pending-state commands below were run
+against a live PR, the publishing behaviour comes from the API reference and the schema:
+
+1. The pending path exists only over GraphQL: `gh pr review` submits on the spot, and REST
+   `in_reply_to` has no pending form.
+2. One pending review per user per PR. A second `addPullRequestReview`, and the REST
+   equivalent, answer `User can only have one pending review per pull request` — so look
+   for an open one and reuse it rather than creating a second.
+3. `-f`/`-F` send every value as a string, so a typed variable (the `threads` list on
+   `addPullRequestReview`) cannot go through them. Either add threads one at a time with
+   `addPullRequestReviewThread`, as below, or pass the whole request as a file:
+   `gh api graphql --input <file>`, where the file holds
+   `{"query":"mutation(...){...}","variables":{...}}` — query and variables together, not
+   a bare variables object.
+4. `pullRequestReviewId` is optional on `addPullRequestReviewThreadReply`. A reply without
+   it belongs to no pending review, so treat its absence as publishing.
+
+```
+# lookup: PR id, own pending review, thread ids. Pages 50 threads at a time
+# (re-run with -f after=<endCursor>); leave isResolved threads alone
+gh api graphql -f query='
+  query($o:String!,$r:String!,$n:Int!,$after:String) {
+    viewer { login }
+    repository(owner:$o, name:$r) { pullRequest(number:$n) {
+      id
+      reviews(last:10, states:PENDING) { nodes { id author { login } } }
+      reviewThreads(first:50, after:$after) {
+        pageInfo { hasNextPage endCursor }
+        nodes { id isResolved comments(first:1) { nodes { path body } } }
+      }
+    } }
+  }' -f o=<owner> -f r=<repo> -F n=<pr-number>
+
+# open one when the lookup returns none authored by viewer; omitting event keeps it PENDING
+gh api graphql -f query='mutation($pr:ID!,$body:String!){addPullRequestReview(input:{pullRequestId:$pr,body:$body}){pullRequestReview{id state}}}' -f pr=<pr-node-id> -f body='<overall comment>'
+
+# one finding: swap side to LEFT for a deleted line, add startLine/startSide for a span
+gh api graphql -f query='mutation($rev:ID!,$path:String!,$line:Int!,$body:String!){addPullRequestReviewThread(input:{pullRequestReviewId:$rev,path:$path,line:$line,side:RIGHT,body:$body}){thread{id}}}' -f rev=<review-id> -f path=<file> -F line=<line> -f body='<finding>'
+
+# reply into an existing thread
+gh api graphql -f query='mutation($rev:ID!,$thread:ID!,$body:String!){addPullRequestReviewThreadReply(input:{pullRequestReviewId:$rev,pullRequestReviewThreadId:$thread,body:$body}){comment{id}}}' -f rev=<review-id> -f thread=<thread-id> -f body='<reply>'
+
+# discard, and only a review this pass opened - a reused one may hold an unsent draft
+gh api graphql -f query='mutation($rev:ID!){deletePullRequestReview(input:{pullRequestReviewId:$rev}){pullRequestReview{state}}}' -f rev=<review-id>
+```
+
+**GitLab.** Draft notes take the same shape, untested here, so check the response:
+`glab api projects/<id>/merge_requests/<iid>/draft_notes -X POST -f note='<comment>'`. The
+human publishes them from the MR page, or with `POST .../draft_notes/bulk_publish`.
+
 ### Register
 
 Full sentences, exact identifiers in backticks, no filler or hedging, no slang or
@@ -224,14 +313,15 @@ Gates the merge itself — distinct from the Pre-Open Checklist above, which gat
 ### Rules
 
 1. **Issue gate.** Merge only after the Pre-Merge Checklist above passes.
-2. **Rebase before merge.** `git rebase <target>` first; merge only when the branch sits on the current target tip.
-3. **`--no-ff` only.** No fast-forward merge. No squash merge.
-4. **Merge subject:** `Merge PR #<pr-number>: <pr subject>` — copy the PR subject verbatim. Do not re-prefix with `type(scope):` (the PR title already carries it; re-prefixing duplicates the type in the merged log). When the PR title starts with a tracker ID, `#<pr-number>` and `TRACKER-N` are distinct identifiers — both appear and that is correct (`Merge PR #7: PROJ-42: Add SipHash…`).
-5. **Merge subject length:** ≤ 120 characters (same limit as PR title; supersedes the 72-char rule in `commit-rules` for merge commits only).
-6. **Merge body required** — same rule as ordinary commits (`commit-rules`). Body explains what was integrated and why; never empty.
-7. **Trailers:** same ban as `commit-rules` — no AI-attribution. `Co-authored-by` injected by GitHub when committer differs from author is allowed.
-8. **Cleanup before opening the PR.** Squash fixups via `git commit --fixup=<hash>` + `git rebase -i --autosquash` (per `commit-rules`). Never at merge time.
-9. **Rewrite squashed commit bodies** to reflect the final state (see `commit-rules`).
+2. **The human authorises the merge.** An agent does not merge on its own initiative, and an authorisation given for one PR does not carry to the next — the same rule the review feedback follows (Review Comments → Pending by Default), applied to the heavier act.
+3. **Rebase before merge.** `git rebase <target>` first; merge only when the branch sits on the current target tip.
+4. **`--no-ff` only.** No fast-forward merge. No squash merge.
+5. **Merge subject:** `Merge PR #<pr-number>: <pr subject>` — copy the PR subject verbatim. Do not re-prefix with `type(scope):` (the PR title already carries it; re-prefixing duplicates the type in the merged log). When the PR title starts with a tracker ID, `#<pr-number>` and `TRACKER-N` are distinct identifiers — both appear and that is correct (`Merge PR #7: PROJ-42: Add SipHash...`).
+6. **Merge subject length:** ≤ 120 characters (same limit as PR title; supersedes the 72-char rule in `commit-rules` for merge commits only).
+7. **Merge body required** — same rule as ordinary commits (`commit-rules`). Body explains what was integrated and why; never empty.
+8. **Trailers:** same ban as `commit-rules` — no AI-attribution. `Co-authored-by` injected by GitHub when committer differs from author is allowed.
+9. **Cleanup before opening the PR.** Squash fixups via `git commit --fixup=<hash>` + `git rebase -i --autosquash` (per `commit-rules`). Never at merge time.
+10. **Rewrite squashed commit bodies** to reflect the final state (see `commit-rules`).
 
 ### Rationale
 

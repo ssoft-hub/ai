@@ -52,6 +52,11 @@ See `skills/hook-scripts/SKILL.md` for full hook development conventions.
    `tools/claude-md-skills-sync-check.js` warns at session start if you forget)
 6. Run `node install.js` to deploy
 
+A skill is one file: `install.js` copies `skills/<name>/SKILL.md` and nothing else from
+the skill directory, so a sibling reference file never reaches `~/.claude/` and the
+installed skill silently loses whatever it pointed at. Splitting a long skill means
+changing that copy loop first.
+
 ## Adding an agent
 
 1. Copy `templates/AGENT.md` to `agents/<name>.md`
