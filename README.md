@@ -63,7 +63,7 @@ pipeline of persona agents and commands built on top of them.
 | `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |
 | `observability-and-instrumentation` | Logging, metrics, tracing for production visibility |
 | `performance-optimization` | Profile-measure-optimize workflow for a reported performance problem |
-| `pr-rules` | PR title, description, merge strategy |
+| `pr-rules` | PR title, description, review comments, merge strategy |
 | `project-planning` | Scoping, estimation, milestones, risk, status updates |
 | `release` | Semver release workflow |
 | `requirements` | Requirements gathering, user stories, acceptance criteria |

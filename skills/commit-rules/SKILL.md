@@ -32,7 +32,7 @@ Body explaining the change.
 **Scope** is optional; use when the change is clearly scoped to one module/component.
 **Subject:** imperative mood, lowercase after the colon, no trailing period.
 
-> Merge commits follow `pr-rules` Merge Strategy format (`Merge PR #<n>: …`, subject ≤ 120 chars), not this section.
+> Merge commits follow `pr-rules` Merge Strategy format (`Merge PR #<n>: ...`, subject ≤ 120 chars), not this section.
 
 ```
 feat(hash): add SipHash-2-4 keyed 64-bit hash
