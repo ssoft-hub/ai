@@ -47,6 +47,7 @@
 - `bash-safety` now prompts for confirmation before any `git push` (PreToolUse `permissionDecision: ask`) rather than only warning on `--force`, so no push runs without an explicit yes — even under `bypassPermissions`, which the settings `ask` list cannot cover
 - `comments` skill: the default is now no comment — reserve comments for critical, non-obvious facts a reader would otherwise get wrong; added a red-flags self-check for the common "might help" / "let me explain this expression" rationalizations
 - `doxygen` skill: one block documents the type on its declaration (`@brief`/`@ingroup`/`@tparam`) while members carry no Doxygen; longer type prose can move to the `.cpp` via `@class`/`@struct`/`@enum`, and the `#ifdef DOXYGEN` guard is a last resort for a re-exported type (real type in `detail`, public `using` alias) requiring `PREDEFINED = DOXYGEN` in the Doxyfile
+- `pr-rules` skill: PR description template now opens with a `## Problem` section stating what is wrong today and what triggered the work; the motivation moved out of `## Summary`, so the two sections no longer overlap. `## Test plan` items are checkboxes matching the `issue-rules` templates, and the Pre-Open Checklist gates on all four sections being present and on every checked box corresponding to a run that actually passed; the Pre-Merge Checklist gates on those boxes still being checked at merge time, which the issue-side checklist did not cover
 
 ### CI
 

@@ -52,7 +52,8 @@ Implements SipHash-2-4 with a 128-bit key passed as two uint64_t.
 ```
 PROJ-42: Add SipHash-2-4 keyed 64-bit hash
 ```
-Description: `## Summary` + `## Implementation` + `## Test plan`.
+Description: `## Problem` + `## Summary` + `## Implementation` + `## Test plan`, the
+last one with checkbox items — see Description Structure.
 
 **5. Pre-merge issue check** — before merging (this skill → Pre-Merge Checklist): reconcile every checkbox in the linked issue against what the PR actually delivers, and comment on the issue which items it resolves.
 
@@ -84,8 +85,13 @@ Fix(wrapper): Correct noexcept propagation through executor chain
 ## Description Structure
 
 ```markdown
+## Problem
+What is wrong or missing today, and what prompted the work now — the symptom, the
+cost of leaving it, and the trigger (issue, incident, review finding, blocked task).
+No solution here.
+
 ## Summary
-- What changed and why (user-visible perspective, not implementation details)
+- What changed, from a user-visible perspective (not implementation details)
 - One bullet per logical change
 
 ## Implementation
@@ -93,12 +99,26 @@ Fix(wrapper): Correct noexcept propagation through executor chain
 - Why this approach over alternatives
 
 ## Test plan
-- What was tested and how
-- Edge cases covered
-- How a reviewer can verify the change locally
+- [ ] What was tested and how (automated test name, or manual steps)
+- [ ] Edge cases covered
+- [ ] How a reviewer can verify the change locally
 ```
 
-All three sections are required. A PR with no test plan is not ready to review.
+All four sections are required. A PR missing `## Problem` or the test plan is not ready
+to review.
+
+**Problem** carries the motivation; **Summary** carries the change. Do not put the
+motivation in Summary — the split is what keeps "why this work exists" from
+collapsing into a restatement of the diff. When a tracked issue exists, restate its
+Goal or Problem here in one or two sentences instead of linking to it alone: the PR
+must be readable on its own. A change with no problem to state — a rename, a
+formatting pass — says so in one line ("no user-visible problem; ..."), rather than
+dropping the section.
+
+**Test plan** items are checkboxes, matching the issue templates (`issue-rules` →
+Description Template) so plan items can be reconciled against the issue at merge
+time. Check a box only once that item has actually been run and passed; an unchecked
+box means not yet verified, and the Pre-Open Checklist gates on that.
 
 ---
 
@@ -172,6 +192,8 @@ Project Overrides above).
 ## Pre-Open Checklist
 
 - [ ] CI green on all targets declared in the project
+- [ ] Description carries all four sections, `## Problem` included — see Description Structure
+- [ ] Every checked box in the PR's test plan corresponds to a run that actually passed
 - [ ] PR carries the issue's labels — type label if any, plus topic labels — see `issue-rules` → Labels
 - [ ] `CHANGELOG.md` updated — every user-visible change documented
 - [ ] `git submodule status` — no `+` prefix on any module
@@ -183,14 +205,15 @@ Project Overrides above).
 
 ## Pre-Merge Checklist
 
-Gates the merge itself — distinct from the Pre-Open Checklist above, which gates opening the PR. Run this against the issue linked in the PR title, not just the PR description.
+Gates the merge itself — distinct from the Pre-Open Checklist above, which gates opening the PR. Run it against the issue linked in the PR title and against the PR's own test plan; neither one alone is enough.
 
 - [ ] Every checklist checkbox in the issue reflects actual current state, not the state at issue-creation time
 - [ ] Each checkbox now checked is verifiable from what shipped in this PR or an earlier merged PR
 - [ ] Every unchecked item either is out of scope for this PR or has a linked follow-up PR/MR
+- [ ] Every test-plan box in the PR description is checked, or the item is named out of scope with a reason — an unchecked box means the work is merging unverified
 - [ ] A comment is added to the issue recording which PR/MR resolves which item (`issue-rules` → Progress Comments)
 
-**Merge gate:** merge only if every item in the issue is checked, or the remaining unchecked items already have a follow-up PR/MR linked in an issue comment. An issue with unchecked items and no plan to address them blocks the merge.
+**Merge gate:** merge only if every item in the issue and every test-plan box in the PR is checked, or the remaining ones already have a follow-up PR/MR linked in an issue comment or a stated reason for staying unrun. Unchecked items with no plan behind them block the merge.
 
 ---
 
