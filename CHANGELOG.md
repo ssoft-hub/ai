@@ -29,6 +29,7 @@
 - `templates/AGENT.md` and `templates/COMMAND.md` for consistent agent/command authoring, matching `templates/SKILL.md`'s role for skills
 - `AGENTS.md`: "Idea-to-Release Pipeline" section describing the `/spec` → `/build` → `/ship` flow and when to invoke a persona agent directly instead of via its command
 - `comment-check` tool: `PostToolUse` reminder when an edit adds a new non-Doxygen comment to a C++ file, pointing back at the `comments` skill — runs unconditionally, unlike the lint tools which require a project config file
+- `review-publish-guard` tool: `PreToolUse` `permissionDecision: ask` before a `gh` command that publishes review feedback the moment it runs — `gh pr review --comment/--approve/--request-changes`, `gh pr comment`, `POST /pulls/{n}/comments` with `in_reply_to`, an `event` field on `POST /pulls/{n}/reviews`, `submitPullRequestReview`, and `addPullRequestReviewThreadReply` without a `pullRequestReviewId`, which belongs to no pending review and therefore publishes. The prompt names the pending-review alternative, and the pending path itself (`addPullRequestReview` with no `event`, `addPullRequestReviewThread`, a reply carrying the review id, `deletePullRequestReview`, `gh api graphql --input`) runs unprompted. Rules read a command as argv rather than as text: each rule anchors to the command word, so a commit message or progress note naming a blocked command does not prompt, and a quoted body arrives as one token, so a delimiter or a flag quoted inside it neither splits the call apart nor changes how it parses. Enforces `pr-rules` → Pending by Default, which until now held only while the agent remembered it
 
 ### Changed
 
@@ -52,6 +53,7 @@
 - `pr-rules` skill: Merge Strategy states that the human authorises each merge, matching the rule that review feedback already follows
 - `code-reviewer` agent: states an approving verdict in its report instead of approving the PR, and points at `pr-rules` → Pending by Default for how findings reach the PR
 - `AGENTS.md` "Adding a skill": states that `install.js` copies only `skills/<name>/SKILL.md`, so a skill stays one file until that copy loop changes
+- `PreToolUse` dispatcher now emits one permission decision per run: the strictest of the decisions returned (`deny` over `ask` over `allow`), carrying every reason behind it and any warning printed alongside. Two tools deciding on one command (`git push && gh pr comment ...`) used to write two JSON objects onto one stdout, which parses as neither, so the decision could be lost together with the prompt it was raised for; the reason is also all the user reads before answering, and one tool's reason alone misstates what is about to run
 
 ### CI
 

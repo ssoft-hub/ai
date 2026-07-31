@@ -21,6 +21,7 @@ pipeline of persona agents and commands built on top of them.
 **`PreToolUse`** — runs before every tool call:
 - `bash-safety.js` — blocks destructive shell commands (`rm -rf /`, `format C:`), warns on reversible-but-risky ones (`git reset --hard`, `DROP TABLE`)
 - `commit-trailer-guard.js` — blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
+- `review-publish-guard.js` — prompts for confirmation before a `gh` command that publishes review feedback on the spot (`gh pr review --comment/--approve/--request-changes`, `gh pr comment`, REST `in_reply_to`, an `event` field on `POST /pulls/{n}/reviews`, `submitPullRequestReview`, and a thread reply carrying no `pullRequestReviewId`); the pending-review path stays unprompted
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) containing private keys, AWS keys, GitHub PATs; warns on probable credentials
 
 **`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit` on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
