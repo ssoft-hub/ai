@@ -59,6 +59,8 @@ pipeline of persona agents and commands built on top of them.
 | `doxygen` | Doxygen tag coverage for public headers |
 | `editing` | File editing workflow (re-read before edit) |
 | `encapsulation` | Access-specifier discipline (public/protected/private) |
+| `github-cli` | `gh` mechanics — issues, PRs, labels, pending review threads, merges |
+| `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, merges |
 | `hook-scripts` | Writing Claude Code hooks and tools |
 | `issue-rules` | Tracker issue title, description, labels, priority, lifecycle |
 | `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |

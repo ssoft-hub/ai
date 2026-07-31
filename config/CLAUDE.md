@@ -22,6 +22,8 @@ When modelling domain objects, aggregates, or bounded contexts → apply `ddd` s
 When writing commit messages or naming branches → apply `commit-rules` skill.
 When creating or reviewing tracker issues → apply `issue-rules` skill.
 When opening, reviewing, or preparing a PR → apply `pr-rules` skill.
+When running `gh` — creating an issue or PR, labelling, review threads, merging → apply `github-cli` skill.
+When running `glab` — creating an issue or MR, labelling, draft notes, merging → apply `gitlab-cli` skill.
 When updating CHANGELOG.md → apply `changelog` skill.
 When preparing a release, bumping version, or tagging → apply `release` skill.
 When writing or modifying hook scripts in hooks/ or tools/ → apply `hook-scripts` skill.

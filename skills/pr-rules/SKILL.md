@@ -24,6 +24,8 @@ Project-local rules win. If the repository's `AGENTS.md` or a project skill defi
 
 End-to-end order of actions from a new task to a merged, closed issue. Steps run in order — do not open a PR before step 1 is satisfied, do not merge before step 5 is satisfied.
 
+Every step that touches the tracker or the PR is carried out with the hosting platform's CLI — `github-cli` for `gh`, `gitlab-cli` for `glab`. This skill states what must be true at each step; the platform skill states the command that gets there.
+
 **1. Scope and issue** — before any code change:
 - Identify the repository the change belongs to (root repo or a submodule); the issue is created and tracked there, not in the root repo.
 - Search the tracker for an existing issue covering the task. If found, check it has a test plan and, for features, acceptance criteria (`issue-rules` → Description Template); if incomplete for this task, update the issue before writing code.
@@ -208,63 +210,8 @@ as usual: recording which PR resolves which checklist item is not a review findi
 the draft was opened by this pass or reused. A draft nobody is told about is the same as
 no review.
 
-**GitHub.** Commands that publish on the spot are out:
-
-| Publishes immediately (do not use) | Use instead |
-|---|---|
-| `gh pr review --comment` / `--approve` / `--request-changes` | `addPullRequestReview` with no `event` field |
-| `gh pr comment` for review feedback | the pending review's `body` |
-| `POST /pulls/{n}/comments` with `in_reply_to` | `addPullRequestReviewThreadReply` into the pending review |
-
-Four things the CLI help does not cover — the pending-state commands below were run
-against a live PR, the publishing behaviour comes from the API reference and the schema:
-
-1. The pending path exists only over GraphQL: `gh pr review` submits on the spot, and REST
-   `in_reply_to` has no pending form.
-2. One pending review per user per PR. A second `addPullRequestReview`, and the REST
-   equivalent, answer `User can only have one pending review per pull request` — so look
-   for an open one and reuse it rather than creating a second.
-3. `-f`/`-F` send every value as a string, so a typed variable (the `threads` list on
-   `addPullRequestReview`) cannot go through them. Either add threads one at a time with
-   `addPullRequestReviewThread`, as below, or pass the whole request as a file:
-   `gh api graphql --input <file>`, where the file holds
-   `{"query":"mutation(...){...}","variables":{...}}` — query and variables together, not
-   a bare variables object.
-4. `pullRequestReviewId` is optional on `addPullRequestReviewThreadReply`. A reply without
-   it belongs to no pending review, so treat its absence as publishing.
-
-```
-# lookup: PR id, own pending review, thread ids. Pages 50 threads at a time
-# (re-run with -f after=<endCursor>); leave isResolved threads alone
-gh api graphql -f query='
-  query($o:String!,$r:String!,$n:Int!,$after:String) {
-    viewer { login }
-    repository(owner:$o, name:$r) { pullRequest(number:$n) {
-      id
-      reviews(last:10, states:PENDING) { nodes { id author { login } } }
-      reviewThreads(first:50, after:$after) {
-        pageInfo { hasNextPage endCursor }
-        nodes { id isResolved comments(first:1) { nodes { path body } } }
-      }
-    } }
-  }' -f o=<owner> -f r=<repo> -F n=<pr-number>
-
-# open one when the lookup returns none authored by viewer; omitting event keeps it PENDING
-gh api graphql -f query='mutation($pr:ID!,$body:String!){addPullRequestReview(input:{pullRequestId:$pr,body:$body}){pullRequestReview{id state}}}' -f pr=<pr-node-id> -f body='<overall comment>'
-
-# one finding: swap side to LEFT for a deleted line, add startLine/startSide for a span
-gh api graphql -f query='mutation($rev:ID!,$path:String!,$line:Int!,$body:String!){addPullRequestReviewThread(input:{pullRequestReviewId:$rev,path:$path,line:$line,side:RIGHT,body:$body}){thread{id}}}' -f rev=<review-id> -f path=<file> -F line=<line> -f body='<finding>'
-
-# reply into an existing thread
-gh api graphql -f query='mutation($rev:ID!,$thread:ID!,$body:String!){addPullRequestReviewThreadReply(input:{pullRequestReviewId:$rev,pullRequestReviewThreadId:$thread,body:$body}){comment{id}}}' -f rev=<review-id> -f thread=<thread-id> -f body='<reply>'
-
-# discard, and only a review this pass opened - a reused one may hold an unsent draft
-gh api graphql -f query='mutation($rev:ID!){deletePullRequestReview(input:{pullRequestReviewId:$rev}){pullRequestReview{state}}}' -f rev=<review-id>
-```
-
-**GitLab.** Draft notes take the same shape, untested here, so check the response:
-`glab api projects/<id>/merge_requests/<iid>/draft_notes -X POST -f note='<comment>'`. The
-human publishes them from the MR page, or with `POST .../draft_notes/bulk_publish`.
+Which command publishes on the spot, which one keeps the feedback unsent, and the traps
+neither CLI help states: `github-cli` → Review Threads, `gitlab-cli` → Draft Notes.
 
 ### Register
 
@@ -329,16 +276,10 @@ Gates the merge itself — distinct from the Pre-Open Checklist above, which gat
 - Rebase before merge ensures no interleaved history under the merge commit.
 - Protected branches — the canonical set is defined and enforced by `hooks/git/pre-commit`. Feature branches commit freely.
 
-### GitHub equivalent
+### Platform mechanics
 
-```
-gh pr merge <n> --merge -t "<subject>" -b "<body>" --delete-branch
-```
-
-### Repo settings prerequisites
-
-- "Allow merge commits" — ON
-- "Require linear history" — OFF (blocks `--no-ff`)
+The command that performs this merge, and the repository settings it depends on:
+`github-cli` → Pull Requests, `gitlab-cli` → Merge Requests.
 
 ---
 
@@ -351,3 +292,12 @@ One logical change per PR. Do not mix:
 - Multiple unrelated features
 
 If a PR touches too many things, split it. A PR that cannot be summarised in one sentence is too large.
+
+---
+
+## Cross-References
+
+- `issue-rules` — the issue this PR resolves: title, description templates, labels, lifecycle.
+- `commit-rules` — commit message format and branch naming on the PR's branch.
+- `github-cli` — the `gh` commands behind every step above.
+- `gitlab-cli` — the `glab` commands behind every step above.
