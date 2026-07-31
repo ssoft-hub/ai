@@ -15,6 +15,9 @@ metadata:
 
 Apply when creating or reviewing tracker issues (GitHub Issues, Jira, Linear, …).
 
+This skill states what an issue must contain. The command that creates it, labels it, or
+comments on it belongs to the platform: `github-cli` for `gh`, `gitlab-cli` for `glab`.
+
 ## Project Overrides
 
 Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own issue conventions, follow those instead. This skill is the fallback for projects that do not specify their own.
@@ -115,8 +118,8 @@ Title types other than these three (see the Types table above) carry no label �
 
 Every issue also gets a few **topic** labels (2-4, not a tag cloud) — named after the
 actual subject matter (component, subsystem, domain concept), not drawn from a fixed
-list. Before creating one, check the tracker's existing labels (e.g. `gh label list`
-on GitHub) for one covering the same topic and reuse it; create a new topic label
+list. Before creating one, list the tracker's existing labels (`github-cli` /
+`gitlab-cli` → Issues) and reuse one covering the same topic; create a new topic label
 only the first time a topic has no match. Topic labels grow organically with the
 project.
 
@@ -181,3 +184,5 @@ A reader should be able to reconstruct, from comments alone, which PR/MR impleme
 
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
 - `pr-rules` — PR title and description mirror the issue being resolved; Pre-Merge Checklist gates merge on this issue's checkbox state.
+- `github-cli` — the `gh` commands that create, label, and comment on an issue.
+- `gitlab-cli` — the `glab` commands for the same.
