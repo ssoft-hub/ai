@@ -5,6 +5,13 @@ description: Apply when adding or modifying Doxygen comments for public C++ head
 license: Unlicense
 metadata:
   author: ssoft
+  tier: narrow
+  reminder: false
+  paths:
+    - "**/*.h"
+    - "**/*.hpp"
+  with:
+    - "api-design"
   tags:
     - cpp
     - doxygen

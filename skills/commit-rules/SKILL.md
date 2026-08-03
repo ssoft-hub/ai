@@ -5,6 +5,7 @@ description: Apply when writing or reviewing commit messages or naming branches
 license: Unlicense
 metadata:
   author: ssoft
+  tier: narrow
   tags:
     - git
     - commits

@@ -5,6 +5,7 @@ description: Apply when creating or reviewing tracker issues
 license: Unlicense
 metadata:
   author: ssoft
+  tier: narrow
   tags:
     - git
     - issues

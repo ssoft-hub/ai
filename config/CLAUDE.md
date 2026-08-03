@@ -12,6 +12,16 @@ Local commits, local file edits within a git repo, and read operations do not re
 
 ## Skills — auto-apply
 
+Applying a skill means loading it with the Skill tool. Recalling that a skill exists, or
+having read it in an earlier session, is not applying it.
+
+Several skills apply to most tasks. Load them all, in this order: process skills
+(`requirements`, `architecture`, `project-planning`, `debugging`,
+`test-driven-development`, `code-review-and-quality`) settle the approach, then the
+domain skill for the code at hand, then narrow-scope skills (`comments`, `doxygen`,
+`encapsulation`, `commit-rules`, `issue-rules`, `pr-rules`, `changelog`,
+`writing-style`). Where two overlap, the narrower one rules its own topic.
+
 When writing or reviewing C++ implementation code → apply `cpp-coding` skill.
 When writing, reviewing, or adding tests to C++ code → apply `cpp-testing` skill.
 When designing public API, adding public headers, or reviewing public interface → apply `api-design` skill.

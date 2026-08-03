@@ -23,6 +23,7 @@ pipeline of persona agents and commands built on top of them.
 - `commit-trailer-guard.js` — blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `review-publish-guard.js` — prompts for confirmation before a `gh` command that publishes review feedback on the spot (`gh pr review --comment/--approve/--request-changes`, `gh pr comment`, REST `in_reply_to`, an `event` field on `POST /pulls/{n}/reviews`, `submitPullRequestReview`, and a thread reply carrying no `pullRequestReviewId`); the pending-review path stays unprompted
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) containing private keys, AWS keys, GitHub PATs; warns on probable credentials
+- `skill-gate.js` — on the same write tools, names the skills that claim the edited file (their `paths:` frontmatter) plus the ones they list in `with:`, minus whatever is already loaded this session; warn-only
 
 **`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit` on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
 - `comment-check.js` — runs unconditionally (no config file needed); reminds to check any newly added non-Doxygen comment against the `comments` skill
@@ -38,9 +39,16 @@ pipeline of persona agents and commands built on top of them.
 - `claude-md-skills-sync-check.js` — warns if `CLAUDE.md`'s skill list has drifted from `skills/`
 
 **`UserPromptSubmit`** — runs on every user message:
-- `skills-reminder.js` — injects a reminder of available skills and their triggers, generated live from `skills/*/SKILL.md` frontmatter
+- `skills-reminder.js` — injects a reminder of the available skills, generated live from `skills/*/SKILL.md` frontmatter; a skill declaring `reminder: false` is left to `skill-gate.js` alone
 
 ## Skills
+
+Each skill declares in its frontmatter how it is triggered and how it ranks against the
+others: `tier` (`process` sets the approach, `domain` shapes the code, `narrow` rules one
+topic), optional `paths` globs naming the files it owns, optional `with` naming the
+skills that always apply alongside it, and optional `reminder: false` for a skill whose
+`paths` are its whole trigger. When several fire on one task they are loaded
+`process` → `domain` → `narrow`, and the narrower one wins on its own topic.
 
 | Skill | Description |
 |-------|-------------|

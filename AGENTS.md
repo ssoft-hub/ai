@@ -34,6 +34,28 @@ No hardcoded user paths anywhere. No npm dependencies.
 
 See `skills/hook-scripts/SKILL.md` for full hook development conventions.
 
+## How a skill reaches the agent
+
+Two paths, so that a skill arrives when it applies instead of every skill arriving on
+every prompt:
+
+- `tools/skills-reminder.js` (`UserPromptSubmit`) lists every skill except those that
+  declare `reminder: false`, meaning their `paths:` are the whole trigger. Declaring
+  `paths:` alone does not remove a skill from this list: most are triggered by intent
+  too, and design work runs before the file that will carry it exists.
+- `tools/skill-gate.js` (`PreToolUse` on `Edit`/`Write`/`MultiEdit`/`NotebookEdit`)
+  matches the edited file against every skill's `paths:`, adds the skills named in
+  their `with:`, subtracts the ones already loaded in this session's transcript, and
+  warns with what's left. Loaded skills are tracked per session in
+  `session-env/<session_id>.skill-gate.json` against a transcript byte cursor.
+
+Both read `tools/skill-catalog.js`, which parses `tier`/`paths`/`with` out of each
+`SKILL.md` frontmatter — the frontmatter is the only place a skill's triggers are
+declared, so there is no second list to keep in sync.
+
+When several skills fire on one task they are ordered `process` → `domain` → `narrow`.
+The narrower skill rules its own topic and must not restate the wider one.
+
 ## Adding a skill
 
 0. Pre-flight check, before creating any file:
@@ -43,7 +65,13 @@ See `skills/hook-scripts/SKILL.md` for full hook development conventions.
      adjacent skills (e.g. `encapsulation` covers access-specifier rules;
      `api-design` covers public surface shape — the two must not restate each other).
 1. Copy `templates/SKILL.md` to `skills/<name>/SKILL.md`
-2. Fill in frontmatter (name, description, tags)
+2. Fill in frontmatter (name, description, tags), then decide how it is triggered:
+   - `tier` — `process`, `domain`, or `narrow` (see "How a skill reaches the agent")
+   - `paths` — the files this skill owns, when a kind of file should trigger it
+   - `reminder: false` — only when those files are the *whole* trigger; it drops the
+     skill from the every-prompt reminder and leaves it to the edit-time gate
+   - `with` — skills that must arrive together with this one, so the pair is never
+     half-applied
 3. Write rules sections following the template structure
 4. Add an entry to the skill table in `README.md`
 5. Add the skill's trigger line to `config/CLAUDE.md`'s "Skills — auto-apply" section

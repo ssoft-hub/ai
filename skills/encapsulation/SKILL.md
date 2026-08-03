@@ -5,6 +5,10 @@ description: Apply when choosing access specifiers, designing a class's public/p
 license: Unlicense
 metadata:
   author: ssoft
+  tier: narrow
+  paths:
+    - "**/*.h"
+    - "**/*.hpp"
   tags:
     - cpp
     - encapsulation

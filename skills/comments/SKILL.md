@@ -5,6 +5,7 @@ description: Apply when writing or reviewing non-Doxygen code comments (inline n
 license: Unlicense
 metadata:
   author: ssoft
+  tier: narrow
   tags:
     - cpp
     - comments

@@ -5,6 +5,7 @@ description: Apply when implementing a feature or bug fix, before writing implem
 license: Unlicense
 metadata:
   author: ssoft
+  tier: process
   tags:
     - testing
     - workflow

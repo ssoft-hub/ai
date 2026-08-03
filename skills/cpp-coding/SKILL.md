@@ -5,6 +5,15 @@ description: Apply when writing or reviewing C++ implementation code
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
+  paths:
+    - "**/*.cpp"
+    - "**/*.cc"
+    - "**/*.cxx"
+    - "**/*.h"
+    - "**/*.hpp"
+  with:
+    - "comments"
   tags:
     - cpp
     - coding

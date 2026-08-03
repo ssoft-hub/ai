@@ -9,7 +9,7 @@
 - C++ lint tools: `clang-format`, `clang-tidy`, `cppcheck` wrappers running on every edited C++ file
 - Desktop stop notification via `stop-notify` (Windows / macOS / Linux)
 - Skills: `api-design`, `changelog`, `commit-rules`, `cpp-coding`, `cpp-testing`, `ddd`, `doxygen`, `editing`, `hook-scripts`, `pr-rules`, `release`, `submodule-sync`
-- `UserPromptSubmit` hook: injects active skills reminder into each prompt
+- `UserPromptSubmit` hook: injects a reminder of the available skills into each prompt, with their full trigger text and tier; a skill whose trigger is exactly the files it owns is left to the edit-time gate instead
 - Portable `config/settings.json` using `CLAUDE_CONFIG_DIR` / `os.homedir()` — no hardcoded user paths
 - `install.js` bootstrap with JSON-merge for `~/.claude/settings.json` — existing machine-specific settings preserved
 - `templates/SKILL.md` template for consistent skill authoring
@@ -23,6 +23,8 @@
 - Skills: `security-and-hardening` (trust boundaries, input validation, secrets, least privilege), `performance-optimization` (profile-measure-optimize workflow), `observability-and-instrumentation` (logging, metrics, tracing)
 - Skills: `ci-cd-and-automation` (pipeline design and quality gates), `deprecation-and-migration` (retiring a public API, migration guides), `shipping-and-launch` (release readiness, staged rollout, rollback planning)
 - `writing-style` skill: technical register and vocabulary for documentation, issue/PR/commit text, and conversation, in any human language — no slang, no unnecessary borrowings from another language
+- Skill routing frontmatter: every skill declares `tier` (`process`/`domain`/`narrow`), and optionally `paths` globs for the files it owns, `with` for the skills that always apply alongside it, and `reminder: false` when those files are its whole trigger
+- `skill-gate` tool: on `Edit`/`Write`/`MultiEdit`/`NotebookEdit`, names the skills claiming the edited file and their companions, leaving out those already loaded in the session
 - `install.js` support for `agents/*.md` → `~/.claude/agents/` and `commands/*.md` → `~/.claude/commands/` (both optional; a checkout without either installs cleanly)
 - Agents: `spec-architect`, `implementer`, `code-reviewer`, `security-auditor`, `release-manager` — persona subagents forming an idea-to-release pipeline, each scoped to one stage and pointed at the skills it applies
 - Commands: `/spec`, `/build`, `/ship` — orchestrate the persona agents into an idea-to-release pipeline; `/ship` fans `code-reviewer` and `security-auditor` out in parallel, merges into a go/no-go, and hands off to `release-manager` on go

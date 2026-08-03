@@ -5,6 +5,7 @@ description: Apply when preparing to ship a release to users, beyond the version
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - release
     - operations

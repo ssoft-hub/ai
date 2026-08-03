@@ -5,6 +5,7 @@ description: Apply when writing documentation, issue/PR/commit text, or communic
 license: Unlicense
 metadata:
   author: ssoft
+  tier: narrow
   tags:
     - writing
     - style

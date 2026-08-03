@@ -5,6 +5,10 @@ description: Apply when editing CHANGELOG.md or asked about changelog format
 license: Unlicense
 metadata:
   author: ssoft
+  tier: narrow
+  reminder: false
+  paths:
+    - "**/CHANGELOG.md"
   tags:
     - git
     - changelog

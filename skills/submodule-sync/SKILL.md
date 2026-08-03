@@ -5,6 +5,7 @@ description: Apply when syncing git submodules or working across submodule bound
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - git
     - submodules

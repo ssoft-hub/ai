@@ -5,6 +5,7 @@ description: Apply when designing system or module architecture, evaluating arch
 license: Unlicense
 metadata:
   author: ssoft
+  tier: process
   tags:
     - architecture
     - planning
