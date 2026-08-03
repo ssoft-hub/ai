@@ -22,7 +22,7 @@ Apply, in order:
    project's include order and type-safety rules.
 3. `ddd` skill — keep the vocabulary from the spec; don't invent a parallel one at
    implementation time.
-4. `encapsulation` skill — private by default; a member is public only when the spec
+4. `cpp-encapsulation` skill — private by default; a member is public only when the spec
    requires callers outside the type to use it.
 5. `cpp-testing` skill — for the structural rules (AAA, boundary cases, naming) that
    `test-driven-development` doesn't itself cover.

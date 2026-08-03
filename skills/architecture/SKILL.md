@@ -18,7 +18,7 @@ competing designs, or writing an Architecture Decision Record (ADR).
 
 - This skill covers how modules/services/processes fit together. A single public
   interface's own hygiene (namespacing, no `void*`, breaking-change policy) →
-  `api-design` skill.
+  `cpp-api-design` skill.
 - Modelling one bounded context's domain objects and invariants → `ddd` skill.
   Architecture decides where the boundaries between contexts are; `ddd` decides what
   goes on inside one of them.
@@ -80,7 +80,7 @@ it later, instead of looking like an arbitrary preference:
   must you stay responsive? Most internal-tool architectures over-index on consistency
   by default without ever interrogating whether availability matters more here.
 - **Build vs buy/reuse** — building gives full control and a maintenance burden; reuse
-  trades control for less code to own. Check `api-design`'s "no runtime dependencies in
+  trades control for less code to own. Check `cpp-api-design`'s "no runtime dependencies in
   public API" rule before reuse decisions that would leak a third-party type across a
   public boundary.
 - **Synchronous vs asynchronous boundary** — sync is easier to reason about and debug;

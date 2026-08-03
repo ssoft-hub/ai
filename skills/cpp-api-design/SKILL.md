@@ -1,7 +1,7 @@
 ---
-name: api-design
+name: cpp-api-design
 version: "1.0.0"
-description: Apply when designing new API, adding public headers, or reviewing public interface
+description: Apply when designing a new C++ API, adding public C++ headers, or reviewing a public C++ interface
 license: Unlicense
 metadata:
   author: ssoft
@@ -16,7 +16,7 @@ metadata:
 
 # Skill: C++ API Design
 
-Apply when designing new API, adding public headers, or reviewing public interface changes.
+Apply when designing a new C++ API, adding public C++ headers, or reviewing public C++ interface changes.
 
 ## Structural Rules
 
@@ -83,5 +83,5 @@ Breaking change = removing or renaming any public symbol, or changing its observ
 
 1. Create the header at the path the project declares (check `AGENTS.md`)
 2. Add `#pragma once` (classic headers) — C++20+ module projects use `export module <name>;` instead; the two are mutually exclusive
-3. Add Doxygen `@defgroup` or `@ingroup` (see `doxygen` skill)
+3. Add Doxygen `@defgroup` or `@ingroup` (see `cpp-doxygen` skill)
 4. Add a test file alongside the implementation

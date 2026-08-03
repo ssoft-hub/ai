@@ -19,11 +19,11 @@ Apply, in order:
 1. `code-review-and-quality` skill — the five review axes (correctness, readability,
    architecture fit, security, performance), in that priority order; change-size and
    dependency-bump discipline; flag now-orphaned code the change left behind.
-2. `encapsulation` skill — check that nothing new is public that didn't need to be.
-3. `api-design` skill — for a public-surface change, check the structural rules (no
+2. `cpp-encapsulation` skill — check that nothing new is public that didn't need to be.
+3. `cpp-api-design` skill — for a public-surface change, check the structural rules (no
    `bool` parameters, no `void*`, namespace) and whether it's a breaking change
    requiring a version bump.
-4. `comments` / `doxygen` skills — flag a comment that narrates what the code already
+4. `comments` / `cpp-doxygen` skills — flag a comment that narrates what the code already
    says, and confirm a new public header carries the Doxygen block it needs.
 
 State the problem and the concrete fix for every finding, and mark each as blocking or

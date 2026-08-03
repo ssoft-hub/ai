@@ -16,7 +16,7 @@ metadata:
 
 Apply when designing domain models, domain APIs, or structuring a module around a business domain.
 
-C++ mechanics → `cpp-coding`, `api-design`. This skill covers domain modelling only.
+C++ mechanics → `cpp-coding`, `cpp-api-design`. This skill covers domain modelling only.
 
 Reference: Eric Evans, *Domain-Driven Design* (2003). Patterns below are the strategic and tactical core.
 

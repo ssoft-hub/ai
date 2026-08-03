@@ -16,7 +16,7 @@ metadata:
 Apply when retiring a public API, planning a breaking change, or writing a migration
 guide for consumers moving off one.
 
-- What counts as a breaking change and the version bump it requires → `api-design`
+- What counts as a breaking change and the version bump it requires → `cpp-api-design`
   skill (Breaking Changes section) — this skill covers the deprecation-to-removal
   process around that change, not the definition of "breaking" itself.
 - The version bump and changelog mechanics of shipping the removal →
@@ -95,7 +95,7 @@ working.
 
 ## Internal vs Public Deprecation
 
-Deprecating an internal-only symbol (not part of the public API per `api-design`) does
+Deprecating an internal-only symbol (not part of the public API per `cpp-api-design`) does
 not need a grace period or migration guide — update every internal call site in the
 same change. This skill's ceremony is proportional to how many consumers outside this
 repo are affected.

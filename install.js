@@ -204,9 +204,33 @@ if (!SKIP_GIT) {
   installGitHook();
 }
 
+// A rename only reaches a machine whose manifest still names the old path. Warn about
+// the ones it doesn't own so a lost manifest doesn't leave a skill live under both
+// names — an untracked file may be the user's own, so it is never deleted here.
+function warnRetiredPaths() {
+  const src = path.join(repoDir, 'config', 'retired.json');
+  if (!fs.existsSync(src)) return;
+  let retired;
+  try { retired = JSON.parse(fs.readFileSync(src, 'utf8')).retired; }
+  catch { warn(`${src} is not valid JSON — skipping retired-path check`); return; }
+  if (!Array.isArray(retired)) return;
+  let found = 0;
+  for (const rel of retired) {
+    const dest = path.join(claudeDir, rel);
+    if (!fs.existsSync(dest) || isTracked(dest)) continue;
+    found++;
+    warn(`${dest} was retired upstream and install does not own it — `
+      + 'remove it by hand if it is a leftover from an older install');
+  }
+  log(`  ${logPrefix} ${found ? `${found} left for manual removal` : '(none)'}`);
+}
+
 // Upgrade hygiene: remove files a previous install created under claudeDir that
 // the current repo no longer ships (renamed/deleted hooks, tools, skills).
 // Scoped to claudeDir so the git pre-commit hook (outside it) is never touched.
+log('\nretired paths install does not own:');
+warnRetiredPaths();
+
 log('\npruning files no longer shipped:');
 const orphans = manifest.createdFiles.filter(
   f => isInside(f, claudeDir) && !written.has(f) && fs.existsSync(f),
@@ -215,11 +239,41 @@ for (const f of orphans) {
   if (!DRY_RUN) fs.unlinkSync(f);
   log(`  ${logPrefix} removed ${f}`);
 }
+
+// A path install overwrote rather than created is given back to the content it had
+// before, instead of being left live: uninstall would otherwise be the only step that
+// ever restores it, and until then the retired name keeps loading.
+const orphanBackups = manifest.backups.filter(
+  b => isInside(b.dest, claudeDir) && !written.has(b.dest),
+);
+for (const { dest, backup } of orphanBackups) {
+  if (fs.existsSync(backup)) {
+    if (!DRY_RUN) {
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.copyFileSync(backup, dest);
+      fs.unlinkSync(backup);
+    }
+    log(`  ${logPrefix} restored ${dest} ← ${backup} (no longer shipped)`);
+  } else {
+    // Nothing left to restore from, so the record goes rather than staying: uninstall
+    // treats a missing backup as a hard failure and keeps the manifest for a retry that
+    // can never succeed, which would wedge every later uninstall over one path this
+    // repo no longer ships. The file itself may carry edits, so it is left alone.
+    warn(`backup missing: ${backup} — ${dest} is no longer tracked and stays as it is; `
+      + 'remove it by hand if it is a leftover from an older install');
+  }
+}
+// Both outcomes end install's ownership of the path, so every record drops either way.
+if (orphanBackups.length) {
+  const released = new Set(orphanBackups.map(b => b.dest));
+  manifest.backups = manifest.backups.filter(b => !released.has(b.dest));
+}
+
 if (orphans.length) {
   const orphanSet = new Set(orphans);
   manifest.createdFiles = manifest.createdFiles.filter(f => !orphanSet.has(f));
   for (const dir of new Set(orphans.map(f => path.dirname(f)))) pruneEmptyDirs(dir, claudeDir);
-} else {
+} else if (!orphanBackups.length) {
   log(`  ${logPrefix} (none)`);
 }
 

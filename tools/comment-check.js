@@ -4,7 +4,7 @@ const path = require('path');
 const CPP_EXTS = new Set(['.h', '.hpp', '.cpp', '.cc', '.cxx']);
 
 // A "plain" comment line the `comments` skill governs. Doxygen markers (///, //!,
-// /**) are excluded — those belong to the separate `doxygen` skill. `//` must sit at
+// /**) are excluded — those belong to the separate `cpp-doxygen` skill. `//` must sit at
 // line start or after whitespace so a URL literal like "https://x" doesn't match.
 function isPlainCommentLine(line) {
   if (/\/\/\/|\/\/!|\/\*\*/.test(line)) return false;

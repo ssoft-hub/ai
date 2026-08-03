@@ -18,15 +18,15 @@ having read it in an earlier session, is not applying it.
 Several skills apply to most tasks. Load them all, in this order: process skills
 (`requirements`, `architecture`, `project-planning`, `debugging`,
 `test-driven-development`, `code-review-and-quality`) settle the approach, then the
-domain skill for the code at hand, then narrow-scope skills (`comments`, `doxygen`,
-`encapsulation`, `commit-rules`, `issue-rules`, `pr-rules`, `changelog`,
+domain skill for the code at hand, then narrow-scope skills (`comments`, `cpp-doxygen`,
+`cpp-encapsulation`, `commit-rules`, `issue-rules`, `pr-rules`, `changelog`,
 `writing-style`). Where two overlap, the narrower one rules its own topic.
 
 When writing or reviewing C++ implementation code → apply `cpp-coding` skill.
 When writing, reviewing, or adding tests to C++ code → apply `cpp-testing` skill.
-When designing public API, adding public headers, or reviewing public interface → apply `api-design` skill.
-When choosing access specifiers or reviewing member visibility → apply `encapsulation` skill.
-When adding or modifying Doxygen comments on public headers → apply `doxygen` skill.
+When designing a C++ API, adding public C++ headers, or reviewing a public C++ interface → apply `cpp-api-design` skill.
+When choosing C++ access specifiers or reviewing member visibility → apply `cpp-encapsulation` skill.
+When adding or modifying Doxygen comments on public C++ headers → apply `cpp-doxygen` skill.
 When writing or reviewing non-Doxygen code comments → apply `comments` skill.
 When modelling domain objects, aggregates, or bounded contexts → apply `ddd` skill.
 When writing commit messages or naming branches → apply `commit-rules` skill.

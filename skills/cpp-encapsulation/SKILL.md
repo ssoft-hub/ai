@@ -1,7 +1,7 @@
 ---
-name: encapsulation
+name: cpp-encapsulation
 version: "1.0.0"
-description: Apply when choosing access specifiers, designing a class's public/protected/private surface, or reviewing member visibility
+description: Apply when choosing C++ access specifiers, designing a C++ class's public/protected/private surface, or reviewing member visibility
 license: Unlicense
 metadata:
   author: ssoft
@@ -15,11 +15,11 @@ metadata:
     - api
 ---
 
-# Skill: Encapsulation
+# Skill: C++ Encapsulation
 
-Apply when choosing access specifiers, designing a class's public/protected/private surface, or reviewing member visibility.
+Apply when choosing C++ access specifiers, designing a C++ class's public/protected/private surface, or reviewing member visibility.
 
-Public API structure across headers/modules → `api-design`. This skill covers access-level choice within a single type.
+Public API structure across headers/modules → `cpp-api-design`. This skill covers access-level choice within a single type.
 
 ---
 
