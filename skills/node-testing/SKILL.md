@@ -5,6 +5,12 @@ description: Apply when writing or reviewing tests under test/*.test.js for Clau
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
+  reminder: false
+  paths:
+    - "**/test/*.test.js"
+  with:
+    - "test-driven-development"
   tags:
     - testing
     - node

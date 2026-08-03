@@ -5,6 +5,7 @@ description: Apply when diagnosing or fixing a reported performance problem, or 
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - performance
     - quality

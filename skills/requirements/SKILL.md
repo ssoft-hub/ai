@@ -5,6 +5,7 @@ description: Apply when eliciting requirements, writing user stories or use case
 license: Unlicense
 metadata:
   author: ssoft
+  tier: process
   tags:
     - requirements
     - planning

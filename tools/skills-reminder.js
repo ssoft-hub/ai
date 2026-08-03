@@ -1,40 +1,36 @@
 'use strict';
-const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { TIERS, loadCatalog } = require(path.join(__dirname, 'skill-catalog.js'));
 
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 const skillsDir = path.join(configDir, 'skills');
 
-const MAX_HINT_LEN = 70;
+const HEADER = [
+  'SKILLS — before acting, match the work against this list and load every matching',
+  'skill with the Skill tool. Loading is the only way a skill applies: recalling that',
+  'a skill exists, or that you read it in an earlier session, does not count.',
+  'Several may match one task — load them all, process tier first, then domain, then',
+  'narrow; the narrower skill wins on its own topic. Skills tied to a kind of file are',
+  'left out here — they are named at the moment that file is edited.',
+].join('\n');
 
-function shortHint(description) {
-  let hint = description.replace(/^Apply when\s+/i, '').trim();
-  if (hint.length <= MAX_HINT_LEN) return hint;
-  const cut = hint.slice(0, MAX_HINT_LEN);
-  const lastSpace = cut.lastIndexOf(' ');
-  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
+function trigger(description) {
+  return description.replace(/^Apply when\s+/i, '').trim();
 }
 
+// A skill that opted out is announced by skill-gate instead, when its file is edited.
 function buildSkillList(dir) {
-  if (!fs.existsSync(dir)) return [];
-  const entries = [];
-  for (const name of fs.readdirSync(dir).sort()) {
-    const skillFile = path.join(dir, name, 'SKILL.md');
-    if (!fs.existsSync(skillFile)) continue;
-    let text;
-    try { text = fs.readFileSync(skillFile, 'utf8'); } catch { continue; }
-    const m = text.match(/^description:\s*(.+)$/m);
-    if (!m) continue;
-    entries.push(`${name}: ${shortHint(m[1])}`);
-  }
-  return entries;
+  return loadCatalog(dir)
+    .filter(skill => skill.reminder)
+    .sort((a, b) => TIERS.indexOf(a.tier) - TIERS.indexOf(b.tier) || a.name.localeCompare(b.name))
+    .map(skill => `${skill.name} [${skill.tier}]: ${trigger(skill.description)}`);
 }
 
 function buildContext(dir) {
   const entries = buildSkillList(dir);
   if (!entries.length) return null;
-  return 'SKILLS — apply before matching work:\n' + entries.join(' | ');
+  return HEADER + '\n' + entries.map(e => `- ${e}`).join('\n');
 }
 
 if (require.main === module) {
@@ -52,4 +48,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { shortHint, buildSkillList, buildContext };
+module.exports = { trigger, buildSkillList, buildContext };

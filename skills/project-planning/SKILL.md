@@ -5,6 +5,7 @@ description: Apply when scoping work, breaking a feature down into tasks, estima
 license: Unlicense
 metadata:
   author: ssoft
+  tier: process
   tags:
     - planning
     - project-management

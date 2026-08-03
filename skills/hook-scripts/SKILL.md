@@ -5,6 +5,13 @@ description: Apply when writing or modifying hook scripts in hooks/ or tools/
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
+  reminder: false
+  paths:
+    - "**/hooks/*.js"
+    - "**/tools/*.js"
+  with:
+    - "comments"
   tags:
     - hooks
     - workflow

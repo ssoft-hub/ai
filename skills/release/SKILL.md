@@ -5,6 +5,7 @@ description: Apply when preparing a release, bumping version, or tagging
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - git
     - release

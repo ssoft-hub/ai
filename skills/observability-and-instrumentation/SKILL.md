@@ -5,6 +5,7 @@ description: Apply when adding logging, metrics, or tracing, or reviewing how a 
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - observability
     - quality

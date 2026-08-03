@@ -5,6 +5,10 @@ description: Apply when designing new API, adding public headers, or reviewing p
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
+  paths:
+    - "**/*.h"
+    - "**/*.hpp"
   tags:
     - cpp
     - api

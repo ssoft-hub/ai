@@ -5,6 +5,25 @@ description: <one-line description of when to use this skill>
 license: <license identifier, e.g. MIT>
 metadata:
   author: <author or team name>
+  # process = sets the approach, domain = shapes the code, narrow = rules one topic.
+  # Several skills firing on one task are loaded in that order; the narrower one wins
+  # on its own topic and must not restate the wider one.
+  tier: <process | domain | narrow>
+  # Optional. Globs of the files this skill owns, matched against the full path with
+  # forward slashes — write '**/' in front of anything that isn't repo-root-anchored.
+  # A skill with paths is announced by tools/skill-gate.js when such a file is edited.
+  # An item may hold a comma; it may not hold an escaped quote, which the frontmatter
+  # reader does not decode.
+  paths:
+    - "**/*.<ext>"
+  # Optional, defaults to true. Set false only when the paths above are the whole
+  # trigger, which drops the skill from the every-prompt reminder and leaves it to the
+  # gate. A skill whose intent is wider than its files keeps the default: an API is
+  # designed before the header exists, and no edit has happened yet to announce it.
+  reminder: false
+  # Optional. Skills that always apply alongside this one; the gate names them too.
+  with:
+    - <skill-name>
   tags:
     - <primary-tag>
     - <secondary-tag>

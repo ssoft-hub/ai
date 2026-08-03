@@ -5,6 +5,7 @@ description: Apply when designing or reviewing a CI/CD pipeline, build automatio
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - ci
     - automation

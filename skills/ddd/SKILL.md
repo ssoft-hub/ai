@@ -5,6 +5,7 @@ description: Apply when designing domain models, domain APIs, or structuring a m
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - cpp
     - ddd

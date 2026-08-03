@@ -5,6 +5,7 @@ description: Apply when editing any file in the project
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - workflow
     - editing

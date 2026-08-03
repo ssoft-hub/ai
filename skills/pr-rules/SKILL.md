@@ -5,6 +5,7 @@ description: Apply when opening, reviewing, or preparing a PR/MR
 license: Unlicense
 metadata:
   author: ssoft
+  tier: narrow
   tags:
     - git
     - pr

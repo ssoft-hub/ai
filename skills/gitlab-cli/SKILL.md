@@ -5,6 +5,7 @@ description: Apply when carrying out a GitLab action with the glab CLI - issues,
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - gitlab
     - cli

@@ -9,10 +9,10 @@ const toolsDir = path.join(configDir, 'tools');
 const DISPATCH = {
   Agent:        ['bg-agent-counter.js'],
   Bash:         ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js'],
-  Edit:         ['secret-guard.js'],
-  Write:        ['secret-guard.js'],
-  MultiEdit:    ['secret-guard.js'],
-  NotebookEdit: ['secret-guard.js'],
+  Edit:         ['secret-guard.js', 'skill-gate.js'],
+  Write:        ['secret-guard.js', 'skill-gate.js'],
+  MultiEdit:    ['secret-guard.js', 'skill-gate.js'],
+  NotebookEdit: ['secret-guard.js', 'skill-gate.js'],
 };
 
 // Claude Code reads this hook's stdout as a single JSON document when a tool decides

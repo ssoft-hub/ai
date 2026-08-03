@@ -5,6 +5,7 @@ description: Apply when retiring a public API, planning a breaking change, or wr
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - api
     - migration

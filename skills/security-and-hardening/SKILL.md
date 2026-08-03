@@ -5,6 +5,7 @@ description: Apply when code accepts external input, crosses a trust boundary, o
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - security
     - quality

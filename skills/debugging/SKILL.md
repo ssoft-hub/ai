@@ -5,6 +5,7 @@ description: Apply when investigating a bug, test failure, or unexpected behavio
 license: Unlicense
 metadata:
   author: ssoft
+  tier: process
   tags:
     - debugging
     - quality

@@ -5,6 +5,7 @@ description: Apply when carrying out a GitHub action with the gh CLI - issues, p
 license: Unlicense
 metadata:
   author: ssoft
+  tier: domain
   tags:
     - github
     - cli

@@ -5,6 +5,7 @@ description: Apply when reviewing code changes for correctness, readability, arc
 license: Unlicense
 metadata:
   author: ssoft
+  tier: process
   tags:
     - review
     - quality
