@@ -257,6 +257,117 @@ test('upgrade prunes a file a previous install created but no longer ships', () 
   } finally { rmTmp(dir); }
 });
 
+test('upgrade removes a skill directory the repo renamed away from', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    // A skill installed under its previous name, still tracked in the manifest.
+    const oldSkill = path.join(dir, 'skills', 'api-design', 'SKILL.md');
+    fs.mkdirSync(path.dirname(oldSkill), { recursive: true });
+    fs.writeFileSync(oldSkill, '# renamed upstream');
+    const mpath = path.join(dir, '.claude-config-manifest.json');
+    const m = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    m.createdFiles.push(oldSkill);
+    fs.writeFileSync(mpath, JSON.stringify(m, null, 2) + '\n');
+
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.ok(!fs.existsSync(path.dirname(oldSkill)), 'old skill directory removed, not just its file');
+    assert.ok(fs.existsSync(path.join(dir, 'skills', 'cpp-api-design', 'SKILL.md')), 'new name installed');
+  } finally { rmTmp(dir); }
+});
+
+test('upgrade restores a retired path install overwrote instead of leaving it live', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    // A file the user owned before install overwrote it: the manifest carries a
+    // backup rather than a createdFiles entry, and the repo no longer ships it.
+    const retired = path.join(dir, 'skills', 'doxygen', 'SKILL.md');
+    const backup = path.join(dir, '.claude-config-backups', 'SKILL.md.1.bak');
+    const userContent = '# the user\'s own doxygen skill\n';
+    fs.mkdirSync(path.dirname(retired), { recursive: true });
+    fs.mkdirSync(path.dirname(backup), { recursive: true });
+    fs.writeFileSync(retired, '# shipped by an earlier version\n');
+    fs.writeFileSync(backup, userContent);
+    const mpath = path.join(dir, '.claude-config-manifest.json');
+    const m = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    m.backups.push({ dest: retired, backup });
+    fs.writeFileSync(mpath, JSON.stringify(m, null, 2) + '\n');
+
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.strictEqual(fs.readFileSync(retired, 'utf8'), userContent, 'pre-install content restored');
+    assert.ok(!fs.existsSync(backup), 'backup consumed');
+    const m2 = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    assert.ok(!m2.backups.some(b => b.dest === retired), 'backup record dropped');
+  } finally { rmTmp(dir); }
+});
+
+test('upgrade releases a retired path whose backup file is gone, keeping uninstall usable', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    // The backup install took has since been deleted, so the pre-install content
+    // cannot be put back and the record can only wedge a later uninstall.
+    const retired = path.join(dir, 'skills', 'doxygen', 'SKILL.md');
+    const backup = path.join(dir, '.claude-config-backups', 'SKILL.md.gone.bak');
+    const onDisk = '# shipped by an earlier version\n';
+    fs.mkdirSync(path.dirname(retired), { recursive: true });
+    fs.writeFileSync(retired, onDisk);
+    const mpath = path.join(dir, '.claude-config-manifest.json');
+    const m = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    m.backups.push({ dest: retired, backup });
+    fs.writeFileSync(mpath, JSON.stringify(m, null, 2) + '\n');
+
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.match(r.stderr, /backup missing/, 'the unrestorable path is named');
+    assert.strictEqual(fs.readFileSync(retired, 'utf8'), onDisk, 'file left as it is');
+    const m2 = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    assert.ok(!m2.backups.some(b => b.dest === retired), 'unrestorable record dropped');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, `uninstall must not fail over a released path: ${ru.stderr}`);
+  } finally { rmTmp(dir); }
+});
+
+test('install warns about a retired path it does not own and leaves the file alone', () => {
+  const dir = mkTmp();
+  try {
+    // No manifest entry for it: install cannot tell a leftover from a file the
+    // user wrote, so it names the path instead of deleting it.
+    const stray = path.join(dir, 'skills', 'encapsulation', 'SKILL.md');
+    fs.mkdirSync(path.dirname(stray), { recursive: true });
+    fs.writeFileSync(stray, '# untracked\n');
+
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.ok(fs.existsSync(stray), 'untracked file kept');
+    assert.match(r.stderr, /skills[\\/]encapsulation[\\/]SKILL\.md was retired upstream/);
+  } finally { rmTmp(dir); }
+});
+
+test('uninstall after a rename upgrade leaves the directory empty', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    const oldSkill = path.join(dir, 'skills', 'api-design', 'SKILL.md');
+    fs.mkdirSync(path.dirname(oldSkill), { recursive: true });
+    fs.writeFileSync(oldSkill, '# renamed upstream');
+    const mpath = path.join(dir, '.claude-config-manifest.json');
+    const m = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    m.createdFiles.push(oldSkill);
+    fs.writeFileSync(mpath, JSON.stringify(m, null, 2) + '\n');
+
+    runInstall(dir);
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    const remaining = fs.readdirSync(dir);
+    assert.deepStrictEqual(remaining, [], `expected empty dir, got: ${remaining.join(', ')}`);
+  } finally { rmTmp(dir); }
+});
+
 test('upgrade replaces a drifted hook command instead of duplicating it', () => {
   const dir = mkTmp();
   try {

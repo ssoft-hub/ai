@@ -1,5 +1,5 @@
 ---
-name: doxygen
+name: cpp-doxygen
 version: "1.0.0"
 description: Apply when adding or modifying Doxygen comments for public C++ headers
 license: Unlicense
@@ -11,18 +11,18 @@ metadata:
     - "**/*.h"
     - "**/*.hpp"
   with:
-    - "api-design"
+    - "cpp-api-design"
   tags:
     - cpp
     - doxygen
     - docs
 ---
 
-# Skill: Doxygen
+# Skill: C++ Doxygen
 
 Apply when documenting public C++ headers.
 
-Header structure, namespace rules, `#pragma once` → `api-design` / `cpp-coding` skills.
+Header structure, namespace rules, `#pragma once` → `cpp-api-design` / `cpp-coding` skills.
 Non-Doxygen implementation comments → `comments` skill.
 
 ## Project Overrides

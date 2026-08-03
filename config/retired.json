@@ -1,0 +1,8 @@
+{
+  "$comment": "Paths, relative to the Claude config dir, that this repo shipped once and no longer does. install.js warns when one survives untracked, so a machine whose manifest was lost is not left with a renamed skill live under both names. See AGENTS.md -> Renaming or retiring a skill.",
+  "retired": [
+    "skills/api-design/SKILL.md",
+    "skills/doxygen/SKILL.md",
+    "skills/encapsulation/SKILL.md"
+  ]
+}

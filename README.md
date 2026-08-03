@@ -52,21 +52,21 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 
 | Skill | Description |
 |-------|-------------|
-| `api-design` | C++ public API structure and hygiene |
 | `architecture` | System/module architecture design, ADRs, tradeoffs |
 | `changelog` | Keep a Changelog format |
 | `ci-cd-and-automation` | CI/CD pipeline design and quality gates |
 | `code-review-and-quality` | Review substance — correctness, readability, architecture, security, performance |
 | `comments` | Non-Doxygen code comment style (brief, general, no fix narration) |
 | `commit-rules` | Conventional Commits format and branch naming |
+| `cpp-api-design` | C++ public API structure and hygiene |
 | `cpp-coding` | C++ implementation conventions |
+| `cpp-doxygen` | Doxygen tag coverage for public C++ headers |
+| `cpp-encapsulation` | C++ access-specifier discipline (public/protected/private) |
 | `cpp-testing` | Unit test structure (AAA, naming, coverage) |
 | `ddd` | Domain-Driven Design patterns in C++ |
 | `debugging` | Root-cause investigation before proposing a fix |
 | `deprecation-and-migration` | Retiring a public API and writing a migration guide |
-| `doxygen` | Doxygen tag coverage for public headers |
 | `editing` | File editing workflow (re-read before edit) |
-| `encapsulation` | Access-specifier discipline (public/protected/private) |
 | `github-cli` | `gh` mechanics — issues, PRs, labels, pending review threads, merges |
 | `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, merges |
 | `hook-scripts` | Writing Claude Code hooks and tools |
@@ -91,9 +91,9 @@ points at the skills it applies — see `AGENTS.md` → "Adding an agent".
 
 | Agent | Stage | Skills applied |
 |-------|-------|-----------------|
-| `spec-architect` | Idea → spec → architecture | `requirements`, `ddd`, `architecture`, `api-design` |
-| `implementer` | Implementation (TDD) | `test-driven-development`, `cpp-coding`, `ddd`, `encapsulation`, `cpp-testing` |
-| `code-reviewer` | Review | `code-review-and-quality`, `encapsulation`, `api-design`, `comments`, `doxygen` |
+| `spec-architect` | Idea → spec → architecture | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
+| `implementer` | Implementation (TDD) | `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing` |
+| `code-reviewer` | Review | `code-review-and-quality`, `cpp-encapsulation`, `cpp-api-design`, `comments`, `cpp-doxygen` |
 | `security-auditor` | Security audit | `security-and-hardening` |
 | `release-manager` | Release | `changelog`, `release`, `shipping-and-launch` |
 

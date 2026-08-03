@@ -17,8 +17,8 @@ Apply when reviewing code changes for correctness, readability, architecture, se
 and performance. This skill covers the substance of a review — what to look for. Process
 around opening/merging the PR the review attaches to → `pr-rules` skill.
 
-- Public API shape and breaking-change review → `api-design` skill.
-- Access-specifier and encapsulation review → `encapsulation` skill.
+- Public API shape and breaking-change review → `cpp-api-design` skill.
+- Access-specifier and encapsulation review → `cpp-encapsulation` skill.
 - Security-specific review depth (auth, input validation, secrets) → `security-and-hardening` skill.
 - Performance-specific review depth (complexity, allocations) → `performance-optimization` skill.
 

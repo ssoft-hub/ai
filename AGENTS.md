@@ -62,28 +62,62 @@ The narrower skill rules its own topic and must not restate the wider one.
    - Confirm the concern isn't already covered by an existing skill here, or by a
      separate plugin (e.g. Qt/QML belongs to `qt-development-skills`, not here).
    - Confirm the new skill owns one clearly bounded concern with no overlap against
-     adjacent skills (e.g. `encapsulation` covers access-specifier rules;
-     `api-design` covers public surface shape — the two must not restate each other).
-1. Copy `templates/SKILL.md` to `skills/<name>/SKILL.md`
-2. Fill in frontmatter (name, description, tags), then decide how it is triggered:
+     adjacent skills (e.g. `cpp-encapsulation` covers access-specifier rules;
+     `cpp-api-design` covers public surface shape — the two must not restate each other).
+1. Name it after the concern, and prefix it with the language when the rules are
+   language-specific. The test a reviewer applies: take a rule out of the skill and try
+   to state it for another language. If it survives and only the example changes, the
+   name stays neutral (`comments`, `ddd`, `code-review-and-quality`). If the rule has to
+   be rewritten to mean anything at all — `#pragma once`, `enum class` instead of `bool`,
+   `friend`, a Doxygen tag — the name carries the language: `cpp-api-design`,
+   `cpp-doxygen`, `cpp-encapsulation`, `node-testing`. A skill bound to a tool rather
+   than a language is named after the tool (`hook-scripts`, `github-cli`).
+2. Copy `templates/SKILL.md` to `skills/<name>/SKILL.md`
+3. Fill in frontmatter (name, description, tags), then decide how it is triggered:
    - `tier` — `process`, `domain`, or `narrow` (see "How a skill reaches the agent")
    - `paths` — the files this skill owns, when a kind of file should trigger it
    - `reminder: false` — only when those files are the *whole* trigger; it drops the
      skill from the every-prompt reminder and leaves it to the edit-time gate
    - `with` — skills that must arrive together with this one, so the pair is never
      half-applied
-3. Write rules sections following the template structure
-4. Add an entry to the skill table in `README.md`
-5. Add the skill's trigger line to `config/CLAUDE.md`'s "Skills — auto-apply" section
+   - `description` must name the language when the name does, so the one line the
+     every-prompt reminder shows is unambiguous without opening the skill
+4. Write rules sections following the template structure
+5. Add an entry to the skill table in `README.md`
+6. Add the skill's trigger line to `config/CLAUDE.md`'s "Skills — auto-apply" section
    (this file is static prose, not regenerated — `tools/skills-reminder.js` reads
    `skills/` directly so it never goes stale, but this file must be updated by hand;
    `tools/claude-md-skills-sync-check.js` warns at session start if you forget)
-6. Run `node install.js` to deploy
+7. Run `node install.js` to deploy
 
 A skill is one file: `install.js` copies `skills/<name>/SKILL.md` and nothing else from
 the skill directory, so a sibling reference file never reaches `~/.claude/` and the
 installed skill silently loses whatever it pointed at. Splitting a long skill means
 changing that copy loop first.
+
+## Renaming or retiring a skill
+
+The directory name is the skill's identity: the name the Skill tool is called with, the
+string `with:` and every cross-reference resolves against, and the path `install.js`
+writes under `~/.claude/skills/`. A rename is therefore a repo-wide edit plus one step
+for the machines that already carry the old name.
+
+1. `git mv skills/<old> skills/<new>`, and set `name:` in the frontmatter to match the
+   new directory — `tools/skill-catalog.js` keys the catalog on the directory, so a
+   mismatch between the two is silent
+2. Update every reference: `config/CLAUDE.md`, `README.md`, this file, `agents/*.md`,
+   `commands/*.md`, the cross-reference lines of other skills, the `with:` frontmatter
+   of any skill naming it, and tool comments. `grep -rn '<old>'` must come back empty
+   outside `CHANGELOG.md` history
+3. Add the old install path to `config/retired.json`
+4. Record the rename in `CHANGELOG.md` under `### Changed`
+5. Run `node install.js`
+
+Step 3 exists because install can only clean up what its manifest records. On a machine
+whose manifest is intact, the prune step deletes the old file install created, or gives
+the path back to the content it had before install overwrote it. `config/retired.json`
+covers the remaining case: the path survives untracked, so install names it and leaves
+the removal to the user rather than deleting a file it may not own.
 
 ## Adding an agent
 

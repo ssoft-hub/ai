@@ -19,7 +19,7 @@ of a specific artifact is covered elsewhere — this skill governs the language 
 written in, not its shape:
 
 - Code comment structure and when to write one → `comments` skill.
-- Public API documentation structure → `doxygen` skill.
+- Public API documentation structure → `cpp-doxygen` skill.
 - Issue title/description structure → `issue-rules` skill.
 - PR title/description structure, review comment/reply structure → `pr-rules` skill.
 - Commit message structure → `commit-rules` skill.

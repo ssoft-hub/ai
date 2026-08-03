@@ -88,8 +88,8 @@ test('buildSkillList leaves out a skill that opts out with reminder: false', () 
 test('buildSkillList keeps a path-triggered skill whose intent is wider than its files', () => {
   const tmp = mkTmp();
   try {
-    writeSkill(tmp, 'api-design', 'Apply when designing an API', 'metadata:\n  paths: ["**/*.h"]\n');
-    assert.deepStrictEqual(buildSkillList(tmp), ['api-design [domain]: designing an API']);
+    writeSkill(tmp, 'cpp-api-design', 'Apply when designing a C++ API', 'metadata:\n  paths: ["**/*.h"]\n');
+    assert.deepStrictEqual(buildSkillList(tmp), ['cpp-api-design [domain]: designing a C++ API']);
   } finally {
     rmTmp(tmp);
   }

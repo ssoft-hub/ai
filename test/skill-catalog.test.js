@@ -43,8 +43,8 @@ test('parseFrontmatter reads a block sequence', () => {
 });
 
 test('parseFrontmatter reads an inline sequence', () => {
-  const fm = parseFrontmatter('---\nname: x\nmetadata:\n  with: [comments, encapsulation]\n---\nbody\n');
-  assert.deepStrictEqual(fm.with, ['comments', 'encapsulation']);
+  const fm = parseFrontmatter('---\nname: x\nmetadata:\n  with: [comments, cpp-encapsulation]\n---\nbody\n');
+  assert.deepStrictEqual(fm.with, ['comments', 'cpp-encapsulation']);
 });
 
 test('parseFrontmatter keeps a comma that sits inside a quoted inline item', () => {
@@ -143,9 +143,9 @@ test('matchSkills lists a companion once when two skills name it', () => {
 test('matchSkills lists a skill once when it is both path-matched and a companion', () => {
   const tmp = mkTmp();
   try {
-    writeSkill(tmp, 'cpp-coding', 'description: d\nmetadata:\n  paths: ["**/*.h"]\n  with: [doxygen]\n');
-    writeSkill(tmp, 'doxygen', 'description: d\nmetadata:\n  tier: narrow\n  paths: ["**/*.h"]\n');
-    assert.deepStrictEqual(matchSkills(loadCatalog(tmp), 'a.h'), ['cpp-coding', 'doxygen']);
+    writeSkill(tmp, 'cpp-coding', 'description: d\nmetadata:\n  paths: ["**/*.h"]\n  with: [cpp-doxygen]\n');
+    writeSkill(tmp, 'cpp-doxygen', 'description: d\nmetadata:\n  tier: narrow\n  paths: ["**/*.h"]\n');
+    assert.deepStrictEqual(matchSkills(loadCatalog(tmp), 'a.h'), ['cpp-coding', 'cpp-doxygen']);
   } finally { rmTmp(tmp); }
 });
 

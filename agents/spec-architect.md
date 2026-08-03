@@ -24,7 +24,7 @@ Apply, in order:
 3. `architecture` skill — only when the change affects module boundaries or introduces
    a new architectural pattern: write the ADR (context, decision, consequences,
    alternatives considered).
-4. `api-design` skill — when the spec implies a new or changed public surface, state
+4. `cpp-api-design` skill — when the spec implies a new or changed public surface, state
    the shape (no `bool` parameters, no `void*`, namespace) so the implementer isn't
    guessing at the API while writing the first test.
 
