@@ -18,20 +18,25 @@ const DISPATCH = {
 // Claude Code reads this hook's stdout as a single JSON document when a tool decides
 // on a permission. Several tools can decide on one command, so a run keeps the
 // strictest decision and every reason behind it, plain-text warnings included: the
-// reason is all the user reads before answering.
+// reason is all the user reads before answering. These three are the whole vocabulary a
+// decision can name.
 const RANK = { allow: 0, ask: 1, deny: 2 };
 
-function toDecision(out) {
-  try {
-    const parsed = JSON.parse(out);
-    return parsed.hookSpecificOutput?.permissionDecision ? parsed : null;
-  } catch { return null; }
+// Output that names none of the three is text: unparseable output as written, and output
+// that parses behind a line naming the tool it came from, so that a run whose only output
+// is a malformed decision cannot be read as a decision either.
+function readOutput(out, tool) {
+  let parsed;
+  try { parsed = JSON.parse(out); } catch { return { note: out }; }
+  return Object.hasOwn(RANK, parsed.hookSpecificOutput?.permissionDecision)
+    ? { decision: parsed }
+    : { note: `${tool} named no permission decision: ${out}` };
 }
 
 function strictest(decisions) {
   return decisions.reduce((a, b) =>
-    (RANK[b.hookSpecificOutput.permissionDecision] ?? 0) >
-    (RANK[a.hookSpecificOutput.permissionDecision] ?? 0) ? b : a);
+    RANK[b.hookSpecificOutput.permissionDecision] >
+    RANK[a.hookSpecificOutput.permissionDecision] ? b : a);
 }
 
 let raw = '';
@@ -58,9 +63,9 @@ process.stdin.on('end', () => {
     }
     const out = r.stdout?.trim() ?? '';
     if (!out) continue;
-    const decision = toDecision(out);
+    const { decision, note } = readOutput(out, tool);
     if (decision) decisions.push(decision);
-    else notes.push(out);
+    else notes.push(note);
   }
 
   if (decisions.length) {

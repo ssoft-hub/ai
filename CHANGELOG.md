@@ -66,6 +66,8 @@
 
 ### Fixed
 
+- A tool naming a permission decision outside `allow`, `ask` and `deny` no longer decides anything. Those three are the whole vocabulary, and an unrecognized value used to rank as low as `allow`, so a tool bug could win the merge against a real `allow` and reach Claude Code as a decision it cannot act on. Such output now counts as text, behind a line naming the tool it came from: it still reaches the user — inside the reason when another tool decides, on its own when none does — while the decision comes from a tool that named one. Naming the tool is what makes the run's stdout unreadable as a decision even when that malformed output is the only thing a run produced, and points at the tool to fix
+
 - A permission prompt no longer carries a line reading `undefined`. The `PreToolUse` dispatcher merges the reasons behind every decision into the one prompt the user answers, and a tool that decides without stating a reason used to contribute the literal string `undefined` to that text — `permissionDecision` alone makes a response a decision, so the reason is optional to the tool and was mandatory to the merge. A decision without a reason now contributes no line. No shipped tool omits its reason, so the defect was latent and would have surfaced with the next tool to emit a decision
 
 ### CI

@@ -129,6 +129,41 @@ test('merges an empty reason when the only deciding tool states none', () => {
   } finally { rmConfig(dir); }
 });
 
+test('gives a value outside allow, ask and deny no say in the decision', () => {
+  const dir = mkConfig(['maybe', 'allow', null]);
+  try {
+    const out = JSON.parse(run('anything', dir).stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'allow');
+  } finally { rmConfig(dir); }
+});
+
+test('still shows what a tool naming an unknown decision wrote', () => {
+  const dir = mkConfig(['maybe', 'ask', null]);
+  try {
+    const out = JSON.parse(run('anything', dir).stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /maybe fixture/);
+  } finally { rmConfig(dir); }
+});
+
+test('keeps a lone unknown decision off stdout as a decision of its own', () => {
+  const dir = mkConfig(['maybe', null, null]);
+  try {
+    const r = run('anything', dir);
+    assert.strictEqual(r.status, 0);
+    assert.throws(() => JSON.parse(r.stdout));
+  } finally { rmConfig(dir); }
+});
+
+test('names the tool behind output that decides nothing', () => {
+  const dir = mkConfig(['maybe', null, null]);
+  try {
+    const r = run('anything', dir);
+    assert.match(r.stdout, /bash-safety\.js/);
+    assert.match(r.stdout, /maybe fixture/);
+  } finally { rmConfig(dir); }
+});
+
 test('exits 0 on malformed stdin JSON', () => {
   const r = spawnSync('node', [HOOK], { input: 'not json', encoding: 'utf8' });
   assert.strictEqual(r.status, 0);
