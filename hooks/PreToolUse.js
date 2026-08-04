@@ -68,7 +68,7 @@ process.stdin.on('end', () => {
     decision.hookSpecificOutput.permissionDecisionReason = [
       ...notes,
       ...decisions.map(d => d.hookSpecificOutput.permissionDecisionReason),
-    ].join('\n');
+    ].filter(Boolean).join('\n');
     process.stdout.write(JSON.stringify(decision));
   } else if (notes.length) {
     process.stdout.write(notes.join('\n'));

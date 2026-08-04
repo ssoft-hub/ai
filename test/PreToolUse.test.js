@@ -20,10 +20,15 @@ function run(command, configDir = repoDir) {
 // The Bash tools the dispatcher spawns, replaced by fixtures that decide on command.
 const BASH_TOOLS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js'];
 
-function deciding(decision) {
-  return decision
-    ? `'use strict';process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'${decision}',permissionDecisionReason:'${decision} fixture'}}));`
-    : "'use strict';";
+// A spec is a decision name, `{ decision, reason: false }` for a tool that decides
+// without stating a reason, or null for a tool that decides nothing.
+function deciding(spec) {
+  if (!spec) return "'use strict';";
+  const { decision, reason = true } = typeof spec === 'string' ? { decision: spec } : spec;
+  const hookSpecificOutput = { hookEventName: 'PreToolUse', permissionDecision: decision };
+  if (reason) hookSpecificOutput.permissionDecisionReason = `${decision} fixture`;
+  return `'use strict';process.stdout.write(${
+    JSON.stringify(JSON.stringify({ hookSpecificOutput }))});`;
 }
 
 function mkConfig(decisions) {
@@ -104,6 +109,23 @@ test('keeps ask over allow', () => {
   try {
     const out = JSON.parse(run('anything', dir).stdout);
     assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+  } finally { rmConfig(dir); }
+});
+
+test('leaves out the missing reason of a tool that decides without one', () => {
+  const dir = mkConfig([{ decision: 'ask', reason: false }, 'deny', null]);
+  try {
+    const out = JSON.parse(run('anything', dir).stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecisionReason, 'deny fixture');
+  } finally { rmConfig(dir); }
+});
+
+test('merges an empty reason when the only deciding tool states none', () => {
+  const dir = mkConfig([{ decision: 'ask', reason: false }, null, null]);
+  try {
+    const out = JSON.parse(run('anything', dir).stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+    assert.strictEqual(out.hookSpecificOutput.permissionDecisionReason, '');
   } finally { rmConfig(dir); }
 });
 
