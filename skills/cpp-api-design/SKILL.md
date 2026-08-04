@@ -22,7 +22,8 @@ Apply when designing a new C++ API, adding public C++ headers, or reviewing publ
 
 - **Namespace hierarchy**: public symbols in consistent `lib::` or `lib::module::` namespace; check project `AGENTS.md` for exact namespace.
   **Why:** a consumer including the library should be able to predict where a symbol lives without grepping — inconsistent namespacing forces them to search instead of guess.
-- Identifier and comment language: follow project AGENTS.md
+- Identifier language: follow project `AGENTS.md` — comment language belongs to
+  `cpp-doxygen` (documentation) and `comments` (everything else)
 
 ## Dependencies
 
@@ -43,11 +44,16 @@ Apply when designing a new C++ API, adding public C++ headers, or reviewing publ
 
 ## Breaking Changes
 
-Breaking change = removing or renaming any public symbol, or changing its observable behaviour.
-- Requires `MAJOR` version bump (semver)
-- Document in `CHANGELOG.md` under `### Removed` or `### Changed`
-- Prefer deprecation (`[[deprecated("use X instead")]]`) before removal
-- Avoid unless necessary
+Breaking change = removing or renaming any public symbol, or changing its observable
+behaviour. This skill owns that definition; everything that follows from a change
+meeting it is owned elsewhere:
+
+- Avoid one unless it is necessary — an addition beside the existing symbol is almost
+  always available.
+- Retiring the old path (deprecate before removing, grace period, migration guide) →
+  `deprecation-and-migration` skill.
+- The version bump it forces → `release` skill → Step 1 — Decide Version.
+- The entry announcing it → `changelog` skill.
 
 ## API Hygiene
 
@@ -82,6 +88,6 @@ Breaking change = removing or renaming any public symbol, or changing its observ
 ## Adding a New Header
 
 1. Create the header at the path the project declares (check `AGENTS.md`)
-2. Add `#pragma once` (classic headers) — C++20+ module projects use `export module <name>;` instead; the two are mutually exclusive
+2. Add the header guard (`cpp-coding` → Header Guards)
 3. Add Doxygen `@defgroup` or `@ingroup` (see `cpp-doxygen` skill)
 4. Add a test file alongside the implementation

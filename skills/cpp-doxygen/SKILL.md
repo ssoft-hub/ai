@@ -22,8 +22,8 @@ metadata:
 
 Apply when documenting public C++ headers.
 
-Header structure, namespace rules, `#pragma once` → `cpp-api-design` / `cpp-coding` skills.
-Non-Doxygen implementation comments → `comments` skill.
+Header structure and namespace rules → `cpp-api-design` skill; the header guard →
+`cpp-coding` skill. Non-Doxygen implementation comments → `comments` skill.
 
 ## Project Overrides
 

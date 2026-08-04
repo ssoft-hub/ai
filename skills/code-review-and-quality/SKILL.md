@@ -113,10 +113,10 @@ change that leaves dead code behind isn't finished, even if what it added is cor
 
 ## Giving Feedback
 
-- State the problem and the concrete fix, not just the problem — "this can be null"
-  without "add a check before line N" leaves the author to reconstruct the fix.
-- Distinguish a blocking issue from a suggestion explicitly (e.g. "blocking:" vs
-  "nit:") — an author should not have to guess which comments gate merge.
+How a finding is worded — the fact/consequence/fix order and the severity label in front
+of it — is `pr-rules` → Review Comments, wherever the feedback lands. What belongs here is
+what counts as a finding in the first place:
+
 - Review the diff for what it claims to do, not for what you would have done instead —
   a differently-shaped but equally correct approach is not a review finding.
 

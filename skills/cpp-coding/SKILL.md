@@ -84,7 +84,8 @@ In public API headers: include only what the header directly uses.
 
 ## Header Guards
 
-Every header file starts with `#pragma once` before any other content.
+Every header file starts with `#pragma once` before any other content. A C++20 module
+interface declares `export module <name>;` instead — the two are mutually exclusive.
 
 ## Type Safety
 
@@ -121,7 +122,7 @@ Standard attributes — apply where appropriate:
 | `[[nodiscard("reason")]]` | Return value must not be discarded (error codes, resources) |
 | `[[maybe_unused]]` | Parameter or variable intentionally unused |
 | `[[likely]]` / `[[unlikely]]` | Branch probability hint for hot paths |
-| `[[deprecated("use X")]]` | Mark obsolete API before removal |
+| `[[deprecated("use X")]]` | Obsolete API — the retirement process is `deprecation-and-migration` |
 
 Library and project attribute macros (e.g. `Q_INVOKABLE`, `MY_LIB_EXPORT`, `BOOST_FORCEINLINE`) follow the same discipline: use only those declared in the project; document the full set in `AGENTS.md`.
 

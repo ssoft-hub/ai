@@ -23,7 +23,7 @@ Framework choice is project-specific (check `AGENTS.md`). This skill covers prin
 
 - Every public API function must have tests — private implementation details are not tested directly
 - Test behaviour, not implementation: if internal refactoring breaks a test, the test was wrong
-- Every bug fix gets a regression test that reproduces the bug before the fix
+- Every bug fix gets a regression test (`debugging` → Regression Test First)
 
 ## Test Structure — AAA
 

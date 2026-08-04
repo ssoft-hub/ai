@@ -31,7 +31,7 @@ Project-local rules win. If the repository's `AGENTS.md` or a project skill defi
 Type(scope): Subject description
 ```
 
-- **Type** — capitalized (see Types table below).
+- **Type** — capitalized (see Types below).
 - **Scope** — optional; component or module the issue targets.
 - **Subject** — imperative mood, uppercase first letter after the colon, no trailing period, ≤ 80 characters total.
 
@@ -45,17 +45,10 @@ Chore: Update CI runner to Ubuntu 24.04
 
 ## Types
 
-| Type | When |
-|------|------|
-| `Feat` | New user-visible functionality |
-| `Fix` | Bug or regression |
-| `Refactor` | Code change with no behaviour change |
-| `Perf` | Performance improvement |
-| `Docs` | Documentation only |
-| `Test` | Test additions or changes |
-| `Chore` | Build, tooling, dependency updates |
-| `Ci` | CI/CD workflow changes |
-| `Style` | Formatting only (no logic change) |
+The same set as `commit-rules` → Types, which owns what each one means. The only
+difference an issue makes is capitalization:
+
+`Feat`, `Fix`, `Refactor`, `Perf`, `Docs`, `Test`, `Chore`, `Ci`, `Style`
 
 ---
 
@@ -115,7 +108,7 @@ Every issue gets at most one **type** label, matching the title Type, when one a
 | `BUG` | `Fix` |
 | `Refactor` | `Refactor` |
 
-Title types other than these three (see the Types table above) carry no label — the title prefix alone is enough.
+Title types other than these three (see Types above) carry no label — the title prefix alone is enough.
 
 Every issue also gets a few **topic** labels (2-4, not a tag cloud) — named after the
 actual subject matter (component, subsystem, domain concept), not drawn from a fixed

@@ -126,7 +126,8 @@ if (!candidate.string().starts_with(base_dir.string()))
 
 ## When a Vulnerability Is Found
 
-Reproduce it, understand the root cause (`debugging` skill), fix the root cause rather
-than the specific exploit string, and add a regression test that would have caught it.
-Do not silently patch a security bug without documenting the class of issue — the next
-similar bug in a different location depends on that being written down.
+Run it through `debugging` skill like any other defect — reproduce, root-cause,
+regression test. What is specific to a vulnerability: fix the class of weakness rather
+than the exploit string that revealed it, and document that class. A silently patched
+security bug leaves the next instance of the same weakness, in a different location,
+undiscovered.
