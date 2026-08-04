@@ -233,7 +233,7 @@ Project Overrides above).
 - [ ] Every checked box in the PR's test plan corresponds to a run that actually passed
 - [ ] PR carries the issue's labels — type label if any, plus topic labels — see `issue-rules` → Labels
 - [ ] `CHANGELOG.md` updated — every user-visible change documented
-- [ ] `git submodule status` — no `+` prefix on any module
+- [ ] `git submodule status` — no `+` prefix on any module (`submodule-sync`)
 - [ ] Every commit in the branch builds independently (no broken intermediate state)
 - [ ] Commit trailers conform to `commit-rules` skill
 - [ ] Branch is rebased onto the current target branch (no stale merge base)

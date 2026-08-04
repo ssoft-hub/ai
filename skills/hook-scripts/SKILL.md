@@ -144,11 +144,12 @@ if (!CPP_EXTS.has(path.extname(filePath).toLowerCase())) process.exit(0);
 if (require('fs').existsSync(path.join(process.cwd(), '.claude', 'hooks', 'ProjectHookName.js'))) process.exit(0);
 ```
 
-**Test without shell quoting issues:**
-```javascript
-const r = spawnSync('node', [path.join(toolsDir, 'my-tool.js')], {
-  input: JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'rm -rf /' } }),
-  encoding: 'utf8', stdio: 'pipe',
-});
-console.log(`exit=${r.status}`, r.stdout?.trim(), r.stderr?.trim());
-```
+**Exercise a tool without shell quoting issues:** feed it its stdin JSON from Node, never
+through a shell. The form that takes as a test — exported logic called directly, versus a
+`spawnSync` round-trip for the exit-code and stdin/stdout contract — is `node-testing`
+skill.
+
+## Cross-References
+
+- `node-testing` — the tests covering the hooks and tools written here (`test/*.test.js`).
+- `comments` — comment rules inside these scripts (arrives with this skill via `with`).

@@ -34,10 +34,9 @@ Git tag format: `vX.Y.Z`.
 
 ## Step 2 — Update CHANGELOG.md
 
-See `changelog` skill for format details.
-
-1. Rename `## [Unreleased]` → `## [X.Y.Z] - YYYY-MM-DD` (today's date, ISO 8601)
-2. Ensure all notable changes since last release are documented
+`changelog` skill → On Release owns the edit itself — renaming `[Unreleased]` into the
+new version section and prepending a fresh empty one. What this step adds: confirm every
+notable change since the last release is actually in there before the version is frozen.
 
 ## Step 3 — Bump Version Strings
 
@@ -54,12 +53,18 @@ Verify nothing remains:
 git grep -F "1.2.3"   # must return empty
 ```
 
-## Step 4 — Verify
+## Step 4 — Pre-Release Checklist
 
-- [ ] Build passes on all compilers declared in project (check AGENTS.md)
-- [ ] All tests pass
-- [ ] No breaking API change without `MAJOR` bump
-- [ ] `CHANGELOG.md` covers all changes since last release
+Gates the commit and tag of Step 5. Whether the release, once built, is safe to expose
+to users is a separate gate → `shipping-and-launch` skill.
+
+- [ ] Build passes on all compilers declared in project (check `AGENTS.md`)
+- [ ] All tests pass; CI green on all compiler targets
+- [ ] No breaking API change without `MAJOR` bump (`cpp-api-design` → Breaking Changes)
+- [ ] `CHANGELOG.md` covers all changes since last release, `[Unreleased]` renamed
+- [ ] Version string consistent across **all** version files (grep confirms)
+- [ ] Submodule ref updated in root repo (if applicable)
+- [ ] Commit trailers conform to `commit-rules` skill
 
 ## Step 5 — Commit and Tag
 
@@ -76,11 +81,3 @@ git push --tags    # separate push — triggers CI release workflow
 If this library is a submodule in a root repo:
 1. After pushing the tag, update the submodule ref in root
 2. See `submodule-sync` skill for the exact workflow
-
-## Pre-Release Checklist
-
-- [ ] `CHANGELOG.md` updated — `[Unreleased]` renamed, new section added
-- [ ] Version string consistent across **all** version files (grep confirms)
-- [ ] CI green on all compiler targets
-- [ ] Submodule ref updated in root repo (if applicable)
-- [ ] Commit trailers conform to `commit-rules` skill
