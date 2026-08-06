@@ -19,11 +19,21 @@ function globToRegExp(glob) {
       }
     } else if (c === '?') {
       re += '[^/]';
+    } else if (c === '{' && glob.includes('}', i)) {
+      // A brace holds literal alternatives only, so one skill can claim the dozens of
+      // extensions of a language family on a single line
+      const close = glob.indexOf('}', i);
+      re += `(?:${glob.slice(i + 1, close).split(',')
+        .map(alt => alt.trim()).filter(Boolean)
+        .map(alt => alt.replace(/[.+^${}()|[\]\\*?]/g, '\\$&')).join('|')})`;
+      i = close;
     } else {
       re += c.replace(/[.+^${}()|[\]\\]/g, '\\$&');
     }
   }
-  return new RegExp(`^${re}$`);
+  // Case-insensitive: the filesystems this runs on are, so `Makefile` and `makefile`
+  // are one file and must reach the same skill
+  return new RegExp(`^${re}$`, 'i');
 }
 
 function readSequence(block, key) {

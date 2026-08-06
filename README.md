@@ -56,7 +56,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `changelog` | Keep a Changelog format |
 | `ci-cd-and-automation` | CI/CD pipeline design and quality gates |
 | `code-review-and-quality` | Review substance — correctness, readability, architecture, security, performance |
-| `comments` | Non-Doxygen code comment style (brief, general, no fix narration) |
+| `comments` | Code comment style in any language, Doxygen aside (brief, general, no fix narration) |
 | `commit-rules` | Conventional Commits format and branch naming |
 | `cpp-api-design` | C++ public API structure and hygiene |
 | `cpp-coding` | C++ implementation conventions |

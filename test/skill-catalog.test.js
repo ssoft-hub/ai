@@ -31,6 +31,19 @@ test('globToRegExp keeps a single star inside one path segment', () => {
   assert.ok(!re.test('D:/repo/test/nested/secret-guard.test.js'));
 });
 
+test('globToRegExp matches any alternative inside braces', () => {
+  const re = globToRegExp('**/*.{py,sh,yml}');
+  assert.ok(re.test('D:/repo/tools/x.py'));
+  assert.ok(re.test('D:/repo/x.yml'));
+  assert.ok(!re.test('D:/repo/x.rb'));
+});
+
+test('globToRegExp keeps a brace alternative from spanning a directory', () => {
+  const re = globToRegExp('*.{js,ts}');
+  assert.ok(re.test('x.ts'));
+  assert.ok(!re.test('src/x.ts'));
+});
+
 test('globToRegExp escapes regex metacharacters in literal text', () => {
   const re = globToRegExp('**/CHANGELOG.md');
   assert.ok(re.test('D:/repo/CHANGELOG.md'));
@@ -171,4 +184,35 @@ test('matchSkills normalises backslash paths before matching', () => {
     writeSkill(tmp, 'cpp-coding', 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n');
     assert.deepStrictEqual(matchSkills(loadCatalog(tmp), 'D:\\repo\\src\\a.cpp'), ['cpp-coding']);
   } finally { rmTmp(tmp); }
+});
+
+// The catalog these two read is the repository's own skills/, so they fail when a
+// skill's frontmatter stops claiming what it says it covers.
+test('the comments skill claims a source file in every language family', () => {
+  const catalog = loadCatalog(path.join(__dirname, '..', 'skills'));
+  for (const file of ['a.cpp', 'a.js', 'a.py', 'a.sql', 'a.ini', 'a.tex', 'a.html']) {
+    assert.ok(matchSkills(catalog, `D:/repo/${file}`).includes('comments'), file);
+  }
+});
+
+test('the comments skill leaves a file carrying no code alone', () => {
+  const catalog = loadCatalog(path.join(__dirname, '..', 'skills'));
+  assert.ok(!matchSkills(catalog, 'D:/repo/notes.txt').includes('comments'));
+});
+
+test('globToRegExp drops an empty brace alternative', () => {
+  const re = globToRegExp('*.{js,}');
+  assert.ok(re.test('x.js'));
+  assert.ok(!re.test('x.'));
+});
+
+test('globToRegExp matches a path whose case differs from the glob', () => {
+  assert.ok(globToRegExp('**/*.cpp').test('D:/repo/A.CPP'));
+});
+
+test('the comments skill claims a build file named without an extension', () => {
+  const catalog = loadCatalog(path.join(__dirname, '..', 'skills'));
+  for (const file of ['Makefile', 'makefile', 'CMakeLists.txt', 'Dockerfile', '.gitignore']) {
+    assert.ok(matchSkills(catalog, `D:/repo/${file}`).includes('comments'), file);
+  }
 });

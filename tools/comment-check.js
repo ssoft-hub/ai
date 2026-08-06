@@ -27,7 +27,7 @@ const BY_EXT = new Map([
   [SEMICOLON, ['.ini', '.lisp', '.cl', '.el', '.clj', '.cljs', '.cljc', '.scm', '.rkt',
     '.asm', '.s']],
   [PERCENT, ['.tex', '.sty', '.cls', '.erl', '.hrl']],
-  [MARKUP, ['.html', '.htm', '.xhtml', '.xml', '.xsl', '.xslt', '.svg', '.md', '.markdown']],
+  [MARKUP, ['.html', '.htm', '.xhtml', '.xml', '.xsl', '.xslt', '.svg']],
 ].flatMap(([syntax, exts]) => exts.map(ext => [ext, syntax])));
 
 // `path.extname('.env')` is '', so a name that looks like an extension is matched whole.

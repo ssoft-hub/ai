@@ -1,22 +1,31 @@
 ---
 name: comments
 version: "1.0.0"
-description: Apply when writing or reviewing non-Doxygen code comments (inline notes, implementation comments)
+description: Apply when writing or reviewing a code comment in any language (inline notes, implementation comments), Doxygen blocks aside
 license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  paths:
+    - "**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx,inl,ipp,m,mm,java,cs,go,rs,swift,kt,kts,scala,php,qml,dart,groovy,gradle,glsl,vert,frag,proto}"
+    - "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,css,scss,less}"
+    - "**/*.{py,pyi,rb,pl,pm,sh,bash,zsh,fish,ps1,psm1,r,jl,ex,exs,nim,yml,yaml,toml,cfg,conf,tf,tfvars,cmake,mk}"
+    - "**/*.{sql,lua,hs,elm,ada,adb,ads,vhd,vhdl}"
+    - "**/*.{ini,lisp,cl,el,clj,cljs,cljc,scm,rkt,asm,s}"
+    - "**/*.{tex,sty,cls,erl,hrl}"
+    - "**/*.{html,htm,xhtml,xml,xsl,xslt,svg}"
+    - "**/{CMakeLists.txt,Makefile,Dockerfile,Gemfile,Rakefile}"
+    - "**/{.env,.gitignore,.gitattributes,.dockerignore,.editorconfig}"
   tags:
-    - cpp
     - comments
     - style
 ---
 
 # Skill: Code Comments
 
-Apply when writing or reviewing non-Doxygen code comments (inline notes, implementation comments).
+Apply when writing or reviewing a code comment in any language (inline notes, implementation comments), whatever marker opens it — `//`, `/* */`, `#`, `--`, `;`, `%`, `<!-- -->`.
 
-Doc comments on public headers → `cpp-doxygen` skill. This skill covers everything else: comments inside function bodies, `.cpp` files, private implementation. Implementation conventions (types, RAII, naming) → `cpp-coding` skill.
+Doxygen blocks on public C++ headers → `cpp-doxygen` skill. This skill covers every other comment, in every language: inside function bodies, in implementation files, in a hook script, a build file or a configuration file. C++ implementation conventions (types, RAII, naming) → `cpp-coding` skill.
 
 ---
 
@@ -25,7 +34,7 @@ Doc comments on public headers → `cpp-doxygen` skill. This skill covers everyt
 Code documents itself. **The default is no comment.** Add one only when, without it, a careful reader would get a critical, non-obvious fact wrong — never to restate what the code already shows.
 
 - **Default to none** — first make the code self-explanatory (better names, extracted function, clearer types). "Might help the reader" is not enough; the bar is that they get it *wrong* without the line.
-- **Keep it short** — one line. No multi-line prose blocks outside Doxygen.
+- **Keep it short** — one line. No multi-line prose blocks outside a documentation block.
 - **General character, not case history** — state a timeless fact about the code (an invariant, a constraint, a non-obvious reason), not the story of how it got that way.
 
 ## When a Comment Is Justified

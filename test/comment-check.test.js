@@ -8,7 +8,7 @@ const hash = syntaxFor('x.py');
 const dash = syntaxFor('x.sql');
 const semicolon = syntaxFor('x.ini');
 const percent = syntaxFor('x.tex');
-const markup = syntaxFor('x.md');
+const markup = syntaxFor('x.html');
 
 test('detects a leading // comment', () => {
   assert.strictEqual(isPlainCommentLine('// note', cFamily), true);
@@ -92,6 +92,10 @@ test('detects an HTML comment', () => {
 
 test('syntaxFor returns nothing for a file with no known comment syntax', () => {
   assert.strictEqual(syntaxFor('data.bin'), undefined);
+});
+
+test('syntaxFor leaves prose files to their own skills', () => {
+  assert.strictEqual(syntaxFor('CHANGELOG.md'), undefined);
 });
 
 test('syntaxFor recognises a name without an extension', () => {
