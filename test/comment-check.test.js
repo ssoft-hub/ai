@@ -38,6 +38,18 @@ test('detects a plain block comment opener', () => {
   assert.strictEqual(isPlainCommentLine('/* explanation */', cFamily), true);
 });
 
+test('detects a trailing block comment after code', () => {
+  assert.strictEqual(isPlainCommentLine('int x = 5; /* meaning of x */', cFamily), true);
+});
+
+test('ignores a /* inside a glob string', () => {
+  assert.strictEqual(isPlainCommentLine('const glob = "**/*.cpp";', cFamily), false);
+});
+
+test('detects a // comment beside a doc-like glob string', () => {
+  assert.strictEqual(isPlainCommentLine('const glob = "/**/*.cpp"; // why this glob', cFamily), true);
+});
+
 test('detects a plain block comment closer', () => {
   assert.strictEqual(isPlainCommentLine(' * still explaining */', cFamily), true);
 });
