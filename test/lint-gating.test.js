@@ -123,3 +123,30 @@ test('comment-check reminder surfaces through the dispatcher even with no lint c
     cleanup(cfgDir, repo);
   }
 });
+
+test('the comment-check reminder reaches the model as additionalContext', () => {
+  const cfgDir = makeStubConfigDir();
+  const repo = makeRepo();
+  try {
+    const out = JSON.parse(runDispatcher(cfgDir, path.join(repo, 'x.cpp'), {
+      old_string: 'int x = 5;',
+      new_string: 'int x = 5; // why 5',
+    }));
+    assert.strictEqual(out.hookSpecificOutput.hookEventName, 'PostToolUse');
+    assert.match(out.hookSpecificOutput.additionalContext, /why 5/);
+  } finally {
+    cleanup(cfgDir, repo);
+  }
+});
+
+test('lint output reaches the model as additionalContext', () => {
+  const cfgDir = makeStubConfigDir();
+  const repo = makeRepo();
+  fs.writeFileSync(path.join(repo, '.clang-tidy'), '');
+  try {
+    const out = JSON.parse(runDispatcher(cfgDir, path.join(repo, 'x.cpp')));
+    assert.match(out.hookSpecificOutput.additionalContext, /INVOKED clang-tidy\.js/);
+  } finally {
+    cleanup(cfgDir, repo);
+  }
+});

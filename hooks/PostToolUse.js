@@ -61,10 +61,15 @@ process.stdin.on('end', () => {
   const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path;
   if (!filePath || !CPP_EXTS.has(path.extname(filePath).toLowerCase())) process.exit(0);
 
+  // Everything a tool writes is collected instead of printed: after the fact, the model
+  // reads `additionalContext` and nothing else this hook puts on stdout.
+  const context = [];
+
   // Reminder for the `comments` skill, not an external linter — runs unconditionally,
   // unlike the LINT tools below which require a project config file.
   const cc = spawnSync('node', [path.join(toolsDir, 'comment-check.js')], { input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 10000 });
-  if (cc.stdout?.trim()) process.stdout.write(cc.stdout.trim() + '\n');
+  if (cc.stdout?.trim()) context.push(cc.stdout.trim());
+  if (cc.stderr?.trim()) process.stderr.write(cc.stderr.trim() + '\n');
 
   const fileDir = path.dirname(path.resolve(filePath));
   const boundary = repoBoundary(fileDir);
@@ -73,8 +78,17 @@ process.stdin.on('end', () => {
     const cfg = findConfig(fileDir, config, boundary);
     if (!cfg) continue;
     const r = spawnSync('node', [path.join(toolsDir, tool), filePath, cfg], { encoding: 'utf8', stdio: 'pipe', timeout: 30000 });
-    if (r.stdout?.trim()) process.stdout.write(r.stdout.trim() + '\n');
+    if (r.stdout?.trim()) context.push(r.stdout.trim());
     if (r.stderr?.trim()) process.stderr.write(r.stderr.trim() + '\n');
+  }
+
+  if (context.length) {
+    process.stdout.write(JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PostToolUse',
+        additionalContext: context.join('\n'),
+      },
+    }));
   }
 
   process.exit(0);
