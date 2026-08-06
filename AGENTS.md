@@ -46,11 +46,16 @@ every prompt:
   declare `reminder: false`, meaning their `paths:` are the whole trigger. Declaring
   `paths:` alone does not remove a skill from this list: most are triggered by intent
   too, and design work runs before the file that will carry it exists.
-- `tools/skill-gate.js` (`PreToolUse` on `Edit`/`Write`/`MultiEdit`/`NotebookEdit`)
-  matches the edited file against every skill's `paths:`, adds the skills named in
-  their `with:`, subtracts the ones already loaded in this session's transcript, and
-  warns with what's left. Loaded skills are tracked per session in
-  `session-env/<session_id>.skill-gate.json` against a transcript byte cursor.
+- `tools/skill-gate.js` (`PreToolUse` on `Edit`/`Write`/`MultiEdit`/`NotebookEdit`,
+  and on `Bash` for the file a command writes to — a redirection, `tee`,
+  `Set-Content`/`Add-Content`/`Out-File`, or a `cp`/`mv` destination) matches the
+  written file against every skill's `paths:`, adds the skills named in their `with:`,
+  and subtracts the ones already loaded in this session's transcript. The first call
+  left with missing skills is denied with instructions to load them and retry; a
+  repeat of the same file and missing set warns instead, so an agent without the
+  Skill tool is slowed once, never deadlocked. Loaded skills and spent denies are
+  tracked per session in `session-env/<session_id>.skill-gate.json` against a
+  transcript byte cursor.
 
 Both read `tools/skill-catalog.js`, which parses `tier`/`paths`/`with` out of each
 `SKILL.md` frontmatter — the frontmatter is the only place a skill's triggers are
