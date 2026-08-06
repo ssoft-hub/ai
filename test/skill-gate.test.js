@@ -5,7 +5,7 @@ const { spawnSync } = require('node:child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { skillsIn, notice, loadedSkills } = require('../tools/skill-gate');
+const { skillsIn, notice, loadedSkills, writeTargets } = require('../tools/skill-gate');
 
 const gateJs = path.join(__dirname, '..', 'tools', 'skill-gate.js');
 
@@ -128,6 +128,40 @@ test('loadedSkills returns nothing for a missing transcript', () => {
   } finally { rmTmp(dir); }
 });
 
+test('gate denies the first edit whose claiming skills are not loaded', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: 's1' });
+    assert.strictEqual(r.status, 0);
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /cpp-coding/);
+    assert.match(out.hookSpecificOutput.additionalContext, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate downgrades the second identical attempt to a warning', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const input = { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: 's1' };
+    runGate(dir, input);
+    const r = runGate(dir, input);
+    assert.strictEqual(r.status, 0);
+    assert.throws(() => JSON.parse(r.stdout));
+    assert.ok(r.stdout.includes('cpp-coding'));
+  } finally { rmTmp(dir); }
+});
+
+test('gate denies a fresh file even after another file was denied', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    runGate(dir, { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: 's1' });
+    const r = runGate(dir, { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/b.cpp' }, session_id: 's1' });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+  } finally { rmTmp(dir); }
+});
+
 test('gate names the skills claiming the edited file', () => {
   const dir = mkConfigDir({
     'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n  with: [comments]\n',
@@ -187,6 +221,90 @@ test('gate stays silent once every matching skill is loaded', () => {
       tool_name: 'Edit',
       tool_input: { file_path: 'D:/repo/a.cpp' },
       transcript_path: transcript,
+      session_id: 's1',
+    });
+    assert.strictEqual(r.stdout.trim(), '');
+  } finally { rmTmp(dir); }
+});
+
+test('writeTargets finds the file behind an output redirection', () => {
+  assert.deepStrictEqual(writeTargets('cat <<EOF > src/a.cpp'), ['src/a.cpp']);
+  assert.deepStrictEqual(writeTargets('echo x >> "logs of work.md"'), ['logs of work.md']);
+});
+
+test('writeTargets leaves descriptor and null redirections alone', () => {
+  assert.deepStrictEqual(writeTargets('cmd > /dev/null 2>&1'), []);
+  assert.deepStrictEqual(writeTargets('cmd 2> /dev/null'), []);
+  assert.deepStrictEqual(writeTargets('cmd >&2'), []);
+  assert.deepStrictEqual(writeTargets('cmd > NUL'), []);
+});
+
+test('writeTargets finds the file behind tee', () => {
+  assert.deepStrictEqual(writeTargets('make 2>&1 | tee build.log'), ['build.log']);
+  assert.deepStrictEqual(writeTargets('cmd | tee -a notes.py'), ['notes.py']);
+});
+
+test('writeTargets finds every file tee writes at once', () => {
+  assert.deepStrictEqual(writeTargets('cmd | tee first.log second.cpp'), ['first.log', 'second.cpp']);
+  assert.deepStrictEqual(writeTargets('cmd | tee a.txt b.txt | grep x'), ['a.txt', 'b.txt']);
+});
+
+test('writeTargets finds the file behind a PowerShell content cmdlet', () => {
+  assert.deepStrictEqual(writeTargets('Set-Content -Path a.js -Value x'), ['a.js']);
+  assert.deepStrictEqual(writeTargets('"x" | Out-File out.ps1'), ['out.ps1']);
+  assert.deepStrictEqual(writeTargets("Add-Content 'b.py' 'line'"), ['b.py']);
+});
+
+test('writeTargets finds the file behind PowerShell flags preceding it', () => {
+  assert.deepStrictEqual(writeTargets('"x" | Out-File -Encoding UTF8 out.txt'), ['out.txt']);
+  assert.deepStrictEqual(writeTargets('"x" | Out-File -Append out.txt'), ['out.txt']);
+  assert.deepStrictEqual(writeTargets('Set-Content -Value "text" -Path a.js'), ['a.js']);
+});
+
+test('writeTargets finds the destination of cp and mv', () => {
+  assert.deepStrictEqual(writeTargets('cp fixture.cpp src/real.cpp'), ['src/real.cpp']);
+  assert.deepStrictEqual(writeTargets('mv -f old.js new.js'), ['new.js']);
+});
+
+test('writeTargets reads a plain command as no write', () => {
+  assert.deepStrictEqual(writeTargets('git status && npm test'), []);
+  assert.deepStrictEqual(writeTargets('grep -rn "x" tools/'), []);
+});
+
+test('gate denies a bash write to a file a skill claims', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'Bash',
+      tool_input: { command: 'cat <<EOF > src/a.cpp' },
+      session_id: 's1',
+    });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate shares its deny between an edit and a bash write of one file', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    runGate(dir, { tool_name: 'Edit', tool_input: { file_path: 'src/a.cpp' }, session_id: 's1' });
+    const r = runGate(dir, {
+      tool_name: 'Bash',
+      tool_input: { command: 'echo x > src/a.cpp' },
+      session_id: 's1',
+    });
+    assert.throws(() => JSON.parse(r.stdout));
+    assert.ok(r.stdout.includes('cpp-coding'));
+  } finally { rmTmp(dir); }
+});
+
+test('gate stays silent for a bash command writing no claimed file', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'Bash',
+      tool_input: { command: 'npm test > result.log' },
       session_id: 's1',
     });
     assert.strictEqual(r.stdout.trim(), '');

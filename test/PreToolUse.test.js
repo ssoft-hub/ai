@@ -17,16 +17,31 @@ function run(command, configDir = repoDir) {
   });
 }
 
-function edit(filePath) {
+// A config dir with the real skill-gate and a skill claiming C++ files, so gate
+// behaviour is exercised without writing session state into the repository.
+function mkGateConfig() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
+  fs.mkdirSync(path.join(dir, 'tools'));
+  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js']) {
+    fs.copyFileSync(path.join(repoDir, 'tools', tool), path.join(dir, 'tools', tool));
+  }
+  const skillDir = path.join(dir, 'skills', 'comments');
+  fs.mkdirSync(skillDir, { recursive: true });
+  fs.writeFileSync(path.join(skillDir, 'SKILL.md'),
+    '---\nname: comments\ndescription: d\nmetadata:\n  paths: ["**/*.cpp"]\n---\nbody\n');
+  return dir;
+}
+
+function gateInput(configDir, input, session) {
   return spawnSync('node', [HOOK], {
-    input: JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: filePath }, session_id: 'preTooluse-test' }),
-    env: { ...process.env, CLAUDE_CONFIG_DIR: repoDir },
+    input: JSON.stringify({ ...input, session_id: session }),
+    env: { ...process.env, CLAUDE_CONFIG_DIR: configDir },
     encoding: 'utf8',
   });
 }
 
 // The Bash tools the dispatcher spawns, replaced by fixtures that decide on command.
-const BASH_TOOLS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js'];
+const BASH_TOOLS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js', 'skill-gate.js'];
 
 // A spec is a decision name, `{ decision, reason: false }` for a tool that decides
 // without stating a reason, `{ decision, context }` for one that speaks to the model
@@ -101,9 +116,27 @@ test('gives the model a warning that arrives alongside a decision', () => {
   assert.match(out.hookSpecificOutput.additionalContext, /rm -r/);
 });
 
-test('gives the model the skill-gate notice of an edit', () => {
-  const out = JSON.parse(edit('/tmp/does-not-exist/x.cpp').stdout);
-  assert.match(out.hookSpecificOutput.additionalContext, /comments/);
+test('forwards the skill-gate deny of a first edit, then its warning', () => {
+  const dir = mkGateConfig();
+  try {
+    const input = { tool_name: 'Edit', tool_input: { file_path: '/tmp/does-not-exist/x.cpp' } };
+    const first = JSON.parse(gateInput(dir, input, 's1').stdout);
+    assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(first.hookSpecificOutput.permissionDecisionReason, /comments/);
+    const second = JSON.parse(gateInput(dir, input, 's1').stdout);
+    assert.strictEqual(second.hookSpecificOutput.permissionDecision, undefined);
+    assert.match(second.hookSpecificOutput.additionalContext, /comments/);
+  } finally { rmConfig(dir); }
+});
+
+test('forwards the skill-gate deny of a bash write', () => {
+  const dir = mkGateConfig();
+  try {
+    const input = { tool_name: 'Bash', tool_input: { command: 'echo x > y.cpp' } };
+    const out = JSON.parse(gateInput(dir, input, 's2').stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /comments/);
+  } finally { rmConfig(dir); }
 });
 
 test('leaves additionalContext out when every tool decided', () => {
