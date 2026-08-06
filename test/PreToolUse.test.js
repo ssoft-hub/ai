@@ -17,16 +17,31 @@ function run(command, configDir = repoDir) {
   });
 }
 
+function edit(filePath) {
+  return spawnSync('node', [HOOK], {
+    input: JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: filePath }, session_id: 'preTooluse-test' }),
+    env: { ...process.env, CLAUDE_CONFIG_DIR: repoDir },
+    encoding: 'utf8',
+  });
+}
+
 // The Bash tools the dispatcher spawns, replaced by fixtures that decide on command.
 const BASH_TOOLS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js'];
 
 // A spec is a decision name, `{ decision, reason: false }` for a tool that decides
-// without stating a reason, or null for a tool that decides nothing.
+// without stating a reason, `{ decision, context }` for one that speaks to the model
+// alongside its decision, `{ warn }` for plain warning text, `{ block }` for a tool that
+// blocks, or null for a tool that decides nothing.
 function deciding(spec) {
   if (!spec) return "'use strict';";
-  const { decision, reason = true } = typeof spec === 'string' ? { decision: spec } : spec;
+  if (spec.warn) return `'use strict';process.stdout.write(${JSON.stringify(spec.warn)});`;
+  if (spec.block) {
+    return `'use strict';process.stderr.write(${JSON.stringify(spec.block)});process.exit(2);`;
+  }
+  const { decision, reason = true, context } = typeof spec === 'string' ? { decision: spec } : spec;
   const hookSpecificOutput = { hookEventName: 'PreToolUse', permissionDecision: decision };
   if (reason) hookSpecificOutput.permissionDecisionReason = `${decision} fixture`;
+  if (context) hookSpecificOutput.additionalContext = context;
   return `'use strict';process.stdout.write(${
     JSON.stringify(JSON.stringify({ hookSpecificOutput }))});`;
 }
@@ -67,11 +82,51 @@ test('keeps an earlier warning in the reason of the decision that follows it', (
   assert.match(out.hookSpecificOutput.permissionDecisionReason, /gh pr comment/);
 });
 
-test('passes plain warning text through when no tool decides', () => {
+test('gives the model the warning of a tool that decides nothing', () => {
   const r = run('rm -r build');
   assert.strictEqual(r.status, 0);
-  assert.match(r.stdout, /rm -r/);
-  assert.throws(() => JSON.parse(r.stdout));
+  const out = JSON.parse(r.stdout);
+  assert.strictEqual(out.hookSpecificOutput.hookEventName, 'PreToolUse');
+  assert.match(out.hookSpecificOutput.additionalContext, /rm -r/);
+});
+
+test('names no permission decision when only a warning was written', () => {
+  const out = JSON.parse(run('rm -r build').stdout);
+  assert.strictEqual(out.hookSpecificOutput.permissionDecision, undefined);
+});
+
+test('gives the model a warning that arrives alongside a decision', () => {
+  const out = JSON.parse(run('rm -r build && gh pr comment 49 -b x').stdout);
+  assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+  assert.match(out.hookSpecificOutput.additionalContext, /rm -r/);
+});
+
+test('gives the model the skill-gate notice of an edit', () => {
+  const out = JSON.parse(edit('/tmp/does-not-exist/x.cpp').stdout);
+  assert.match(out.hookSpecificOutput.additionalContext, /comments/);
+});
+
+test('leaves additionalContext out when every tool decided', () => {
+  const out = JSON.parse(run('git push && gh pr comment 49 -b x').stdout);
+  assert.strictEqual(out.hookSpecificOutput.additionalContext, undefined);
+});
+
+test('keeps the additionalContext a deciding tool wrote for the model', () => {
+  const dir = mkConfig([{ decision: 'ask', context: 'context fixture' }, { warn: 'warn fixture' }, null]);
+  try {
+    const out = JSON.parse(run('anything', dir).stdout);
+    assert.match(out.hookSpecificOutput.additionalContext, /context fixture/);
+    assert.match(out.hookSpecificOutput.additionalContext, /warn fixture/);
+  } finally { rmConfig(dir); }
+});
+
+test('gives the model an earlier warning when a later tool blocks', () => {
+  const dir = mkConfig([{ warn: 'warn fixture' }, { block: 'Blocked fixture' }, null]);
+  try {
+    const r = run('anything', dir);
+    assert.strictEqual(r.status, 2);
+    assert.match(r.stderr, /Blocked fixture\nwarn fixture/);
+  } finally { rmConfig(dir); }
 });
 
 test('exits 2 on a blocked command', () => {
@@ -151,16 +206,16 @@ test('keeps a lone unknown decision off stdout as a decision of its own', () => 
   try {
     const r = run('anything', dir);
     assert.strictEqual(r.status, 0);
-    assert.throws(() => JSON.parse(r.stdout));
+    assert.strictEqual(JSON.parse(r.stdout).hookSpecificOutput.permissionDecision, undefined);
   } finally { rmConfig(dir); }
 });
 
 test('names the tool behind output that decides nothing', () => {
   const dir = mkConfig(['maybe', null, null]);
   try {
-    const r = run('anything', dir);
-    assert.match(r.stdout, /bash-safety\.js/);
-    assert.match(r.stdout, /maybe fixture/);
+    const context = JSON.parse(run('anything', dir).stdout).hookSpecificOutput.additionalContext;
+    assert.match(context, /bash-safety\.js/);
+    assert.match(context, /maybe fixture/);
   } finally { rmConfig(dir); }
 });
 

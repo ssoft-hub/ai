@@ -25,8 +25,8 @@ pipeline of persona agents and commands built on top of them.
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) containing private keys, AWS keys, GitHub PATs; warns on probable credentials
 - `skill-gate.js` — on the same write tools, names the skills that claim the edited file (their `paths:` frontmatter) plus the ones they list in `with:`, minus whatever is already loaded this session; warn-only
 
-**`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit` on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
-- `comment-check.js` — runs unconditionally (no config file needed); reminds to check any newly added non-Doxygen comment against the `comments` skill
+**`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit`; the three lint tools only on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
+- `comment-check.js` — runs on every file whose comment syntax it knows (`//`, `/* */`, `#`, `--`, `;`, `%`, `<!-- -->`), no config file needed; reminds to check any newly added non-doc comment against the `comments` skill
 - `clang-format.js` — formats in-place; requires `.clang-format` in this repository (searched from the edited file up to the git root, never into a parent repo) — skips silently if missing, or if `clang-format` isn't in PATH
 - `clang-tidy.js` — runs static analysis; requires `.clang-tidy` (uses `compile_commands.json` when found)
 - `cppcheck.js` — runs `cppcheck --enable=warning,style,performance,portability --std=c++20 --error-exitcode=1 …`; requires `.cppcheck`, passed as `--suppressions-list`
@@ -56,7 +56,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `changelog` | Keep a Changelog format |
 | `ci-cd-and-automation` | CI/CD pipeline design and quality gates |
 | `code-review-and-quality` | Review substance — correctness, readability, architecture, security, performance |
-| `comments` | Non-Doxygen code comment style (brief, general, no fix narration) |
+| `comments` | Code comment style in any language, Doxygen aside (brief, general, no fix narration) |
 | `commit-rules` | Conventional Commits format and branch naming |
 | `cpp-api-design` | C++ public API structure and hygiene |
 | `cpp-coding` | C++ implementation conventions |

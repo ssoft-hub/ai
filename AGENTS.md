@@ -26,8 +26,11 @@ No hardcoded user paths anywhere. No npm dependencies.
 
 ## Adding a new tool check
 
-1. Create `tools/<name>.js` — reads stdin JSON, writes to stdout (warn) or stderr+exit(2) (block)
+1. Create `tools/<name>.js` — reads stdin JSON, writes plain text to stdout (warn) or
+   stderr+exit(2) (block)
 2. Add it to the appropriate dispatcher in `hooks/PreToolUse.js` or `hooks/PostToolUse.js`
+   — the dispatcher, not the tool, wraps that text in the `additionalContext` the model
+   reads (see `skills/hook-scripts/SKILL.md` → Reaching the Model)
 3. Export pure logic (regexes, helpers) and add tests under `test/<name>.test.js`
    (see `skills/node-testing/SKILL.md` for conventions: flat `test()`, fixtures, `CLAUDE_CONFIG_DIR` isolation)
 4. Run `npm test`
@@ -67,7 +70,7 @@ agent reading both has nothing telling it which one wins.
 - `changelog` — the `CHANGELOG.md` file: subsections, bullet wording, what goes in, the release-time rename. Hands off the version number to `release`, the definition of a breaking change to `cpp-api-design`.
 - `ci-cd-and-automation` — the pipeline producing the "CI green" signal: what it gates, stage order, flaky checks, who owns a red build. Hands off the per-language checks to `cpp-coding`/`hook-scripts`, merge gating to `pr-rules`, tag automation to `release`, pipeline credentials to `security-and-hardening`.
 - `code-review-and-quality` — what a review looks for: the five axes, change size, dependency bumps, orphaned code. Hands off how a finding is worded to `pr-rules`, security depth to `security-and-hardening`, performance depth to `performance-optimization`, public-surface and access review to `cpp-api-design`/`cpp-encapsulation`.
-- `comments` — non-Doxygen comments: whether one is justified at all, its length, its timeless character. Hands off documentation blocks to `cpp-doxygen`, case history to `commit-rules`.
+- `comments` — a comment in any language, whatever marker opens it: whether one is justified at all, its length, its timeless character. Hands off Doxygen blocks to `cpp-doxygen`, case history to `commit-rules`.
 - `commit-rules` — commit message format, the type vocabulary every artifact reuses, body, branch naming, fixups, banned trailers. Hands off the merge commit's subject and length to `pr-rules`, prose register to `writing-style`.
 - `cpp-api-design` — the shape of a public C++ surface: namespacing, dependency leakage, `bool`/`void*` bans, and the definition of a breaking change. Hands off the header guard to `cpp-coding`, doc blocks to `cpp-doxygen`, access levels to `cpp-encapsulation`, retiring a symbol to `deprecation-and-migration`, the bump and the entry to `release`/`changelog`.
 - `cpp-coding` — C++ implementation conventions: value semantics, include order, header guard, type safety, RAII, qualifiers, attributes, modern idioms, and the performance idioms always in effect. Hands off the public surface to `cpp-api-design`, comments to `comments`, a specific performance investigation to `performance-optimization`, naming and file layout to the project's `AGENTS.md`.

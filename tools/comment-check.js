@@ -1,23 +1,61 @@
 'use strict';
 const path = require('path');
 
-const CPP_EXTS = new Set(['.h', '.hpp', '.cpp', '.cc', '.cxx']);
+// One entry per family of comment syntaxes. `doc` marks the doc-comment openers this
+// check leaves alone (`cpp-doxygen` owns those); a `line` opener must sit at line start
+// or after whitespace, so "https://x", "#ffffff" and "counter--" are not comments.
+const C_FAMILY = {
+  doc: /\/\/\/|\/\/!|\/\*\*/,
+  line: /(^|\s)\/\/(?!\/)/,
+  block: [/\/\*(?!\*)/, /\*\/\s*$/],
+};
+const HASH = { skip: /^#!/, line: /(^|\s)#/ };
+const DASH = { line: /(^|\s)--/ };
+const SEMICOLON = { line: /(^|\s);/ };
+const PERCENT = { line: /(^|\s)%/ };
+const MARKUP = { block: [/<!--/, /-->\s*$/] };
 
-// A "plain" comment line the `comments` skill governs. Doxygen markers (///, //!,
-// /**) are excluded — those belong to the separate `cpp-doxygen` skill. `//` must sit at
-// line start or after whitespace so a URL literal like "https://x" doesn't match.
-function isPlainCommentLine(line) {
-  if (/\/\/\/|\/\/!|\/\*\*/.test(line)) return false;
-  if (/(^|\s)\/\/(?!\/)/.test(line)) return true;
-  return /\/\*(?!\*)/.test(line) || /\*\/\s*$/.test(line);
+const BY_EXT = new Map([
+  [C_FAMILY, ['.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.hxx', '.inl', '.ipp',
+    '.m', '.mm', '.java', '.cs', '.js', '.mjs', '.cjs', '.jsx', '.ts', '.mts', '.cts',
+    '.tsx', '.go', '.rs', '.swift', '.kt', '.kts', '.scala', '.php', '.qml', '.dart',
+    '.groovy', '.gradle', '.glsl', '.vert', '.frag', '.proto', '.css', '.scss', '.less']],
+  [HASH, ['.py', '.pyi', '.rb', '.pl', '.pm', '.sh', '.bash', '.zsh', '.fish', '.ps1',
+    '.psm1', '.r', '.jl', '.ex', '.exs', '.nim', '.yml', '.yaml', '.toml', '.cfg',
+    '.conf', '.tf', '.tfvars', '.cmake', '.mk']],
+  [DASH, ['.sql', '.lua', '.hs', '.elm', '.ada', '.adb', '.ads', '.vhd', '.vhdl']],
+  [SEMICOLON, ['.ini', '.lisp', '.cl', '.el', '.clj', '.cljs', '.cljc', '.scm', '.rkt',
+    '.asm', '.s']],
+  [PERCENT, ['.tex', '.sty', '.cls', '.erl', '.hrl']],
+  [MARKUP, ['.html', '.htm', '.xhtml', '.xml', '.xsl', '.xslt', '.svg']],
+].flatMap(([syntax, exts]) => exts.map(ext => [ext, syntax])));
+
+// `path.extname('.env')` is '', so a name that looks like an extension is matched whole.
+const BY_NAME = new Map([
+  ['cmakelists.txt', HASH], ['makefile', HASH], ['dockerfile', HASH],
+  ['gemfile', HASH], ['rakefile', HASH], ['.env', HASH], ['.gitignore', HASH],
+  ['.gitattributes', HASH], ['.dockerignore', HASH], ['.editorconfig', HASH],
+]);
+
+function syntaxFor(filePath) {
+  if (!filePath) return undefined;
+  const name = path.basename(String(filePath)).toLowerCase();
+  return BY_NAME.get(name) ?? BY_EXT.get(path.extname(name));
+}
+
+function isPlainCommentLine(line, syntax) {
+  if (!syntax || syntax.skip?.test(line) || syntax.doc?.test(line)) return false;
+  if (syntax.line?.test(line)) return true;
+  return (syntax.block ?? []).some(re => re.test(line));
 }
 
 // Compares whole lines against the pre-edit set, not just the comment substring, so
 // a comment attached to a changed code line is flagged too — cheaper than a real
 // line-level diff, at the cost of an occasional re-flag of an unchanged comment.
-function addedCommentLines(oldText, newText) {
+function addedCommentLines(oldText, newText, syntax) {
   const oldLines = new Set((oldText ?? '').split('\n'));
-  return (newText ?? '').split('\n').filter(line => isPlainCommentLine(line) && !oldLines.has(line));
+  return (newText ?? '').split('\n')
+    .filter(line => isPlainCommentLine(line, syntax) && !oldLines.has(line));
 }
 
 // Edit -> one {old,new} pair; MultiEdit -> one pair per edits[]. Write has no prior
@@ -35,8 +73,10 @@ function extractEdits(toolInput) {
 }
 
 function check(toolInput, filePath) {
-  if (!filePath || !CPP_EXTS.has(path.extname(filePath).toLowerCase())) return { added: [] };
-  const added = extractEdits(toolInput).flatMap(({ old, new: n }) => addedCommentLines(old, n));
+  const syntax = syntaxFor(filePath);
+  if (!syntax) return { added: [] };
+  const added = extractEdits(toolInput)
+    .flatMap(({ old, new: n }) => addedCommentLines(old, n, syntax));
   return { added };
 }
 
@@ -62,4 +102,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { isPlainCommentLine, addedCommentLines, extractEdits, check };
+module.exports = { syntaxFor, isPlainCommentLine, addedCommentLines, extractEdits, check };

@@ -27,7 +27,7 @@ When writing, reviewing, or adding tests to C++ code → apply `cpp-testing` ski
 When designing a C++ API, adding public C++ headers, or reviewing a public C++ interface → apply `cpp-api-design` skill.
 When choosing C++ access specifiers or reviewing member visibility → apply `cpp-encapsulation` skill.
 When adding or modifying Doxygen comments on public C++ headers → apply `cpp-doxygen` skill.
-When writing or reviewing non-Doxygen code comments → apply `comments` skill.
+When writing or reviewing a code comment in any language, Doxygen blocks aside → apply `comments` skill.
 When modelling domain objects, aggregates, or bounded contexts → apply `ddd` skill.
 When writing commit messages or naming branches → apply `commit-rules` skill.
 When creating or reviewing tracker issues → apply `issue-rules` skill.

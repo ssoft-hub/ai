@@ -15,11 +15,11 @@ const DISPATCH = {
   NotebookEdit: ['secret-guard.js', 'skill-gate.js'],
 };
 
-// Claude Code reads this hook's stdout as a single JSON document when a tool decides
-// on a permission. Several tools can decide on one command, so a run keeps the
-// strictest decision and every reason behind it, plain-text warnings included: the
-// reason is all the user reads before answering. These three are the whole vocabulary a
-// decision can name.
+// Claude Code reads this hook's stdout as a single JSON document; anything else it
+// writes reaches the debug log alone. A permission reason is read by the user, and
+// `additionalContext` by the model, so a warning goes to both. Several tools can decide
+// on one command, so a run keeps the strictest decision and every reason behind it.
+// These three are the whole vocabulary a decision can name.
 const RANK = { allow: 0, ask: 1, deny: 2 };
 
 // Output that names none of the three is text: unparseable output as written, and output
@@ -56,9 +56,11 @@ process.stdin.on('end', () => {
     const r = spawnSync('node', [path.join(toolsDir, tool)], {
       input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 30000,
     });
-    if (r.stderr?.trim()) process.stderr.write(r.stderr);
+    if (r.stderr?.trim()) process.stderr.write(`${r.stderr.trim()}\n`);
     if (r.status === 2) {
-      if (notes.length) process.stdout.write(notes.join('\n'));
+      // A blocked call has no JSON output left to carry a warning: stderr is the only
+      // channel exit 2 leaves open, and it reaches the model as well as the user.
+      if (notes.length) process.stderr.write(`${notes.join('\n')}\n`);
       process.exit(2);
     }
     const out = r.stdout?.trim() ?? '';
@@ -68,15 +70,20 @@ process.stdin.on('end', () => {
     else notes.push(note);
   }
 
+  if (!decisions.length && !notes.length) process.exit(0);
+
+  const merged = decisions.length
+    ? strictest(decisions)
+    : { hookSpecificOutput: { hookEventName: 'PreToolUse' } };
   if (decisions.length) {
-    const decision = strictest(decisions);
-    decision.hookSpecificOutput.permissionDecisionReason = [
+    merged.hookSpecificOutput.permissionDecisionReason = [
       ...notes,
       ...decisions.map(d => d.hookSpecificOutput.permissionDecisionReason),
     ].filter(Boolean).join('\n');
-    process.stdout.write(JSON.stringify(decision));
-  } else if (notes.length) {
-    process.stdout.write(notes.join('\n'));
   }
+  const context = [...decisions.map(d => d.hookSpecificOutput.additionalContext), ...notes]
+    .filter(Boolean);
+  if (context.length) merged.hookSpecificOutput.additionalContext = context.join('\n');
+  process.stdout.write(JSON.stringify(merged));
   process.exit(0);
 });
