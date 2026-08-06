@@ -8,7 +8,7 @@ const toolsDir = path.join(configDir, 'tools');
 
 const DISPATCH = {
   Agent:        ['bg-agent-counter.js'],
-  Bash:         ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js'],
+  Bash:         ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js', 'skill-gate.js'],
   Edit:         ['secret-guard.js', 'skill-gate.js'],
   Write:        ['secret-guard.js', 'skill-gate.js'],
   MultiEdit:    ['secret-guard.js', 'skill-gate.js'],

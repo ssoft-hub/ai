@@ -40,9 +40,64 @@ function loadedSkills(transcriptPath, statePath) {
   const skills = [...new Set([...state.skills, ...skillsIn(chunk)])];
   try {
     fs.mkdirSync(path.dirname(statePath), { recursive: true });
-    fs.writeFileSync(statePath, JSON.stringify({ size: consumed, skills }));
+    fs.writeFileSync(statePath, JSON.stringify({ ...state, size: consumed, skills }));
   } catch {}
   return skills;
+}
+
+// One deny per file and missing-skill set: enough to stop an agent that can load the
+// skills, harmless to one that cannot. A deny that fails to persist warns instead —
+// deny-every-time would deadlock an agent with no Skill tool.
+function denyOnce(statePath, key) {
+  let state = {};
+  try { state = JSON.parse(fs.readFileSync(statePath, 'utf8')); } catch {}
+  const denied = state.denied ?? {};
+  if (denied[key]) return false;
+  denied[key] = true;
+  try {
+    fs.mkdirSync(path.dirname(statePath), { recursive: true });
+    fs.writeFileSync(statePath, JSON.stringify({ ...state, denied }));
+  } catch { return false; }
+  return true;
+}
+
+// The shell-side writes a blocked Edit could be rerouted through. Interpreters
+// (node -e, python -c) stay out of reach — this narrows the bypass, it cannot seal it.
+const WRITE_FORMS = [
+  // `> file` and `>> file`, but not `2>`, `&>`, `>&2` or a here-doc's `<<`
+  /(?<![<>&\d])>{1,2}\s*(?:"([^"]+)"|'([^']+)'|([^\s;|&<>)]+))/g,
+  // an explicit -Path/-FilePath/-LiteralPath wins over position
+  /\b(?:Set-Content|Add-Content|Out-File)\b[^;|&]*?-(?:Path|FilePath|LiteralPath)\s+(?:"([^"]+)"|'([^']+)'|([^\s;|&<>]+))/gi,
+  // positional target; a flag's optional value never starts with a dash, and
+  // backtracking hands the last word back when the flag turns out to take none.
+  // Stops at a path-naming flag — the explicit form above owns that case
+  /\b(?:Set-Content|Add-Content|Out-File)\s+(?:-(?!(?:Path|FilePath|LiteralPath)\b)\w+(?:\s+(?:"[^"]*"|'[^']*'|[^-\s;|&<>][^\s;|&<>]*))?\s+)*(?:"([^"]+)"|'([^']+)'|([^\s;|&<>]+))/gi,
+  /\b(?:cp|mv)\s+(?:-\S+\s+)*\S+\s+(?:"([^"]+)"|'([^']+)'|([^\s;|&<>]+))\s*(?:$|[;|&])/g,
+];
+// tee writes every operand, so its whole argument run is captured and tokenized.
+const TEE_RUN = /\btee\s+(?:-\w+\s+)*((?:"[^"]+"|'[^']+'|[^\s;|&<>]+)(?:[ \t]+(?:"[^"]+"|'[^']+'|[^\s;|&<>]+))*)/g;
+const TOKEN = /"([^"]+)"|'([^']+)'|(\S+)/g;
+const SINKS = new Set(['/dev/null', 'nul']);
+
+function keepTarget(targets, target) {
+  if (target && !SINKS.has(target.toLowerCase()) && !target.startsWith('-')) {
+    targets.push(target);
+  }
+}
+
+function writeTargets(command) {
+  const targets = [];
+  for (const form of WRITE_FORMS) {
+    for (const m of command.matchAll(form)) {
+      keepTarget(targets, m[1] ?? m[2] ?? m[3]);
+    }
+  }
+  for (const run of command.matchAll(TEE_RUN)) {
+    for (const t of run[1].matchAll(TOKEN)) {
+      keepTarget(targets, t[1] ?? t[2] ?? t[3]);
+    }
+  }
+  return [...new Set(targets)];
 }
 
 function notice(filePath, missing) {
@@ -59,20 +114,41 @@ if (require.main === module) {
   process.stdin.on('end', () => {
     let data;
     try { data = JSON.parse(raw); } catch { process.exit(0); }
-    if (!EDIT_TOOLS.has(data.tool_name)) process.exit(0);
 
-    const filePath = data.tool_input?.file_path ?? data.tool_input?.path ?? '';
-    if (!filePath) process.exit(0);
+    let targets;
+    if (EDIT_TOOLS.has(data.tool_name)) {
+      const filePath = data.tool_input?.file_path ?? data.tool_input?.path ?? '';
+      targets = filePath ? [filePath] : [];
+    } else if (data.tool_name === 'Bash') {
+      targets = writeTargets(data.tool_input?.command ?? '');
+    } else {
+      process.exit(0);
+    }
+    if (!targets.length) process.exit(0);
 
-    const matched = matchSkills(loadCatalog(path.join(configDir, 'skills')), filePath);
-    if (!matched.length) process.exit(0);
-
+    const catalog = loadCatalog(path.join(configDir, 'skills'));
     const statePath = path.join(configDir, 'session-env', `${data.session_id ?? 'unknown'}.skill-gate.json`);
     const loaded = new Set(data.transcript_path ? loadedSkills(data.transcript_path, statePath) : []);
-    const missing = matched.filter(name => !loaded.has(name));
-    if (missing.length) process.stdout.write(notice(filePath, missing));
+    const hits = targets
+      .map(file => ({ file, missing: matchSkills(catalog, file).filter(name => !loaded.has(name)) }))
+      .filter(hit => hit.missing.length);
+    if (!hits.length) process.exit(0);
+
+    const text = hits.map(hit => notice(hit.file, hit.missing)).join('\n');
+    const key = hits.map(hit => `${hit.file}|${hit.missing.join(',')}`).join(';');
+    if (denyOnce(statePath, key)) {
+      const blocked = `${text} This call was blocked; load them, then retry it.`;
+      process.stdout.write(JSON.stringify({ hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'deny',
+        permissionDecisionReason: blocked,
+        additionalContext: blocked,
+      } }));
+    } else {
+      process.stdout.write(text);
+    }
     process.exit(0);
   });
 }
 
-module.exports = { skillsIn, loadedSkills, notice };
+module.exports = { skillsIn, loadedSkills, notice, denyOnce, writeTargets };
