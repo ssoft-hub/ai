@@ -51,15 +51,24 @@ process.stdin.setEncoding('utf8');
 process.stdin.on('data', c => { raw += c; });
 process.stdin.on('end', () => {
   let data; try { data = JSON.parse(raw); } catch { process.exit(0); }
+  const context = [];
   for (const tool of DISPATCH[data.tool_name] ?? []) {
     const r = spawnSync('node', [path.join(d, 'tools', tool)], { input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 30000 });
-    if (r.stdout?.trim()) process.stdout.write(r.stdout);
+    if (r.stdout?.trim()) context.push(r.stdout.trim());
     if (r.stderr?.trim()) process.stderr.write(r.stderr);
     if (r.status === 2) process.exit(2);
+  }
+  if (context.length) {
+    process.stdout.write(JSON.stringify({
+      hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: context.join('\n') },
+    }));
   }
   process.exit(0);
 });
 ```
+
+A dispatcher collects what its tools write instead of forwarding it line by line: on
+every event but the three below, plain stdout reaches nobody (see Reaching the Model).
 
 ## Tool Skeleton
 
@@ -82,10 +91,31 @@ process.stdin.on('end', () => {
 
 | Code | Meaning | Channel |
 |------|---------|---------|
-| `0` | Allow / warning | stdout → Claude sees it |
-| `2` | Deny / block | stderr → shown to user |
+| `0` | Allow / warning | stdout, parsed as JSON output; anything else goes to the debug log |
+| `2` | Deny / block | stderr → the model reads it; `PreToolUse` also blocks the call |
 
 Never use `1` — unpredictable behavior.
+
+## Reaching the Model
+
+A warning nobody reads is worse than no warning: it looks like a working guard. Which
+channel carries a hook's output to the model depends on the event.
+
+- `UserPromptSubmit`, `UserPromptExpansion` and `SessionStart` — plain stdout on exit `0`
+  is added to the model's context as written.
+- Every other event, `PreToolUse` and `PostToolUse` included — the model reads
+  `hookSpecificOutput.additionalContext` inside a JSON document on stdout, or stderr
+  behind exit `2`. Plain stdout reaches the debug log alone.
+- `permissionDecisionReason` is the text of the permission prompt: the user reads it,
+  the model does not. A warning that both need goes in both fields.
+
+```javascript
+process.stdout.write(JSON.stringify({
+  hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: 'what the model must know' },
+}));
+```
+
+The event name in the payload must match the event the hook is registered for.
 
 ## Hook JSON Fields
 
