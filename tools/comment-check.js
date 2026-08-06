@@ -2,12 +2,14 @@
 const path = require('path');
 
 // One entry per family of comment syntaxes. `doc` marks the doc-comment openers this
-// check leaves alone (`cpp-doxygen` owns those); a `line` opener must sit at line start
-// or after whitespace, so "https://x", "#ffffff" and "counter--" are not comments.
+// check leaves alone (`cpp-doxygen` owns those); every opener, doc included, must sit
+// at line start or after whitespace, so "https://x", "#ffffff", "counter--" and the
+// `/*` or `/**` of a glob like "**/*.cpp" are not comments — an unanchored doc opener
+// would also swallow the line and hide a real comment sitting next to it.
 const C_FAMILY = {
-  doc: /\/\/\/|\/\/!|\/\*\*/,
+  doc: /(^|\s)(\/\/\/|\/\/!|\/\*\*)/,
   line: /(^|\s)\/\/(?!\/)/,
-  block: [/\/\*(?!\*)/, /\*\/\s*$/],
+  block: [/(^|\s)\/\*(?!\*)/, /\*\/\s*$/],
 };
 const HASH = { skip: /^#!/, line: /(^|\s)#/ };
 const DASH = { line: /(^|\s)--/ };
