@@ -59,27 +59,29 @@ process.stdin.on('end', () => {
   if (!EDIT_TOOLS.has(data.tool_name)) process.exit(0);
 
   const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path;
-  if (!filePath || !CPP_EXTS.has(path.extname(filePath).toLowerCase())) process.exit(0);
+  if (!filePath) process.exit(0);
 
   // Everything a tool writes is collected instead of printed: after the fact, the model
   // reads `additionalContext` and nothing else this hook puts on stdout.
   const context = [];
 
-  // Reminder for the `comments` skill, not an external linter — runs unconditionally,
-  // unlike the LINT tools below which require a project config file.
+  // Reminder for the `comments` skill, not an external linter — runs on every language
+  // it knows a comment syntax for, unlike the C++-only LINT tools below.
   const cc = spawnSync('node', [path.join(toolsDir, 'comment-check.js')], { input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 10000 });
   if (cc.stdout?.trim()) context.push(cc.stdout.trim());
   if (cc.stderr?.trim()) process.stderr.write(cc.stderr.trim() + '\n');
 
-  const fileDir = path.dirname(path.resolve(filePath));
-  const boundary = repoBoundary(fileDir);
+  if (CPP_EXTS.has(path.extname(filePath).toLowerCase())) {
+    const fileDir = path.dirname(path.resolve(filePath));
+    const boundary = repoBoundary(fileDir);
 
-  for (const { tool, config } of LINT) {
-    const cfg = findConfig(fileDir, config, boundary);
-    if (!cfg) continue;
-    const r = spawnSync('node', [path.join(toolsDir, tool), filePath, cfg], { encoding: 'utf8', stdio: 'pipe', timeout: 30000 });
-    if (r.stdout?.trim()) context.push(r.stdout.trim());
-    if (r.stderr?.trim()) process.stderr.write(r.stderr.trim() + '\n');
+    for (const { tool, config } of LINT) {
+      const cfg = findConfig(fileDir, config, boundary);
+      if (!cfg) continue;
+      const r = spawnSync('node', [path.join(toolsDir, tool), filePath, cfg], { encoding: 'utf8', stdio: 'pipe', timeout: 30000 });
+      if (r.stdout?.trim()) context.push(r.stdout.trim());
+      if (r.stderr?.trim()) process.stderr.write(r.stderr.trim() + '\n');
+    }
   }
 
   if (context.length) {

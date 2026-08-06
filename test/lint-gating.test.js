@@ -139,6 +139,22 @@ test('the comment-check reminder reaches the model as additionalContext', () => 
   }
 });
 
+test('comment-check runs on a file the lint tools ignore', () => {
+  const cfgDir = makeStubConfigDir();
+  const repo = makeRepo();
+  fs.writeFileSync(path.join(repo, '.clang-format'), '');
+  try {
+    const out = JSON.parse(runDispatcher(cfgDir, path.join(repo, 'x.py'), {
+      old_string: 'x = 5',
+      new_string: 'x = 5  # why 5',
+    }));
+    assert.match(out.hookSpecificOutput.additionalContext, /why 5/);
+    assert.doesNotMatch(out.hookSpecificOutput.additionalContext, /INVOKED/);
+  } finally {
+    cleanup(cfgDir, repo);
+  }
+});
+
 test('lint output reaches the model as additionalContext', () => {
   const cfgDir = makeStubConfigDir();
   const repo = makeRepo();
