@@ -63,6 +63,13 @@ test('notice names the file and every missing skill', () => {
   assert.ok(text.includes('Skill tool'));
 });
 
+test('notice orders every named skill loaded instead of offering candidates', () => {
+  const text = notice('D:/repo/src/a.cpp', ['cpp-coding', 'comments']);
+  assert.match(text, /each/);
+  assert.match(text, /not a suggestion/);
+  assert.match(text, /do not skip/);
+});
+
 test('loadedSkills reads a transcript and remembers it across calls', () => {
   const dir = mkTmp();
   try {

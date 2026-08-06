@@ -46,8 +46,10 @@ function loadedSkills(transcriptPath, statePath) {
 }
 
 function notice(filePath, missing) {
-  return `${path.basename(filePath)}: load with the Skill tool before editing — `
-    + `${missing.join(', ')} (process, then domain, then narrow scope).`;
+  return `${path.basename(filePath)} is claimed by skills this session has not loaded: `
+    + `${missing.join(', ')}. Load each of them with the Skill tool before editing — `
+    + 'the path match is the trigger, not a suggestion; do not skip one as irrelevant. '
+    + 'Load order: process, then domain, then narrow.';
 }
 
 if (require.main === module) {
