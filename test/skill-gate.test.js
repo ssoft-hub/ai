@@ -271,6 +271,46 @@ test('writeTargets reads a plain command as no write', () => {
   assert.deepStrictEqual(writeTargets('grep -rn "x" tools/'), []);
 });
 
+test('writeTargets ignores a write form inside a quoted argument', () => {
+  assert.deepStrictEqual(writeTargets('gh issue comment 1 --body "the gate denied tee a.cpp b.cpp earlier"'), []);
+  assert.deepStrictEqual(writeTargets('git commit -m "fix > b.cpp regression"'), []);
+  assert.deepStrictEqual(writeTargets("echo 'run cp old.js new.js first'"), []);
+});
+
+test('writeTargets finds a redirection beside quoted prose that mentions a write', () => {
+  assert.deepStrictEqual(writeTargets('echo "use cp a.cpp b.cpp" > notes.txt'), ['notes.txt']);
+});
+
+test('writeTargets recognises a write command after an env-var prefix', () => {
+  assert.deepStrictEqual(writeTargets('LC_ALL=C tee out.cpp'), ['out.cpp']);
+});
+
+test('writeTargets recognises a write command inside a substitution', () => {
+  assert.deepStrictEqual(writeTargets('echo $(tee inner.cpp)'), ['inner.cpp']);
+});
+
+test('writeTargets reads tee outside command position as an argument', () => {
+  assert.deepStrictEqual(writeTargets('man tee a.cpp'), []);
+});
+
+test('writeTargets keeps a tee operand that follows a descriptor duplication', () => {
+  assert.deepStrictEqual(writeTargets('cmd | tee a.log >&2 b.log'), ['a.log', 'b.log']);
+});
+
+test('writeTargets finds the target of a noclobber redirection', () => {
+  assert.deepStrictEqual(writeTargets('cmd >| f.cpp'), ['f.cpp']);
+});
+
+test('writeTargets sees through an env prefix carrying a quoted value', () => {
+  assert.deepStrictEqual(writeTargets('V="x y" tee out.cpp'), ['out.cpp']);
+});
+
+test('writeTargets sees through a transparent prefix command', () => {
+  assert.deepStrictEqual(writeTargets('sudo tee out.cpp'), ['out.cpp']);
+  assert.deepStrictEqual(writeTargets('cat list | xargs tee out.cpp'), ['out.cpp']);
+  assert.deepStrictEqual(writeTargets('nohup tee out.cpp'), ['out.cpp']);
+});
+
 test('gate denies a bash write to a file a skill claims', () => {
   const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
   try {

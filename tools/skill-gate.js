@@ -61,41 +61,168 @@ function denyOnce(statePath, key) {
   return true;
 }
 
-// The shell-side writes a blocked Edit could be rerouted through. Interpreters
+// The shell-side writes a blocked Edit could be rerouted through, read as argv rather
+// than as text: a quoted argument is one opaque token, so prose mentioning `tee` or `>`
+// gates nothing, and a write command counts only in command position. Interpreters
 // (node -e, python -c) stay out of reach — this narrows the bypass, it cannot seal it.
-const WRITE_FORMS = [
-  // `> file` and `>> file`, but not `2>`, `&>`, `>&2` or a here-doc's `<<`
-  /(?<![<>&\d])>{1,2}\s*(?:"([^"]+)"|'([^']+)'|([^\s;|&<>)]+))/g,
-  // an explicit -Path/-FilePath/-LiteralPath wins over position
-  /\b(?:Set-Content|Add-Content|Out-File)\b[^;|&]*?-(?:Path|FilePath|LiteralPath)\s+(?:"([^"]+)"|'([^']+)'|([^\s;|&<>]+))/gi,
-  // positional target; a flag's optional value never starts with a dash, and
-  // backtracking hands the last word back when the flag turns out to take none.
-  // Stops at a path-naming flag — the explicit form above owns that case
-  /\b(?:Set-Content|Add-Content|Out-File)\s+(?:-(?!(?:Path|FilePath|LiteralPath)\b)\w+(?:\s+(?:"[^"]*"|'[^']*'|[^-\s;|&<>][^\s;|&<>]*))?\s+)*(?:"([^"]+)"|'([^']+)'|([^\s;|&<>]+))/gi,
-  /\b(?:cp|mv)\s+(?:-\S+\s+)*\S+\s+(?:"([^"]+)"|'([^']+)'|([^\s;|&<>]+))\s*(?:$|[;|&])/g,
-];
-// tee writes every operand, so its whole argument run is captured and tokenized.
-const TEE_RUN = /\btee\s+(?:-\w+\s+)*((?:"[^"]+"|'[^']+'|[^\s;|&<>]+)(?:[ \t]+(?:"[^"]+"|'[^']+'|[^\s;|&<>]+))*)/g;
-const TOKEN = /"([^"]+)"|'([^']+)'|(\S+)/g;
+const WORD_BREAK = new Set([' ', '\t', '\n', '\r', '"', "'", '|', ';', '&', '<', '>', '(', ')', '`']);
+const SEPARATORS = new Set(['|', ';', '&', '(', ')', '`', '\n']);
 const SINKS = new Set(['/dev/null', 'nul']);
+const PS_CMDLETS = new Set(['set-content', 'add-content', 'out-file']);
+const PS_PATH_FLAGS = new Set(['-path', '-filepath', '-literalpath']);
 
-function keepTarget(targets, target) {
-  if (target && !SINKS.has(target.toLowerCase()) && !target.startsWith('-')) {
+// Tokens: {word, quoted} for arguments, {op} for the shell punctuation the scan keys on.
+// 'sep' restarts command position; 'redir' is a stdout redirection whose next token is
+// the written file; 'skip' is punctuation that only ends the position — with
+// `consumesWord` when the following token belongs to it (a here-doc marker, a
+// descriptor redirection's target) rather than to the surrounding command.
+// Adjacent pieces with no space between them are one shell word (`V="x y"`), so they
+// merge into one token, quoted only when every piece was.
+function lex(command) {
+  const tokens = [];
+  let i = 0;
+  let wordEnd = -1;
+  const pushWord = (start, word, quoted) => {
+    const last = tokens[tokens.length - 1];
+    if (start === wordEnd && last?.word !== undefined) {
+      last.word += word;
+      last.quoted = last.quoted && quoted;
+    } else {
+      tokens.push({ word, quoted });
+    }
+  };
+  while (i < command.length) {
+    const c = command[i];
+    if (c === ' ' || c === '\t' || c === '\r') { i += 1; continue; }
+    if (SEPARATORS.has(c)) {
+      tokens.push({ op: 'sep' });
+      while (SEPARATORS.has(command[i])) i += 1;
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      let j = i + 1;
+      while (j < command.length && command[j] !== c) {
+        j += c === '"' && command[j] === '\\' ? 2 : 1;
+      }
+      pushWord(i, command.slice(i + 1, j), true);
+      i = j + 1;
+      wordEnd = i;
+      continue;
+    }
+    if (c === '<') {
+      while (command[i] === '<') i += 1;
+      tokens.push({ op: 'skip', consumesWord: true });
+      continue;
+    }
+    if (c === '>') {
+      let j = i;
+      while (command[j] === '>') j += 1;
+      // `>&2` duplicates a descriptor; nothing is written to a file
+      if (command[j] === '&') {
+        while (command[j] === '&' || /\d/.test(command[j] ?? '')) j += 1;
+        tokens.push({ op: 'skip', consumesWord: false });
+      } else {
+        // `>|` overrides noclobber and writes like a plain `>`
+        if (command[j] === '|') j += 1;
+        tokens.push({ op: 'redir' });
+      }
+      i = j;
+      continue;
+    }
+    let j = i;
+    while (j < command.length && !WORD_BREAK.has(command[j])) j += 1;
+    const word = command.slice(i, j);
+    // a bare descriptor number glued to `>` (`2> file`) redirects that descriptor —
+    // treated as a non-write so stderr logs don't reach the gate, matching `2>&1`
+    if (command[j] === '>' && /^\d+$/.test(word)) {
+      while (command[j] === '>') j += 1;
+      if (command[j] === '&') {
+        while (command[j] === '&' || /\d/.test(command[j] ?? '')) j += 1;
+        tokens.push({ op: 'skip', consumesWord: false });
+      } else {
+        tokens.push({ op: 'skip', consumesWord: true });
+      }
+      i = j;
+      continue;
+    }
+    pushWord(i, word, false);
+    i = j;
+    wordEnd = i;
+  }
+  return tokens;
+}
+
+function keepTarget(targets, token) {
+  const target = token?.word;
+  if (target && !SINKS.has(target.toLowerCase()) && !(token.quoted === false && target.startsWith('-'))) {
     targets.push(target);
   }
 }
 
-function writeTargets(command) {
-  const targets = [];
-  for (const form of WRITE_FORMS) {
-    for (const m of command.matchAll(form)) {
-      keepTarget(targets, m[1] ?? m[2] ?? m[3]);
-    }
+// Operand tokens of one command, from the token after the command word to the next
+// separator; redirections and their targets belong to the redirect handling, not here.
+function operandsAfter(tokens, start) {
+  const operands = [];
+  for (let k = start; k < tokens.length && tokens[k].op !== 'sep'; k += 1) {
+    if (tokens[k].op === 'redir' || tokens[k].consumesWord) { k += 1; continue; }
+    if (tokens[k].op === 'skip') continue;
+    operands.push(tokens[k]);
   }
-  for (const run of command.matchAll(TEE_RUN)) {
-    for (const t of run[1].matchAll(TOKEN)) {
-      keepTarget(targets, t[1] ?? t[2] ?? t[3]);
+  return operands;
+}
+
+function powershellTarget(operands) {
+  const flagIndex = operands.findIndex(
+    t => !t.quoted && PS_PATH_FLAGS.has(t.word?.toLowerCase()));
+  if (flagIndex !== -1) return operands[flagIndex + 1];
+  let lastFlagValue;
+  for (let k = 0; k < operands.length; k += 1) {
+    const t = operands[k];
+    if (!t.quoted && t.word.startsWith('-')) {
+      const next = operands[k + 1];
+      // a flag's value never starts with a dash; remember it in case the flag
+      // actually took none and the value is the positional target after all
+      if (next && !(next.quoted === false && next.word.startsWith('-'))) { lastFlagValue = next; k += 1; }
+      continue;
     }
+    return t;
+  }
+  return lastFlagValue;
+}
+
+// Prefixes that run their operands as a command, so the write command behind them
+// still sits in command position.
+const TRANSPARENT = new Set(['sudo', 'doas', 'xargs', 'nohup', 'command', 'time']);
+
+function writeTargets(command) {
+  const tokens = lex(String(command));
+  const targets = [];
+  let commandPosition = true;
+  for (let k = 0; k < tokens.length; k += 1) {
+    const token = tokens[k];
+    if (token.op === 'sep') { commandPosition = true; continue; }
+    if (token.op === 'redir') {
+      if (tokens[k + 1]?.word !== undefined) { keepTarget(targets, tokens[k + 1]); k += 1; }
+      commandPosition = false;
+      continue;
+    }
+    if (token.op === 'skip') { commandPosition = false; continue; }
+    if (commandPosition && !token.quoted) {
+      // `VAR=x cmd` keeps cmd in command position
+      if (/^\w+=/.test(token.word)) continue;
+      const word = token.word.toLowerCase();
+      if (TRANSPARENT.has(word)) continue;
+      if (word === 'tee') {
+        operandsAfter(tokens, k + 1).forEach(t => keepTarget(targets, t));
+      } else if (word === 'cp' || word === 'mv') {
+        const operands = operandsAfter(tokens, k + 1)
+          .filter(t => t.quoted || !t.word.startsWith('-'));
+        if (operands.length >= 2) keepTarget(targets, operands[operands.length - 1]);
+      } else if (PS_CMDLETS.has(word)) {
+        keepTarget(targets, powershellTarget(operandsAfter(tokens, k + 1)));
+      }
+    }
+    commandPosition = false;
   }
   return [...new Set(targets)];
 }
