@@ -57,6 +57,10 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "node -e \"const p=require('path'),o=require('os'),d=process.env.CLAUDE_CONFIG_DIR||p.join(o.homedir(),'.claude');require(p.join(d,'tools','statusline.js')).main()\""
+  },
   "permissions": {
     "allow": [
       "Read",

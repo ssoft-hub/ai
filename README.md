@@ -14,7 +14,7 @@ pipeline of persona agents and commands built on top of them.
 | `skills/` | Skill definitions (SKILL.md files loaded by `/skill-name`) |
 | `agents/` | Persona subagent definitions (one markdown file per agent) |
 | `commands/` | Slash command definitions (one markdown file per command) |
-| `config/settings.json` | Portable global configuration (hooks + permissions) |
+| `config/settings.json` | Portable global configuration (hooks, permissions, statusline) |
 
 ## Hooks
 
@@ -40,6 +40,37 @@ pipeline of persona agents and commands built on top of them.
 
 **`UserPromptSubmit`** — runs on every user message:
 - `skills-reminder.js` — injects a reminder of the available skills, generated live from `skills/*/SKILL.md` frontmatter; a skill declaring `reminder: false` is left to `skill-gate.js` alone
+
+## Statusline
+
+`statusline.js` renders the line under the prompt from the payload Claude Code writes to
+its stdin — no API call, no transcript parsing:
+
+```
+[Opus 5 (1M context)] [effort high] [Context 34%] [5h 42% 2026-08-07T14:12] [7d 61% 2026-08-10T16:00] [main]
+```
+
+The model, effort and branch badges are dim; `Context` and the two rate-limit windows are
+green below 60%, yellow to 84%, red from 85%. Each limit carries the moment it resets, in
+local time. A badge is left out when the payload does not carry it — the rate-limit
+windows only appear once the API has returned its usage headers, and the branch only
+inside a repository (read from `.git/HEAD`, without spawning `git`, with control bytes
+stripped and the length capped, since that file is writable by anything that can reach
+the checkout).
+
+Claude Code accepts a single `statusLine` command, so registering this one displaces
+whatever was there — a plugin's own statusline included. That output is not lost: install
+records the displaced command, and the line puts its text back in front of the badges.
+Whose command it is, what it draws, and which files it reads are never the tool's business
+— it knows one recorded command string, and `node uninstall.js` hands the slot back
+untouched.
+
+The displaced command never runs on the rendering path. Each render prints the text the
+previous run left in `.statusline-displaced` — around half a millisecond, the payload and
+two small file reads — and, when that cache is older than two seconds, leaves a detached
+process behind to run the command and refresh it. A command taking a third of a second
+therefore costs nothing per keystroke, and its badge trails by one render at most. If it
+fails or times out its text is simply absent; nothing else about the line changes.
 
 ## Skills
 
