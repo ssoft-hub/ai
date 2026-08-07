@@ -67,6 +67,43 @@ test('strip-before-merge replaces a drifted command without duplicating', () => 
   assert.deepStrictEqual(cmds, ['CMD_V2'], 'old command dropped, new one present, no duplicate');
 });
 
+const statusLine = cmd => ({ type: 'command', command: cmd });
+
+test('mergeSettings installs the repo statusLine and records the replaced one', () => {
+  const existing = { statusLine: statusLine('PLUGIN') };
+  const { out, additions } = mergeSettings(existing, { statusLine: statusLine('REPO') });
+  assert.deepStrictEqual(out.statusLine, statusLine('REPO'));
+  assert.deepStrictEqual(additions.replaced.statusLine, { had: true, prior: statusLine('PLUGIN') });
+});
+
+test('mergeSettings records that no statusLine was replaced', () => {
+  const { additions } = mergeSettings({}, { statusLine: statusLine('REPO') });
+  assert.deepStrictEqual(additions.replaced.statusLine, { had: false });
+});
+
+test('additionsFromRepo records the statusLine of a settings file created from scratch', () => {
+  const a = additionsFromRepo({ statusLine: statusLine('REPO') });
+  assert.deepStrictEqual(a.replaced.statusLine, { had: false });
+});
+
+test('subtractAdditions gives a replaced statusLine back', () => {
+  const settings = { statusLine: statusLine('REPO') };
+  subtractAdditions(settings, { replaced: { statusLine: { had: true, prior: statusLine('PLUGIN') } } });
+  assert.deepStrictEqual(settings.statusLine, statusLine('PLUGIN'));
+});
+
+test('subtractAdditions drops a statusLine that install itself introduced', () => {
+  const settings = { statusLine: statusLine('REPO') };
+  subtractAdditions(settings, { replaced: { statusLine: { had: false } } });
+  assert.ok(!('statusLine' in settings));
+});
+
+test('install then uninstall round-trips a statusLine the user already had', () => {
+  const before = { statusLine: statusLine('PLUGIN') };
+  const { out, additions } = mergeSettings(before, { statusLine: statusLine('REPO') });
+  assert.deepStrictEqual(subtractAdditions(out, additions), before);
+});
+
 test('isEffectivelyEmpty is true for {} and a $schema-only object', () => {
   assert.strictEqual(isEffectivelyEmpty({}), true);
   assert.strictEqual(isEffectivelyEmpty({ $schema: 'x' }), true);

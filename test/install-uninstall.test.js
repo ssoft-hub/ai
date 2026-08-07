@@ -122,6 +122,34 @@ test('install+uninstall reverts a preexisting settings.json to its prior content
   } finally { rmTmp(dir); }
 });
 
+test('install registers the statusline command and ships its tool', () => {
+  const dir = mkTmp();
+  try {
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.ok(fs.existsSync(path.join(dir, 'tools', 'statusline.js')));
+    const s = JSON.parse(fs.readFileSync(path.join(dir, 'settings.json'), 'utf8'));
+    assert.match(s.statusLine.command, /statusline\.js/);
+  } finally { rmTmp(dir); }
+});
+
+test('install+uninstall gives back a statusLine another tool had registered', () => {
+  const dir = mkTmp();
+  try {
+    const settingsPath = path.join(dir, 'settings.json');
+    const original = { statusLine: { type: 'command', command: 'other-tool-statusline' } };
+    fs.writeFileSync(settingsPath, JSON.stringify(original, null, 2));
+
+    runInstall(dir);
+    const merged = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    assert.match(merged.statusLine.command, /statusline\.js/, 'repo statusLine takes over');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    assert.deepStrictEqual(JSON.parse(fs.readFileSync(settingsPath, 'utf8')), original);
+  } finally { rmTmp(dir); }
+});
+
 test('uninstall preserves settings added by other tools after install', () => {
   const dir = mkTmp();
   try {

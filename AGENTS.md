@@ -24,6 +24,16 @@ Hooks follow dispatcher → tool separation:
 All paths resolved via `process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude')`.
 No hardcoded user paths anywhere. No npm dependencies.
 
+`tools/statusline.js` is the exception to the dispatcher → tool split: `statusLine` in
+`settings.json` calls its exported `main()` directly, with no dispatcher in between,
+because there is only one such command and no routing to do. That single slot shapes the
+rest: `lib/settings.js` treats `statusLine` as a replaced key so install records the
+command it displaced and uninstall puts it back, and the tool prepends that command's
+output rather than reimplementing what it drew. The command string is the only thing it
+knows about it — never a path, a file, or a plugin name — and running it happens in a
+detached process whose result lands in a cache the next render reads, so a third party's
+cost never reaches the rendering path.
+
 ## Adding a new tool check
 
 1. Create `tools/<name>.js` — reads stdin JSON, writes plain text to stdout (warn) or
