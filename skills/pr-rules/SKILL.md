@@ -123,6 +123,28 @@ Description Template) so plan items can be reconciled against the issue at merge
 time. Check a box only once that item has actually been run and passed; an unchecked
 box means not yet verified, and the Pre-Open Checklist gates on that.
 
+### Length
+
+A description is read before every review pass and again at merge, so its length is a
+cost paid repeatedly. Keep each section to what a reviewer needs in order to act:
+
+- **Problem** — up to five lines.
+- **Summary** — up to five bullets, one line each.
+- **Implementation** — one bullet per decision, up to six, each naming the file or
+  symbol it changed.
+- **Test plan** — one line per item, naming the command that was run or the test that
+  covers it.
+
+A change too large for those budgets is a PR to split (see PR Size below), not a
+description to extend.
+
+The description states the final state of the change and nothing else.
+`writing-style` → State the Result, Not the Process states what that excludes: the
+order the work happened in, abandoned attempts, corrections and the mistakes behind
+them, and the deliberation that produced the approach rather than the constraint that
+decided it. The same rule governs review comments and replies (see Review Comments →
+Register).
+
 ---
 
 ## Review Comments

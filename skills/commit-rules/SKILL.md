@@ -67,11 +67,13 @@ Blank line between subject and body. Lines ≤ 72 characters.
 
 Body is **always required** — no exceptions.
 
-Write in plain language — no rigid sections, no headers. Explain:
+Write in plain language — no rigid sections, no headers. Explain **why** the
+change is made this way: motivation, constraints, non-obvious tradeoffs.
 
-- **why** the change was made
-- **what problem** it solves
-- **how** it was approached (when the approach is non-obvious)
+**One short paragraph, 2-6 lines.** A longer body goes unread. The diff already
+shows *what* changed, so do not restate it. Evidence, measurements, alternatives
+considered, migration notes, and test plans belong in the PR description
+(`pr-rules` skill), not in the commit.
 
 ```
 feat(hash): add SipHash-2-4 keyed 64-bit hash
@@ -80,6 +82,18 @@ SipHash provides hash-flooding resistance missing in fnv1a/djb2.
 Implements the reference SipHash-2-4 algorithm with a 128-bit key.
 Key is passed as two uint64_t values to avoid struct padding issues.
 ```
+
+Exception — a body may exceed one paragraph only for content that has to travel
+with the commit itself: a `BREAKING CHANGE:` paragraph, or trailers referencing
+issues. Both go after the explanatory paragraph, not instead of it.
+
+### Do Not
+
+- Bullet-list every file or function the diff touches.
+- Add headers (`## Motivation`, `## Changes`, `## Testing`) — this is not a PR.
+- Paste benchmark tables, compiler output, or CI logs.
+- Enumerate approaches you rejected; name at most the one constraint that ruled
+  the chosen approach in.
 
 ---
 
