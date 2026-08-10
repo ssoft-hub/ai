@@ -59,6 +59,24 @@ on any platform. A thread comment is the most common place the rule is broken, b
 the work is fresh and the process feels like news; state what is true of the artifact
 now, and say what changed only when the reader has to act on the change.
 
+## No Figures That Go Stale
+
+Leave out numbers that measure a run rather than describe the subject: test totals and
+pass counts, coverage percentages, timings, counts of changed files, lines or commits,
+and the hash of a commit on a branch still being rebased. A rebase, a merge, or one
+further commit invalidates them, and nothing in the text says so afterwards. They carry
+nothing a reader acts on either — the CI run and the diff hold those numbers and keep
+them current.
+
+Name the durable thing instead: the command that produces the number (`npm test`), the
+test that covers the behaviour (`key_shorter_than_16_bytes_is_rejected`), or the file
+and symbol that changed. A figure belonging to the subject itself stays — a measured
+regression the change exists to fix, a documented limit, a version — because rewriting
+history does not make it untrue. A measurement that needs the code it was taken on
+names a released version or a tag, or the merge commit on the protected branch, never a
+hash from the branch under review: rebase replaces those commits and the hash then
+points at nothing.
+
 ## No Slang, No Unnecessary Borrowing
 
 Prefer the term already established in the target language's own professional/technical
