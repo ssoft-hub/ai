@@ -45,22 +45,31 @@ if (require.main === module) {
     try { data = JSON.parse(raw); } catch { process.exit(0); }
 
     const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path ?? '';
-    const content = extractContent(data.tool_input);
+    const command = typeof data.tool_input?.command === 'string' ? data.tool_input.command : '';
 
-    const r = check(content, filePath);
-    if (r.action === 'block') {
+    // The written path decides how the written content is read and says nothing about a
+    // command the same call carries, so the two are checked apart.
+    const checked = [
+      { source: 'file content', r: check(extractContent(data.tool_input), filePath) },
+      { source: 'command', r: command ? check(command, '') : { action: 'pass', warnings: [] } },
+    ];
+
+    const blocked = checked.find(({ r }) => r.action === 'block');
+    if (blocked) {
       process.stderr.write(
-        `Blocked: possible secret in file content — ${r.name}\n` +
-        `File: ${filePath || '(unknown)'}\n` +
+        `Blocked: possible secret in ${blocked.source} — ${blocked.r.name}\n` +
+        `${filePath ? `File: ${filePath}\n` : ''}` +
         `Use env vars or a secrets manager instead of hardcoded values.\n`
       );
       process.exit(2);
     }
-    if (r.action === 'warn') {
+
+    const warned = checked.filter(({ r }) => r.action === 'warn');
+    if (warned.length) {
       process.stdout.write(
-        'secret-guard warning — possible credentials in file content:\n' +
-        r.warnings.map(w => `  • ${w.name}`).join('\n') +
-        `\nFile: ${filePath || '(unknown)'}\n` +
+        `secret-guard warning — possible credentials in ${warned.map(w => w.source).join(' and ')}:\n` +
+        warned.flatMap(({ r }) => r.warnings.map(w => `  • ${w.name}`)).join('\n') +
+        `\n${filePath ? `File: ${filePath}\n` : ''}` +
         `Verify these are not real secrets before committing.\n`
       );
     }

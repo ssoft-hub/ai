@@ -6,7 +6,8 @@ const path = require('path');
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 const toolsDir = path.join(configDir, 'tools');
 
-const COMMAND_GUARDS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js', 'skill-gate.js'];
+const COMMAND_GUARDS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js',
+  'secret-guard.js', 'skill-gate.js'];
 const WRITE_GUARDS = ['secret-guard.js', 'skill-gate.js'];
 
 const BY_NAME = {

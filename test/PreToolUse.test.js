@@ -81,6 +81,12 @@ test('emits one permission decision when two guards fire on one command', () => 
   assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
 });
 
+test('blocks a command carrying a secret', () => {
+  const r = run(`curl -H "Authorization: token ghp_${'a'.repeat(36)}" https://api.github.com`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /GitHub PAT/);
+});
+
 test('keeps every reason when two guards decide on one command', () => {
   const r = run('git push && gh pr comment 49 -b x');
   const reason = JSON.parse(r.stdout).hookSpecificOutput.permissionDecisionReason;
