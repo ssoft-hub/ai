@@ -39,9 +39,9 @@ function makeRepo() {
   return repo;
 }
 
-function runDispatcher(cfgDir, filePath, extraToolInput = {}) {
+function runDispatcher(cfgDir, filePath, extraToolInput = {}, toolName = 'Edit') {
   const r = spawnSync('node', [DISPATCHER], {
-    input: JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: filePath, ...extraToolInput } }),
+    input: JSON.stringify({ tool_name: toolName, tool_input: { file_path: filePath, ...extraToolInput } }),
     encoding: 'utf8',
     env: { ...process.env, CLAUDE_CONFIG_DIR: cfgDir },
   });
@@ -106,6 +106,58 @@ test('config above the repo boundary (parent repo) is not used', () => {
     assert.strictEqual(out.trim(), '');
   } finally {
     cleanup(cfgDir, parent);
+  }
+});
+
+test('a write by a tool the dispatcher does not name still gets linted', () => {
+  const cfgDir = makeStubConfigDir();
+  const repo = makeRepo();
+  fs.writeFileSync(path.join(repo, '.cppcheck'), '');
+  try {
+    const out = runDispatcher(cfgDir, path.join(repo, 'x.cpp'), { content: 'int x = 5;' }, 'PatchFile');
+    assert.match(out, /INVOKED cppcheck\.js/);
+  } finally {
+    cleanup(cfgDir, repo);
+  }
+});
+
+test('a path named for reading reaches no tool', () => {
+  const cfgDir = makeStubConfigDir();
+  const repo = makeRepo();
+  fs.writeFileSync(path.join(repo, '.cppcheck'), '');
+  try {
+    const out = runDispatcher(cfgDir, path.join(repo, 'x.cpp'), {}, 'Read');
+    assert.strictEqual(out.trim(), '');
+  } finally {
+    cleanup(cfgDir, repo);
+  }
+});
+
+test('a named edit tool keeps its lint run when the payload carries no content', () => {
+  const cfgDir = makeStubConfigDir();
+  const repo = makeRepo();
+  fs.writeFileSync(path.join(repo, '.cppcheck'), '');
+  try {
+    const out = runDispatcher(cfgDir, path.join(repo, 'x.cpp'));
+    assert.match(out, /INVOKED cppcheck\.js/);
+  } finally {
+    cleanup(cfgDir, repo);
+  }
+});
+
+test('a payload naming its target as path still gets the comment reminder', () => {
+  const cfgDir = makeStubConfigDir();
+  const repo = makeRepo();
+  try {
+    const out = runDispatcher(cfgDir, path.join(repo, 'x.cpp'), {
+      file_path: undefined,
+      path: path.join(repo, 'x.cpp'),
+      old_string: 'int x = 5;',
+      new_string: 'int x = 5; // why 5',
+    }, 'PatchFile');
+    assert.match(out, /why 5/);
+  } finally {
+    cleanup(cfgDir, repo);
   }
 });
 

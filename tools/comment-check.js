@@ -90,7 +90,7 @@ if (require.main === module) {
     let data;
     try { data = JSON.parse(raw); } catch { process.exit(0); }
 
-    const filePath = data.tool_input?.file_path ?? '';
+    const filePath = data.tool_input?.file_path ?? data.tool_input?.path ?? data.tool_input?.notebook_path ?? '';
     const { added } = check(data.tool_input, filePath);
     if (added.length) {
       process.stdout.write(

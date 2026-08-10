@@ -3,6 +3,7 @@ const { test } = require('node:test');
 const assert = require('node:assert');
 const { commandIn, writePathIn } = require('../tools/payload');
 const { routeFor, BY_NAME, COMMAND_GUARDS, WRITE_GUARDS } = require('../hooks/PreToolUse');
+const { writeTargetOf } = require('../hooks/PostToolUse');
 
 const PAYLOADS = [
   ['Bash', { command: 'git push' }],
@@ -15,6 +16,8 @@ const PAYLOADS = [
   ['Edit', { file_path: 'a.cpp' }],
   ['Read', { file_path: 'a.cpp' }],
   ['RunAndPatch', { command: 'echo x', file_path: 'a.cpp', content: 'x' }],
+  ['PatchFile', { path: 'a.cpp', notebook_path: 'a.ipynb', content: 'x' }],
+  ['PatchFile', { notebook_path: 'a.ipynb', path: 'a.cpp', new_source: 'x' }],
   ['Unknown', {}],
   ['Unknown', undefined],
 ];
@@ -57,6 +60,13 @@ test('the dispatcher routes every payload shape the way the payload rule reads i
       ...(writePathIn(input, toolName) ? WRITE_GUARDS : []),
     ].filter((guard, i, all) => all.indexOf(guard) === i);
     assert.deepStrictEqual(routeFor(input, toolName), expected,
+      `disagreed on ${toolName} ${JSON.stringify(input)}`);
+  }
+});
+
+test('both dispatchers read a write payload the same way', () => {
+  for (const [toolName, input] of PAYLOADS) {
+    assert.strictEqual(writeTargetOf(input, toolName), writePathIn(input, toolName),
       `disagreed on ${toolName} ${JSON.stringify(input)}`);
   }
 });
