@@ -25,7 +25,7 @@ pipeline of persona agents and commands built on top of them.
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) containing private keys, AWS keys, GitHub PATs; warns on probable credentials
 - `skill-gate.js` — on the same write payloads, and on any command that writes a file (redirection, `tee`, `Set-Content`/`Add-Content`/`Out-File`, `cp`/`mv` destination), names the skills that claim the written file (their `paths:` frontmatter) plus the ones they list in `with:`, minus whatever is already loaded this session; the first offending call is denied until the skills are loaded, a repeat of the same file and missing set only warns
 
-**`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit`; the three lint tools only on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
+**`PostToolUse`** — runs after a write, read off the payload the same way: a path arriving with the content written to it, or one of `Edit` / `Write` / `MultiEdit` / `NotebookEdit` naming a path with no content field. A path named for reading reaches nothing. The three lint tools run only on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
 - `comment-check.js` — runs on every file whose comment syntax it knows (`//`, `/* */`, `#`, `--`, `;`, `%`, `<!-- -->`), no config file needed; reminds to check any newly added non-doc comment against the `comments` skill
 - `clang-format.js` — formats in-place; requires `.clang-format` in this repository (searched from the edited file up to the git root, never into a parent repo) — skips silently if missing, or if `clang-format` isn't in PATH
 - `clang-tidy.js` — runs static analysis; requires `.clang-tidy` (uses `compile_commands.json` when found)

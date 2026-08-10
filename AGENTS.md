@@ -31,10 +31,16 @@ command and a write target reaches both sets. The name map that remains holds th
 whose payload alone would not say what they do: `Agent`, and the four edit tools, whose
 call may name a path with no content beside it.
 
-`tools/payload.js` states that rule for the tools, and `hooks/PreToolUse.js` states it again
-for itself: a dispatcher requiring a file from `tools/` would throw on every tool call once
-that file went missing, taking the session with it. `test/payload.test.js` runs both copies
-over every payload shape and fails when they disagree, so the duplication cannot drift.
+`hooks/PostToolUse.js` reads the same rule for the write it runs after: a path arriving with
+its content, or one of the four edit tools naming a path with no content field. The name
+check it keeps is not a shortcut — `Read` carries `file_path` too, and formatting a file that
+was only read would rewrite it.
+
+`tools/payload.js` states that rule for the tools, and both dispatchers state it again for
+themselves: a dispatcher requiring a file from `tools/` would throw on every tool call once
+that file went missing, taking the session with it. `test/payload.test.js` runs all three
+copies over every payload shape and fails when they disagree, so the duplication cannot
+drift.
 
 All paths resolved via `process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude')`.
 No hardcoded user paths anywhere. No npm dependencies.

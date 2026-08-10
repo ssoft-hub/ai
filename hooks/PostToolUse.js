@@ -9,6 +9,15 @@ const EDIT_TOOLS = new Set(['Edit', 'Write', 'MultiEdit', 'NotebookEdit']);
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 const toolsDir = path.join(configDir, 'tools');
 
+// A path alone means nothing: `Read` carries one, and formatting a file that was only read
+// would rewrite it. `tools/payload.js` states the same rule, kept in step by a test.
+function writeTargetOf(input, toolName) {
+  const target = input?.file_path ?? input?.path ?? input?.notebook_path ?? '';
+  if (!target) return '';
+  const content = input?.content ?? input?.new_string ?? input?.new_source ?? input?.edits;
+  return EDIT_TOOLS.has(toolName) || content !== undefined ? target : '';
+}
+
 // Each lint tool runs only when its config file is present in this repository.
 // Without the config the tool is unconfigured here and is skipped silently, so
 // it never produces noise (and never picks up a config from a parent repo).
@@ -49,6 +58,7 @@ function findConfig(fromDir, configName, boundary) {
   }
 }
 
+if (require.main === module) {
 let raw = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', c => { raw += c; });
@@ -56,9 +66,7 @@ process.stdin.on('end', () => {
   let data;
   try { data = JSON.parse(raw); } catch { process.exit(0); }
 
-  if (!EDIT_TOOLS.has(data.tool_name)) process.exit(0);
-
-  const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path;
+  const filePath = writeTargetOf(data.tool_input, data.tool_name);
   if (!filePath) process.exit(0);
 
   // Everything a tool writes is collected instead of printed: after the fact, the model
@@ -95,3 +103,6 @@ process.stdin.on('end', () => {
 
   process.exit(0);
 });
+}
+
+module.exports = { writeTargetOf };
