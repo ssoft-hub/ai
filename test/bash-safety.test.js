@@ -27,9 +27,21 @@ test('blocks rm -rf $HOME/', () => {
   assert.strictEqual(check('rm -rf $HOME/').action, 'block');
 });
 
+test('blocks rm -rf /*', () => {
+  assert.strictEqual(check('rm -rf /*').action, 'block');
+});
 
+test('blocks rm -rf ~/*', () => {
+  assert.strictEqual(check('rm -rf ~/*').action, 'block');
+});
 
+test('blocks rm -rf $HOME/*', () => {
+  assert.strictEqual(check('rm -rf $HOME/*').action, 'block');
+});
 
+test('warns without blocking on rm -rf /home/user/build', () => {
+  assert.strictEqual(check('rm -rf /home/user/build').action, 'warn');
+});
 
 test('blocks rmdir /s /q C:\\', () => {
   assert.strictEqual(check('rmdir /s /q C:\\').action, 'block');
@@ -187,7 +199,13 @@ test('blocks rm -rf / behind a transparent prefix', () => {
   assert.strictEqual(check('xargs rm -rf /').action, 'block');
 });
 
+test('does not block rm -rf / named inside a quoted argument', () => {
+  assert.strictEqual(check('gh issue comment 84 -b "never run rm -rf / on a host"').action, 'pass');
+});
 
+test('does not warn on rm -r named inside a quoted argument', () => {
+  assert.strictEqual(check('git commit -m "document rm -r behaviour"').action, 'pass');
+});
 
 test('asks before git push behind bash -c', () => {
   assert.strictEqual(check('bash -c "git push origin main"').action, 'ask');

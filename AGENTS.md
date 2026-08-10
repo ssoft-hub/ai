@@ -23,8 +23,8 @@ Hooks follow dispatcher → tool separation:
 
 `hooks/PreToolUse.js` routes on the payload rather than the tool name: a `command` string
 reaches the command guards (`bash-safety`, `commit-trailer-guard`, `review-publish-guard`,
-`skill-gate`), and a write target arriving with its content reaches the write guards
-(`secret-guard`, `skill-gate`). Tool names are an open set — a second shell, an MCP server,
+`secret-guard`, `skill-gate`), and a write target arriving with its content reaches the
+write guards (`secret-guard`, `skill-gate`). Tool names are an open set — a second shell, an MCP server,
 a plugin's edit tool — and a name-keyed guard is bypassed silently by anything not on the
 list, since the dispatcher then finds no entry and exits 0. A payload carrying both a
 command and a write target reaches both sets. The name map that remains holds the tools
@@ -41,6 +41,25 @@ themselves: a dispatcher requiring a file from `tools/` would throw on every too
 that file went missing, taking the session with it. `test/payload.test.js` runs all three
 copies over every payload shape and fails when they disagree, so the duplication cannot
 drift.
+
+A guard keyed on a command reads it as argv, never as text. `tools/shell-lex.js` lexes a
+command string into the argv of every command it runs: a transparent prefix (`sudo`,
+`env`, `xargs`, `VAR=x`) is dropped so the command word is the one that decides what runs,
+a quoted argument stays one opaque token so prose naming a command gates nothing, and an
+interpreter's own argument is read as a command string in its own right — `bash -c`,
+`cmd /c`, `powershell -Command` and its base64 `-EncodedCommand`, and the string a
+`node -e` or `python -c` script hands to its exec function, three quoting levels deep.
+`tools/git-command.js` reads that argv as a git call: the global options git accepts
+before the subcommand (`-C <dir>`, `-c <name>=<value>`, `--git-dir=<path>`, …) are skipped
+and an alias is resolved to the subcommand it stands for, whether it was defined with
+`-c alias.x=…` or in a git config file, so a rule states the subcommand alone. A rule
+written as a regex over the raw command string inherits every defect at once: it misses
+each form that spells the same call differently, and it fires on the call named inside a
+commit message.
+
+Only rules whose subject is not a command stay on the raw text — the SQL warnings in
+`bash-safety`, since `psql -c "DROP TABLE users"` carries its subject inside the quotes
+that argv makes opaque.
 
 All paths resolved via `process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude')`.
 No hardcoded user paths anywhere. No npm dependencies.
