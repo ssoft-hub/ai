@@ -1,12 +1,17 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
 const {
   mergeSettings,
   additionsFromRepo,
   subtractAdditions,
   isEffectivelyEmpty,
 } = require('../lib/settings');
+
+const shippedSettings = () => JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', 'config', 'settings.json'), 'utf8'));
 
 const hookEntry = cmd => ({ hooks: [{ type: 'command', command: cmd }] });
 const repo = cmds => ({ hooks: { PreToolUse: [hookEntry(cmds)] } });
@@ -111,4 +116,15 @@ test('isEffectivelyEmpty is true for {} and a $schema-only object', () => {
 
 test('isEffectivelyEmpty is false when any real key remains', () => {
   assert.strictEqual(isEffectivelyEmpty({ $schema: 'x', permissions: {} }), false);
+});
+
+test('every shell rule in the shipped ask list covers both shell tools', () => {
+  const ask = shippedSettings().permissions.ask;
+  for (const rule of ask) {
+    const match = /^(Bash|PowerShell)\((.*)\)$/.exec(rule);
+    if (!match) continue;
+    const [, tool, pattern] = match;
+    const other = tool === 'Bash' ? 'PowerShell' : 'Bash';
+    assert.ok(ask.includes(`${other}(${pattern})`), `${rule} has no ${other} counterpart`);
+  }
 });

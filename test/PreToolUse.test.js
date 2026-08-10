@@ -9,9 +9,9 @@ const path = require('node:path');
 const repoDir = path.join(__dirname, '..');
 const HOOK = path.join(repoDir, 'hooks', 'PreToolUse.js');
 
-function run(command, configDir = repoDir) {
+function run(command, configDir = repoDir, toolName = 'Bash') {
   return spawnSync('node', [HOOK], {
-    input: JSON.stringify({ tool_name: 'Bash', tool_input: { command } }),
+    input: JSON.stringify({ tool_name: toolName, tool_input: { command } }),
     env: { ...process.env, CLAUDE_CONFIG_DIR: configDir },
     encoding: 'utf8',
   });
@@ -22,7 +22,7 @@ function run(command, configDir = repoDir) {
 function mkGateConfig() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
   fs.mkdirSync(path.join(dir, 'tools'));
-  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js']) {
+  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js', 'payload.js']) {
     fs.copyFileSync(path.join(repoDir, 'tools', tool), path.join(dir, 'tools', tool));
   }
   const skillDir = path.join(dir, 'skills', 'comments');
@@ -126,6 +126,78 @@ test('forwards the skill-gate deny of a first edit, then its warning', () => {
     const second = JSON.parse(gateInput(dir, input, 's1').stdout);
     assert.strictEqual(second.hookSpecificOutput.permissionDecision, undefined);
     assert.match(second.hookSpecificOutput.additionalContext, /comments/);
+  } finally { rmConfig(dir); }
+});
+
+test('asks before a git push run through the PowerShell tool', () => {
+  const out = JSON.parse(run('git push', repoDir, 'PowerShell').stdout);
+  assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+  assert.match(out.hookSpecificOutput.permissionDecisionReason, /git push/);
+});
+
+test('asks before a PowerShell command publishing review feedback', () => {
+  const out = JSON.parse(run('gh pr comment 49 -b x', repoDir, 'PowerShell').stdout);
+  assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+  assert.match(out.hookSpecificOutput.permissionDecisionReason, /gh pr comment/);
+});
+
+test('blocks a destructive command run through the PowerShell tool', () => {
+  const r = run('rm -rf /', repoDir, 'PowerShell');
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /Blocked/);
+});
+
+test('asks before a git push run through a shell tool it has never heard of', () => {
+  const out = JSON.parse(run('git push', repoDir, 'Zsh').stdout);
+  assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+  assert.match(out.hookSpecificOutput.permissionDecisionReason, /git push/);
+});
+
+test('asks before a command an MCP shell server would run', () => {
+  const out = JSON.parse(run('git push', repoDir, 'mcp__shell__exec').stdout);
+  assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+});
+
+test('forwards the skill-gate deny of a write by a tool it has never heard of', () => {
+  const dir = mkGateConfig();
+  try {
+    const input = { tool_name: 'PatchFile', tool_input: { file_path: '/tmp/does-not-exist/x.cpp', content: 'x' } };
+    const out = JSON.parse(gateInput(dir, input, 's4').stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /comments/);
+  } finally { rmConfig(dir); }
+});
+
+test('guards both halves of a payload carrying a command and a write target', () => {
+  const dir = mkGateConfig();
+  try {
+    const input = {
+      tool_name: 'RunAndPatch',
+      tool_input: { command: 'echo hi', file_path: '/tmp/does-not-exist/x.cpp', content: 'x' },
+    };
+    const out = JSON.parse(gateInput(dir, input, 's6').stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /x\.cpp/);
+  } finally { rmConfig(dir); }
+});
+
+test('stays silent for a tool that only names a file to read', () => {
+  const dir = mkGateConfig();
+  try {
+    const input = { tool_name: 'Read', tool_input: { file_path: '/tmp/does-not-exist/x.cpp' } };
+    const r = gateInput(dir, input, 's5');
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(r.stdout, '');
+  } finally { rmConfig(dir); }
+});
+
+test('forwards the skill-gate deny of a PowerShell write', () => {
+  const dir = mkGateConfig();
+  try {
+    const input = { tool_name: 'PowerShell', tool_input: { command: 'Set-Content -Path y.cpp -Value x' } };
+    const out = JSON.parse(gateInput(dir, input, 's3').stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /comments/);
   } finally { rmConfig(dir); }
 });
 

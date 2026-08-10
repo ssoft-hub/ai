@@ -18,12 +18,12 @@ pipeline of persona agents and commands built on top of them.
 
 ## Hooks
 
-**`PreToolUse`** — runs before every tool call:
+**`PreToolUse`** — runs before every tool call, routed by payload rather than by tool name: any tool carrying a `command` string reaches the four command guards, and any tool naming a write target together with its content reaches the write guards. A command is checked for what it does, not for which tool was asked to run it, so a second shell or an MCP server cannot slip past by being spelled differently:
 - `bash-safety.js` — blocks destructive shell commands (`rm -rf /`, `format C:`), warns on reversible-but-risky ones (`git reset --hard`, `DROP TABLE`)
 - `commit-trailer-guard.js` — blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `review-publish-guard.js` — prompts for confirmation before a `gh` command that publishes review feedback on the spot (`gh pr review --comment/--approve/--request-changes`, `gh pr comment`, REST `in_reply_to`, an `event` field on `POST /pulls/{n}/reviews`, `submitPullRequestReview`, and a thread reply carrying no `pullRequestReviewId`); the pending-review path stays unprompted
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) containing private keys, AWS keys, GitHub PATs; warns on probable credentials
-- `skill-gate.js` — on the same write tools, and on `Bash` when a command writes a file (redirection, `tee`, `Set-Content`/`Add-Content`/`Out-File`, `cp`/`mv` destination), names the skills that claim the written file (their `paths:` frontmatter) plus the ones they list in `with:`, minus whatever is already loaded this session; the first offending call is denied until the skills are loaded, a repeat of the same file and missing set only warns
+- `skill-gate.js` — on the same write payloads, and on any command that writes a file (redirection, `tee`, `Set-Content`/`Add-Content`/`Out-File`, `cp`/`mv` destination), names the skills that claim the written file (their `paths:` frontmatter) plus the ones they list in `with:`, minus whatever is already loaded this session; the first offending call is denied until the skills are loaded, a repeat of the same file and missing set only warns
 
 **`PostToolUse`** — runs after `Edit` / `Write` / `MultiEdit` / `NotebookEdit`; the three lint tools only on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
 - `comment-check.js` — runs on every file whose comment syntax it knows (`//`, `/* */`, `#`, `--`, `;`, `%`, `<!-- -->`), no config file needed; reminds to check any newly added non-doc comment against the `comments` skill

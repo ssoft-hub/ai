@@ -325,6 +325,88 @@ test('gate denies a bash write to a file a skill claims', () => {
   } finally { rmTmp(dir); }
 });
 
+test('gate takes the targets of a command and of a declared write together', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'RunAndPatch',
+      tool_input: { command: 'echo x > src/a.cpp', file_path: 'src/b.cpp', content: 'x' },
+      session_id: 's1',
+    });
+    const reason = JSON.parse(r.stdout).hookSpecificOutput.permissionDecisionReason;
+    assert.match(reason, /a\.cpp/);
+    assert.match(reason, /b\.cpp/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate denies a write by a shell tool it has never heard of', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'Zsh',
+      tool_input: { command: 'echo x > src/a.cpp' },
+      session_id: 's1',
+    });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate denies a write by an edit tool it has never heard of', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'PatchFile',
+      tool_input: { file_path: 'src/a.cpp', content: 'x' },
+      session_id: 's1',
+    });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate denies a notebook write naming its path and source', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.ipynb"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'NotebookEdit',
+      tool_input: { notebook_path: 'src/a.ipynb', new_source: 'x' },
+      session_id: 's1',
+    });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate stays silent for a tool that only names a file to read', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'Read',
+      tool_input: { file_path: 'src/a.cpp' },
+      session_id: 's1',
+    });
+    assert.strictEqual(r.stdout.trim(), '');
+  } finally { rmTmp(dir); }
+});
+
+test('gate denies a PowerShell write to a file a skill claims', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'PowerShell',
+      tool_input: { command: 'Set-Content -Path src/a.cpp -Value x' },
+      session_id: 's1',
+    });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
 test('gate shares its deny between an edit and a bash write of one file', () => {
   const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
   try {

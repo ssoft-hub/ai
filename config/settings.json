@@ -79,6 +79,7 @@
       "Bash(choco *)",
       "Bash(npm install -g *)",
       "Bash(pip install *)",
+      "PowerShell(git push *)",
       "PowerShell(winget *)",
       "PowerShell(choco *)",
       "PowerShell(npm install -g *)",

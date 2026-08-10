@@ -120,11 +120,33 @@ The event name in the payload must match the event the hook is registered for.
 ## Hook JSON Fields
 
 ```
-tool_name:  'Edit' | 'Write' | 'Bash' | 'Read' | ...
+tool_name:  'Edit' | 'Write' | 'Bash' | 'PowerShell' | 'Read' | ...
 tool_input: { file_path, old_string, new_string }  // Edit
             { file_path, content }                  // Write
-            { command }                             // Bash
+            { command }                             // Bash, PowerShell
 ```
+
+Route on the payload, not on the tool name. Tool names are an open set — a second shell, an
+MCP server, a plugin's own edit tool — and a guard keyed on a name is bypassed by every
+other tool carrying the same payload. The bypass is silent: the dispatcher finds no entry
+and exits 0, so the guard stays installed and never runs. A `command` string means the
+command guards, a write target (`file_path`, `path`, `notebook_path`) arriving with its
+content means the write guards, and a payload carrying both reaches both. Keep a name list
+only for the tools whose payload alone would not say what they do, and read it as the
+exception rather than as the rule.
+
+The cost is the other direction: a tool whose `command` field is not a shell command still
+reaches the command guards. Fail that way round — a guard that runs where it need not is a
+prompt, while a guard that does not run where it must is an unchecked `git push`. A payload
+carrying both a command and a write target reaches both sets of guards, since either half
+alone would leave the other unchecked.
+
+A dispatcher does not `require` a file from `tools/`: a missing or half-installed tool would
+throw before any payload is read and take every tool call in the session with it, where the
+same file missing under `spawnSync` costs one guard and a line on stderr. When a rule has to
+hold on both sides of that boundary, state it on each side and add a test that runs the two
+copies over the same inputs — a duplication a test holds together beats a dependency that
+can bring the session down.
 
 ## PATH Resolution
 
