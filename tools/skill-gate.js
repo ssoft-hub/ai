@@ -4,6 +4,7 @@ const os = require('os');
 const path = require('path');
 const { loadCatalog, matchSkills } = require(path.join(__dirname, 'skill-catalog.js'));
 const { commandIn, writePathIn } = require(path.join(__dirname, 'payload.js'));
+const { lex, TRANSPARENT } = require(path.join(__dirname, 'shell-lex.js'));
 
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 
@@ -67,96 +68,12 @@ function denyOnce(statePath, key) {
   return true;
 }
 
-// The shell-side writes a blocked Edit could be rerouted through, read as argv rather
-// than as text: a quoted argument is one opaque token, so prose mentioning `tee` or `>`
-// gates nothing, and a write command counts only in command position. Interpreters
-// (node -e, python -c) stay out of reach — this narrows the bypass, it cannot seal it.
-const WORD_BREAK = new Set([' ', '\t', '\n', '\r', '"', "'", '|', ';', '&', '<', '>', '(', ')', '`']);
-const SEPARATORS = new Set(['|', ';', '&', '(', ')', '`', '\n']);
+// The shell-side writes a blocked Edit could be rerouted through, read as argv by
+// `shell-lex`: a write command counts only in command position, so prose mentioning
+// `tee` or `>` gates nothing.
 const SINKS = new Set(['/dev/null', 'nul']);
 const PS_CMDLETS = new Set(['set-content', 'add-content', 'out-file']);
 const PS_PATH_FLAGS = new Set(['-path', '-filepath', '-literalpath']);
-
-// Tokens: {word, quoted} for arguments, {op} for the shell punctuation the scan keys on.
-// 'sep' restarts command position; 'redir' is a stdout redirection whose next token is
-// the written file; 'skip' is punctuation that only ends the position — with
-// `consumesWord` when the following token belongs to it (a here-doc marker, a
-// descriptor redirection's target) rather than to the surrounding command.
-// Adjacent pieces with no space between them are one shell word (`V="x y"`), so they
-// merge into one token, quoted only when every piece was.
-function lex(command) {
-  const tokens = [];
-  let i = 0;
-  let wordEnd = -1;
-  const pushWord = (start, word, quoted) => {
-    const last = tokens[tokens.length - 1];
-    if (start === wordEnd && last?.word !== undefined) {
-      last.word += word;
-      last.quoted = last.quoted && quoted;
-    } else {
-      tokens.push({ word, quoted });
-    }
-  };
-  while (i < command.length) {
-    const c = command[i];
-    if (c === ' ' || c === '\t' || c === '\r') { i += 1; continue; }
-    if (SEPARATORS.has(c)) {
-      tokens.push({ op: 'sep' });
-      while (SEPARATORS.has(command[i])) i += 1;
-      continue;
-    }
-    if (c === '"' || c === "'") {
-      let j = i + 1;
-      while (j < command.length && command[j] !== c) {
-        j += c === '"' && command[j] === '\\' ? 2 : 1;
-      }
-      pushWord(i, command.slice(i + 1, j), true);
-      i = j + 1;
-      wordEnd = i;
-      continue;
-    }
-    if (c === '<') {
-      while (command[i] === '<') i += 1;
-      tokens.push({ op: 'skip', consumesWord: true });
-      continue;
-    }
-    if (c === '>') {
-      let j = i;
-      while (command[j] === '>') j += 1;
-      // `>&2` duplicates a descriptor; nothing is written to a file
-      if (command[j] === '&') {
-        while (command[j] === '&' || /\d/.test(command[j] ?? '')) j += 1;
-        tokens.push({ op: 'skip', consumesWord: false });
-      } else {
-        // `>|` overrides noclobber and writes like a plain `>`
-        if (command[j] === '|') j += 1;
-        tokens.push({ op: 'redir' });
-      }
-      i = j;
-      continue;
-    }
-    let j = i;
-    while (j < command.length && !WORD_BREAK.has(command[j])) j += 1;
-    const word = command.slice(i, j);
-    // a bare descriptor number glued to `>` (`2> file`) redirects that descriptor —
-    // treated as a non-write so stderr logs don't reach the gate, matching `2>&1`
-    if (command[j] === '>' && /^\d+$/.test(word)) {
-      while (command[j] === '>') j += 1;
-      if (command[j] === '&') {
-        while (command[j] === '&' || /\d/.test(command[j] ?? '')) j += 1;
-        tokens.push({ op: 'skip', consumesWord: false });
-      } else {
-        tokens.push({ op: 'skip', consumesWord: true });
-      }
-      i = j;
-      continue;
-    }
-    pushWord(i, word, false);
-    i = j;
-    wordEnd = i;
-  }
-  return tokens;
-}
 
 function keepTarget(targets, token) {
   const target = token?.word;
@@ -195,10 +112,6 @@ function powershellTarget(operands) {
   }
   return lastFlagValue;
 }
-
-// Prefixes that run their operands as a command, so the write command behind them
-// still sits in command position.
-const TRANSPARENT = new Set(['sudo', 'doas', 'xargs', 'nohup', 'command', 'time']);
 
 function writeTargets(command) {
   const tokens = lex(String(command));

@@ -22,7 +22,7 @@ function run(command, configDir = repoDir, toolName = 'Bash') {
 function mkGateConfig() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
   fs.mkdirSync(path.join(dir, 'tools'));
-  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js', 'payload.js']) {
+  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js', 'payload.js', 'shell-lex.js']) {
     fs.copyFileSync(path.join(repoDir, 'tools', tool), path.join(dir, 'tools', tool));
   }
   const skillDir = path.join(dir, 'skills', 'comments');
