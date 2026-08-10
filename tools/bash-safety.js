@@ -1,4 +1,6 @@
 'use strict';
+const path = require('path');
+const { gitCalls } = require(path.join(__dirname, 'git-command.js'));
 
 const BLOCK = [
   { re: /(?:sudo\s+)?rm\s+-(?=[a-zA-Z]*r)(?=[a-zA-Z]*f)[a-zA-Z]+\s+["']?(\/|~\/?|\$HOME\/?|%USERPROFILE%\\?)["']?(\s|$)/i, msg: 'rm -rf on root/home — destroys filesystem' },
@@ -6,14 +8,17 @@ const BLOCK = [
   { re: /format\s+[a-zA-Z]:/i, msg: 'disk format command' },
 ];
 
-const ASK = [
-  { re: /(?:^|[\n;&|])\s*git\s+push\b/i, msg: 'git push affects the shared remote — confirm before pushing' },
+const GIT_ASK = [
+  { sub: 'push', msg: 'git push affects the shared remote — confirm before pushing' },
+];
+
+const GIT_WARN = [
+  { sub: 'reset', when: args => args.includes('--hard'), msg: 'git reset --hard — discards uncommitted work' },
+  { sub: 'checkout', when: args => args.includes('--') && args.includes('.'), msg: 'git checkout -- . — discards all working tree changes' },
+  { sub: 'clean', when: args => args.some(a => /^-[a-zA-Z]*f/.test(a)), msg: 'git clean -f — deletes untracked files' },
 ];
 
 const WARN = [
-  { re: /git\s+reset\s+--hard\b/i, msg: 'git reset --hard — discards uncommitted work' },
-  { re: /git\s+checkout\s+--\s*\./i, msg: 'git checkout -- . — discards all working tree changes' },
-  { re: /git\s+clean\s+-[a-zA-Z]*f/i, msg: 'git clean -f — deletes untracked files' },
   { re: /\bDROP\s+TABLE\b/i, msg: 'DROP TABLE — irreversible database operation' },
   { re: /\bDROP\s+DATABASE\b/i, msg: 'DROP DATABASE — irreversible database operation' },
   { re: /\bTRUNCATE\s+TABLE\b/i, msg: 'TRUNCATE TABLE — deletes all rows' },
@@ -24,8 +29,15 @@ const WARN = [
 
 function check(cmd) {
   for (const { re, msg } of BLOCK) if (re.test(cmd)) return { action: 'block', msg };
-  for (const { re, msg } of ASK) if (re.test(cmd)) return { action: 'ask', msg };
-  const warnings = WARN.filter(({ re }) => re.test(cmd));
+
+  const git = gitCalls(cmd);
+  const asked = GIT_ASK.find(r => git.some(c => c.sub === r.sub));
+  if (asked) return { action: 'ask', msg: asked.msg };
+
+  const warnings = [
+    ...GIT_WARN.filter(r => git.some(c => c.sub === r.sub && r.when(c.args))),
+    ...WARN.filter(({ re }) => re.test(cmd)),
+  ];
   return { action: warnings.length ? 'warn' : 'pass', warnings };
 }
 
@@ -66,4 +78,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { BLOCK, ASK, WARN, check };
+module.exports = { BLOCK, GIT_ASK, GIT_WARN, WARN, check };
