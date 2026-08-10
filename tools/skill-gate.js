@@ -3,14 +3,20 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { loadCatalog, matchSkills } = require(path.join(__dirname, 'skill-catalog.js'));
+const { commandIn, writePathIn } = require(path.join(__dirname, 'payload.js'));
 
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 
-const EDIT_TOOLS = new Set(['Edit', 'Write', 'MultiEdit', 'NotebookEdit']);
 const SKILL_CALL = /"name"\s*:\s*"Skill"\s*,\s*"input"\s*:\s*\{\s*"skill"\s*:\s*"([^"]+)"/g;
 
 function skillsIn(text) {
   return [...text.matchAll(SKILL_CALL)].map(m => m[1]);
+}
+
+function gateTargets(input, toolName) {
+  const command = commandIn(input);
+  const declared = writePathIn(input, toolName);
+  return [...(command ? writeTargets(command) : []), ...(declared ? [declared] : [])];
 }
 
 // The transcript only grows, so a run scans the bytes appended since the previous one.
@@ -242,15 +248,7 @@ if (require.main === module) {
     let data;
     try { data = JSON.parse(raw); } catch { process.exit(0); }
 
-    let targets;
-    if (EDIT_TOOLS.has(data.tool_name)) {
-      const filePath = data.tool_input?.file_path ?? data.tool_input?.path ?? '';
-      targets = filePath ? [filePath] : [];
-    } else if (data.tool_name === 'Bash') {
-      targets = writeTargets(data.tool_input?.command ?? '');
-    } else {
-      process.exit(0);
-    }
+    const targets = gateTargets(data.tool_input, data.tool_name);
     if (!targets.length) process.exit(0);
 
     const catalog = loadCatalog(path.join(configDir, 'skills'));
@@ -278,4 +276,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { skillsIn, loadedSkills, notice, denyOnce, writeTargets };
+module.exports = { skillsIn, loadedSkills, notice, denyOnce, writeTargets, gateTargets };

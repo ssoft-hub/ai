@@ -6,14 +6,34 @@ const path = require('path');
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 const toolsDir = path.join(configDir, 'tools');
 
-const DISPATCH = {
+const COMMAND_GUARDS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js', 'skill-gate.js'];
+const WRITE_GUARDS = ['secret-guard.js', 'skill-gate.js'];
+
+const BY_NAME = {
   Agent:        ['bg-agent-counter.js'],
-  Bash:         ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish-guard.js', 'skill-gate.js'],
-  Edit:         ['secret-guard.js', 'skill-gate.js'],
-  Write:        ['secret-guard.js', 'skill-gate.js'],
-  MultiEdit:    ['secret-guard.js', 'skill-gate.js'],
-  NotebookEdit: ['secret-guard.js', 'skill-gate.js'],
+  Edit:         WRITE_GUARDS,
+  Write:        WRITE_GUARDS,
+  MultiEdit:    WRITE_GUARDS,
+  NotebookEdit: WRITE_GUARDS,
 };
+
+// Tool names are an open set, so the payload decides which guards run. `tools/payload.js`
+// states the same rule for the tools, kept in step by a test: a dispatcher requiring a tool
+// file would die on every call once that file went missing.
+function guardsFor(input) {
+  const command = typeof input?.command === 'string' && input.command.trim();
+  const target = input?.file_path ?? input?.path ?? input?.notebook_path;
+  const content = input?.content ?? input?.new_string ?? input?.new_source ?? input?.edits;
+  const guards = command ? [...COMMAND_GUARDS] : [];
+  if (target && content !== undefined) {
+    for (const guard of WRITE_GUARDS) if (!guards.includes(guard)) guards.push(guard);
+  }
+  return guards;
+}
+
+function routeFor(input, toolName) {
+  return BY_NAME[toolName] ?? guardsFor(input);
+}
 
 // Claude Code reads this hook's stdout as a single JSON document; anything else it
 // writes reaches the debug log alone. A permission reason is read by the user, and
@@ -39,6 +59,7 @@ function strictest(decisions) {
     RANK[a.hookSpecificOutput.permissionDecision] ? b : a);
 }
 
+if (require.main === module) {
 let raw = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', c => { raw += c; });
@@ -46,7 +67,7 @@ process.stdin.on('end', () => {
   let data;
   try { data = JSON.parse(raw); } catch { process.exit(0); }
 
-  const tools = DISPATCH[data.tool_name] ?? [];
+  const tools = routeFor(data.tool_input, data.tool_name);
   if (!tools.length) process.exit(0);
 
   const notes = [];
@@ -87,3 +108,6 @@ process.stdin.on('end', () => {
   process.stdout.write(JSON.stringify(merged));
   process.exit(0);
 });
+}
+
+module.exports = { routeFor, BY_NAME, COMMAND_GUARDS, WRITE_GUARDS };

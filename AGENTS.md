@@ -21,6 +21,21 @@ Hooks follow dispatcher → tool separation:
 - `hooks/<Event>.js` — reads stdin JSON, routes to one or more tools
 - `tools/<action>.js` — one responsibility, no side effects outside its purpose
 
+`hooks/PreToolUse.js` routes on the payload rather than the tool name: a `command` string
+reaches the command guards (`bash-safety`, `commit-trailer-guard`, `review-publish-guard`,
+`skill-gate`), and a write target arriving with its content reaches the write guards
+(`secret-guard`, `skill-gate`). Tool names are an open set — a second shell, an MCP server,
+a plugin's edit tool — and a name-keyed guard is bypassed silently by anything not on the
+list, since the dispatcher then finds no entry and exits 0. A payload carrying both a
+command and a write target reaches both sets. The name map that remains holds the tools
+whose payload alone would not say what they do: `Agent`, and the four edit tools, whose
+call may name a path with no content beside it.
+
+`tools/payload.js` states that rule for the tools, and `hooks/PreToolUse.js` states it again
+for itself: a dispatcher requiring a file from `tools/` would throw on every tool call once
+that file went missing, taking the session with it. `test/payload.test.js` runs both copies
+over every payload shape and fails when they disagree, so the duplication cannot drift.
+
 All paths resolved via `process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude')`.
 No hardcoded user paths anywhere. No npm dependencies.
 
@@ -57,7 +72,7 @@ every prompt:
   `paths:` alone does not remove a skill from this list: most are triggered by intent
   too, and design work runs before the file that will carry it exists.
 - `tools/skill-gate.js` (`PreToolUse` on `Edit`/`Write`/`MultiEdit`/`NotebookEdit`,
-  and on `Bash` for the file a command writes to — a redirection, `tee`,
+  and on any tool carrying a shell command for the file that command writes to — a redirection, `tee`,
   `Set-Content`/`Add-Content`/`Out-File`, or a `cp`/`mv` destination) matches the
   written file against every skill's `paths:`, adds the skills named in their `with:`,
   and subtracts the ones already loaded in this session's transcript. The first call
