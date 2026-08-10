@@ -37,6 +37,28 @@ register, not marketing tone, not chat slang. Drop filler ("just", "simply",
 "basically"), hedging padding ("I think maybe", "possibly"), and pleasantries that carry
 no information. State the fact, the reason, the next step.
 
+## State the Result, Not the Process
+
+Every artifact states the result it leaves behind, not the sequence of steps that
+produced it. Leave out the order the work happened in, attempts that were abandoned,
+corrections made along the way, and any account of a mistake and its fix. The reader
+needs what is true now, and the history is already in the commits.
+
+Reasoning that arose while working is not content either. State the constraint that
+decided the outcome, and leave out the deliberation that found it: the options weighed,
+the dead ends, and the asides about what was considered.
+
+Length is part of being correct here. Text longer than its subject requires dilutes the
+part that matters and spends the reader's attention before they reach it. Write full
+sentences, each carrying one fact, and cut every sentence that carries none.
+
+This holds for every artifact and every channel, not only the ones with a template:
+documentation, commit bodies, issue and PR/MR descriptions, comments and replies in an
+issue or review thread, progress notes, and messages in a tracker, a chat or a mail —
+on any platform. A thread comment is the most common place the rule is broken, because
+the work is fresh and the process feels like news; state what is true of the artifact
+now, and say what changed only when the reader has to act on the change.
+
 ## No Slang, No Unnecessary Borrowing
 
 Prefer the term already established in the target language's own professional/technical
