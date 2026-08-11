@@ -1,7 +1,41 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
+const { spawnSync } = require('node:child_process');
+const path = require('node:path');
 const { check, extractContent } = require('../tools/secret-guard');
+
+const TOOL = path.join(__dirname, '..', 'tools', 'secret-guard.js');
+
+function run(toolInput) {
+  return spawnSync(process.execPath, [TOOL], {
+    input: JSON.stringify({ tool_input: toolInput }), encoding: 'utf8',
+  });
+}
+
+test('blocks a GitHub PAT written by a shell command', () => {
+  const r = run({ command: `echo ghp_${'a'.repeat(36)} > token.txt` });
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /GitHub PAT/);
+});
+
+test('names the command as the source of a secret it carries', () => {
+  const r = run({ command: 'export AWS_KEY=AKIAIOSFODNN7EXAMPLE' });
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /in command/);
+});
+
+test('blocks a secret in a command arriving beside a binary write target', () => {
+  const r = run({ file_path: 'logo.png', content: 'x', command: 'export AWS_KEY=AKIAIOSFODNN7EXAMPLE' });
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /AWS Access Key/);
+});
+
+test('lets a command carrying no secret through', () => {
+  const r = run({ command: 'gh auth login --with-token < token.txt' });
+  assert.strictEqual(r.status, 0);
+  assert.strictEqual(r.stdout, '');
+});
 
 test('blocks RSA private key', () => {
   const r = check('-----BEGIN RSA PRIVATE KEY-----\nMII...\n-----END RSA PRIVATE KEY-----', 'key.pem');

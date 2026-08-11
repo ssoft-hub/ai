@@ -30,6 +30,26 @@ test('passes normal commit message', () => {
   assert.strictEqual(r.action, 'pass');
 });
 
+test('blocks a trailer behind git -C <dir> commit', () => {
+  const r = check('git -C module/utility commit -m "fix: x\n\nCo-Authored-By: Bot <bot@example.com>"');
+  assert.strictEqual(r.action, 'block');
+});
+
+test('blocks a trailer behind git -c <name>=<value> commit', () => {
+  const r = check('git -c user.name=x commit -m "fix: x\n\nGenerated-by: Claude"');
+  assert.strictEqual(r.action, 'block');
+});
+
+test('blocks a trailer behind git invoked by an absolute path', () => {
+  const r = check('/usr/bin/git commit -m "fix: x\n\nCo-Authored-By: Bot <bot@example.com>"');
+  assert.strictEqual(r.action, 'block');
+});
+
+test('blocks a trailer behind sudo git commit', () => {
+  const r = check('sudo git commit -m "fix: x\n\nCo-Authored-By: Bot <bot@example.com>"');
+  assert.strictEqual(r.action, 'block');
+});
+
 test('passes non-commit Bash command', () => {
   const r = check('echo "Co-Authored-By: Bot"');
   assert.strictEqual(r.action, 'pass');

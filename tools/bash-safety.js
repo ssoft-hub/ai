@@ -1,31 +1,73 @@
 'use strict';
+const path = require('path');
+const { gitCalls } = require(path.join(__dirname, 'git-command.js'));
+const { commands, commandName } = require(path.join(__dirname, 'shell-lex.js'));
+
+// A trailing glob names the same target: `rm -rf /*` empties the filesystem `rm -rf /`
+// would, and is the form that gets past a shell refusing to remove the root itself.
+const ROOT = /^(?:\/|~|\$HOME|%USERPROFILE%)(?:[/\\]\*?|\*)?$/i;
+const DRIVE_ROOT = /^[a-zA-Z]:\\?$/;
+
+const operands = args => args.filter(a => !a.startsWith('-'));
+const switches = args => args.map(a => a.toLowerCase());
+const clustered = args => args.filter(a => /^-[a-zA-Z]+$/.test(a)).join('').toLowerCase();
+
+const recursive = args => clustered(args).includes('r') || switches(args).includes('--recursive');
+const forced = args => clustered(args).includes('f') || switches(args).includes('--force');
 
 const BLOCK = [
-  { re: /(?:sudo\s+)?rm\s+-(?=[a-zA-Z]*r)(?=[a-zA-Z]*f)[a-zA-Z]+\s+["']?(\/|~\/?|\$HOME\/?|%USERPROFILE%\\?)["']?(\s|$)/i, msg: 'rm -rf on root/home — destroys filesystem' },
-  { re: /rmdir\s+\/s\s+\/q\s+[a-zA-Z]:\\/i, msg: 'rmdir /s /q on drive root' },
-  { re: /format\s+[a-zA-Z]:/i, msg: 'disk format command' },
+  { cmd: 'rm', when: a => recursive(a) && forced(a) && operands(a).some(t => ROOT.test(t)), msg: 'rm -rf on root/home — destroys filesystem' },
+  { cmd: 'rmdir', when: a => switches(a).includes('/s') && switches(a).includes('/q') && a.some(t => DRIVE_ROOT.test(t)), msg: 'rmdir /s /q on drive root' },
+  { cmd: 'format', when: a => a.some(t => /^[a-zA-Z]:$/.test(t)), msg: 'disk format command' },
 ];
 
-const ASK = [
-  { re: /(?:^|[\n;&|])\s*git\s+push\b/i, msg: 'git push affects the shared remote — confirm before pushing' },
+const SHELL_WARN = [
+  { cmd: 'rm', when: recursive, msg: 'rm -r — recursive delete, verify target' },
+  { cmd: 'del', when: a => switches(a).includes('/s') && switches(a).includes('/q'), msg: 'del /s /q — mass file deletion' },
+  { cmd: 'remove-item', when: a => switches(a).includes('-recurse') && switches(a).includes('-force'), msg: 'Remove-Item -Recurse -Force — mass deletion' },
 ];
 
+const GIT_ASK = [
+  { sub: 'push', msg: 'git push affects the shared remote — confirm before pushing' },
+];
+
+const GIT_WARN = [
+  { sub: 'reset', when: args => args.includes('--hard'), msg: 'git reset --hard — discards uncommitted work' },
+  { sub: 'checkout', when: args => args.includes('--') && args.includes('.'), msg: 'git checkout -- . — discards all working tree changes' },
+  { sub: 'clean', when: args => args.some(a => /^-[a-zA-Z]*f/.test(a)), msg: 'git clean -f — deletes untracked files' },
+];
+
+// SQL travels inside a quoted argument (`psql -c "DROP TABLE users"`), so these rules
+// read the command as text where the shell rules above read it as argv.
 const WARN = [
-  { re: /git\s+reset\s+--hard\b/i, msg: 'git reset --hard — discards uncommitted work' },
-  { re: /git\s+checkout\s+--\s*\./i, msg: 'git checkout -- . — discards all working tree changes' },
-  { re: /git\s+clean\s+-[a-zA-Z]*f/i, msg: 'git clean -f — deletes untracked files' },
   { re: /\bDROP\s+TABLE\b/i, msg: 'DROP TABLE — irreversible database operation' },
   { re: /\bDROP\s+DATABASE\b/i, msg: 'DROP DATABASE — irreversible database operation' },
   { re: /\bTRUNCATE\s+TABLE\b/i, msg: 'TRUNCATE TABLE — deletes all rows' },
-  { re: /(?:sudo\s+)?rm\s+-(?=[a-zA-Z]*r)[a-zA-Z]+\b/i, msg: 'rm -r — recursive delete, verify target' },
-  { re: /\bdel\s+(?:\/[sq]\s+){2}/i, msg: 'del /s /q — mass file deletion' },
-  { re: /Remove-Item\s+-Recurse\s+-Force\b/i, msg: 'Remove-Item -Recurse -Force — mass deletion' },
 ];
 
+function shellCalls(cmd) {
+  return commands(cmd).map(argv => ({
+    cmd: commandName(argv[0]),
+    args: argv.slice(1).map(t => t.word),
+  }));
+}
+
 function check(cmd) {
-  for (const { re, msg } of BLOCK) if (re.test(cmd)) return { action: 'block', msg };
-  for (const { re, msg } of ASK) if (re.test(cmd)) return { action: 'ask', msg };
-  const warnings = WARN.filter(({ re }) => re.test(cmd));
+  const calls = shellCalls(cmd);
+  const matches = rules => rules.filter(r => calls.some(c => c.cmd === r.cmd && r.when(c.args)));
+
+  const blocked = matches(BLOCK)[0];
+  if (blocked) return { action: 'block', msg: blocked.msg };
+
+  const git = gitCalls(cmd);
+  const asked = GIT_ASK.find(r => git.some(c => c.sub === r.sub));
+  if (asked) return { action: 'ask', msg: asked.msg };
+
+  const warnings = [
+    ...GIT_WARN.filter(r => git.some(c => c.sub === r.sub && r.when(c.args))),
+    ...matches(SHELL_WARN),
+    ...WARN.filter(({ re }) => re.test(cmd)),
+  ];
   return { action: warnings.length ? 'warn' : 'pass', warnings };
 }
 
@@ -66,4 +108,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { BLOCK, ASK, WARN, check };
+module.exports = { BLOCK, GIT_ASK, GIT_WARN, SHELL_WARN, WARN, check };

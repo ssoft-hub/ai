@@ -22,7 +22,7 @@ function run(command, configDir = repoDir, toolName = 'Bash') {
 function mkGateConfig() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
   fs.mkdirSync(path.join(dir, 'tools'));
-  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js', 'payload.js']) {
+  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js', 'payload.js', 'shell-lex.js']) {
     fs.copyFileSync(path.join(repoDir, 'tools', tool), path.join(dir, 'tools', tool));
   }
   const skillDir = path.join(dir, 'skills', 'comments');
@@ -79,6 +79,12 @@ test('emits one permission decision when two guards fire on one command', () => 
   assert.strictEqual(r.status, 0);
   const out = JSON.parse(r.stdout);
   assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'ask');
+});
+
+test('blocks a command carrying a secret', () => {
+  const r = run(`curl -H "Authorization: token ghp_${'a'.repeat(36)}" https://api.github.com`);
+  assert.strictEqual(r.status, 2);
+  assert.match(r.stderr, /GitHub PAT/);
 });
 
 test('keeps every reason when two guards decide on one command', () => {

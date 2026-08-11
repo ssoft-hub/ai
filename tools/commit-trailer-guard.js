@@ -1,13 +1,18 @@
 'use strict';
+const path = require('path');
+const { gitCalls } = require(path.join(__dirname, 'git-command.js'));
 
-const COMMIT_RE = /\bgit\s+commit\b/i;
 const BANNED_TRAILERS = [
   { name: 'Co-Authored-By', re: /\bco-authored-by\s*:/i },
   { name: 'Generated-by', re: /\bgenerated-by\s*:/i },
 ];
 
+function isCommit(cmd) {
+  return gitCalls(cmd).some(call => call.sub === 'commit');
+}
+
 function check(cmd) {
-  if (!COMMIT_RE.test(cmd)) return { action: 'pass' };
+  if (!isCommit(cmd)) return { action: 'pass' };
   for (const { name, re } of BANNED_TRAILERS) {
     if (re.test(cmd)) return { action: 'block', name };
   }
@@ -37,4 +42,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { COMMIT_RE, BANNED_TRAILERS, check };
+module.exports = { BANNED_TRAILERS, isCommit, check };
