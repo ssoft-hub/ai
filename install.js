@@ -132,7 +132,7 @@ function installSettings() {
   recordSettings(dest, prior ? prior.preexisted : true, additions);
   log(`  ${logPrefix} config/settings.json → ${dest} (merged)`);
   for (const [ev, cmds] of Object.entries(additions.hooks))
-    log(`      added ${cmds.length} hook${cmds.length === 1 ? '' : 's'} to ${ev}`);
+    log(`      registered ${cmds.length} hook${cmds.length === 1 ? '' : 's'} for ${ev}`);
 }
 
 function installCLAUDEmd() {

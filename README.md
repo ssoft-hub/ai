@@ -159,7 +159,11 @@ created file, every backup, and exactly which hooks and permissions it merged in
 `settings.json`. `uninstall.js` reads the manifest and reverses each: created files are
 removed, every backed-up file is restored to its pre-install content byte for byte, and
 `settings.json` is reverted by **subtracting only the entries install added** — so hooks
-or permissions added to it afterwards by other tools or by hand are kept intact.
+or permissions added to it afterwards by other tools or by hand are kept intact. A hook
+command this repository ships counts as install's own even when install found it already
+in the file: it launches a dispatcher uninstall removes, so leaving it registered would
+leave a hook with nothing to run. A permission entry names no file install removes, so
+one already in place stays the user's and survives uninstall.
 
 Re-running `install.js` performs an in-place **upgrade**: files are refreshed, files a
 previous install created but the current repo no longer ships are pruned, and the

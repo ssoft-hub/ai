@@ -18,6 +18,9 @@ function rmTmp(dir) {
   try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
 }
 
+const shippedHooks = () => JSON.parse(
+  fs.readFileSync(path.join(repoDir, 'config', 'settings.json'), 'utf8')).hooks;
+
 function runInstall(dir, extraArgs = []) {
   const r = spawnSync('node', [installJs, '--no-git-hook', ...extraArgs], {
     cwd: repoDir,
@@ -195,6 +198,72 @@ test('install merges hooks into a partial settings.json missing some events', ()
     assert.ok(merged.hooks?.UserPromptSubmit?.length >= 1, 'UserPromptSubmit added');
     assert.ok(merged.permissions.allow.includes('Bash(ls)'), 'user allow preserved');
     assert.ok(merged.permissions.ask?.some(p => p.includes('git push')), 'repo ask permissions merged');
+  } finally { rmTmp(dir); }
+});
+
+test('install records hook commands a settings.json already carries', () => {
+  const dir = mkTmp();
+  try {
+    const hooks = shippedHooks();
+    fs.writeFileSync(path.join(dir, 'settings.json'),
+      JSON.stringify({ hooks, permissions: { defaultMode: 'acceptEdits' } }, null, 2));
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+
+    const m = JSON.parse(fs.readFileSync(path.join(dir, '.claude-config-manifest.json'), 'utf8'));
+    assert.deepStrictEqual(
+      Object.keys(m.settings.additions.hooks).sort(), Object.keys(hooks).sort());
+  } finally { rmTmp(dir); }
+});
+
+test('uninstall removes hook commands install found already in settings.json', () => {
+  const dir = mkTmp();
+  try {
+    const settingsPath = path.join(dir, 'settings.json');
+    fs.writeFileSync(settingsPath, JSON.stringify(
+      { hooks: shippedHooks(), permissions: { defaultMode: 'acceptEdits' } }, null, 2));
+
+    runInstall(dir);
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+
+    const after = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    assert.ok(!after.hooks, `hooks left behind: ${Object.keys(after.hooks || {}).join(', ')}`);
+  } finally { rmTmp(dir); }
+});
+
+test('install claiming a hook command already in settings.json leaves one entry', () => {
+  const dir = mkTmp();
+  try {
+    const settingsPath = path.join(dir, 'settings.json');
+    fs.writeFileSync(settingsPath, JSON.stringify({ hooks: shippedHooks() }, null, 2));
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+
+    const merged = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    for (const [ev, entries] of Object.entries(merged.hooks))
+      assert.strictEqual(entries.length, 1, `${ev} duplicated`);
+  } finally { rmTmp(dir); }
+});
+
+test('install re-claims live hook commands its manifest records as unowned', () => {
+  const dir = mkTmp();
+  try {
+    runInstall(dir);
+    const mpath = path.join(dir, '.claude-config-manifest.json');
+    const m = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    // A manifest owning none of the hook commands the settings file carries.
+    m.settings.additions.hooks = {};
+    fs.writeFileSync(mpath, JSON.stringify(m, null, 2) + '\n');
+
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+
+    const m2 = JSON.parse(fs.readFileSync(mpath, 'utf8'));
+    assert.deepStrictEqual(
+      Object.keys(m2.settings.additions.hooks).sort(), Object.keys(shippedHooks()).sort());
   } finally { rmTmp(dir); }
 });
 
