@@ -4,6 +4,7 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
 const {
+  mergeHookEvent,
   mergeSettings,
   additionsFromRepo,
   subtractAdditions,
@@ -24,9 +25,30 @@ test('mergeSettings adds repo hooks into an empty object', () => {
 
 test('mergeSettings does not re-add an existing command', () => {
   const existing = { hooks: { PreToolUse: [hookEntry('CMD')] } };
-  const { out, additions } = mergeSettings(existing, repo('CMD'));
+  const { out } = mergeSettings(existing, repo('CMD'));
   assert.strictEqual(out.hooks.PreToolUse.length, 1, 'no duplicate entry');
-  assert.deepStrictEqual(additions.hooks, {}, 'nothing recorded as added');
+});
+
+test('mergeHookEvent claims a shipped command the file already carries', () => {
+  const { addedCommands } = mergeHookEvent([hookEntry('CMD')], [hookEntry('CMD')]);
+  assert.deepStrictEqual(addedCommands, ['CMD']);
+});
+
+test('mergeHookEvent claims once per shipped command, not per copy in the file', () => {
+  const { addedCommands } = mergeHookEvent([hookEntry('CMD'), hookEntry('CMD')], [hookEntry('CMD')]);
+  assert.deepStrictEqual(addedCommands, ['CMD']);
+});
+
+test('the round trip leaves no trace of a command shipped twice in one event', () => {
+  const twice = { hooks: { PreToolUse: [hookEntry('CMD'), hookEntry('CMD')] } };
+  const { out, additions } = mergeSettings({}, twice);
+  subtractAdditions(out, additions);
+  assert.ok(!out.hooks, 'every registered copy removed');
+});
+
+test('mergeHookEvent leaves a command the repo does not ship unrecorded', () => {
+  const { addedCommands } = mergeHookEvent([hookEntry('USER')], [hookEntry('CMD')]);
+  assert.deepStrictEqual(addedCommands, ['CMD']);
 });
 
 test('mergeSettings preserves foreign keys and permissions', () => {
@@ -40,6 +62,12 @@ test('mergeSettings records only newly added permission entries', () => {
   const existing = { permissions: { allow: ['Read'] } };
   const { additions } = mergeSettings(existing, { permissions: { allow: ['Read', 'Edit'] } });
   assert.deepStrictEqual(additions.permissions.allow, ['Edit']);
+});
+
+test('mergeSettings leaves a permission entry already present unrecorded', () => {
+  const existing = { permissions: { allow: ['Read'] } };
+  const { additions } = mergeSettings(existing, { permissions: { allow: ['Read'] } });
+  assert.deepStrictEqual(additions.permissions, {});
 });
 
 test('additionsFromRepo lists every repo command and permission', () => {
@@ -60,6 +88,17 @@ test('subtractAdditions keeps foreign entries alongside removed ones', () => {
   subtractAdditions(settings, { hooks: { PreToolUse: ['CMD'] } });
   const cmds = settings.hooks.PreToolUse.flatMap(e => e.hooks.map(h => h.command));
   assert.deepStrictEqual(cmds, ['USER']);
+});
+
+test('the round trip keeps the foreign half of an entry holding both', () => {
+  const mixed = {
+    matcher: 'Bash',
+    hooks: [{ type: 'command', command: 'CMD' }, { type: 'command', command: 'USER' }],
+  };
+  const { out, additions } = mergeSettings({ hooks: { PreToolUse: [mixed] } }, repo('CMD'));
+  subtractAdditions(out, additions);
+  assert.deepStrictEqual(out.hooks.PreToolUse,
+    [{ matcher: 'Bash', hooks: [{ type: 'command', command: 'USER' }] }]);
 });
 
 test('strip-before-merge replaces a drifted command without duplicating', () => {
