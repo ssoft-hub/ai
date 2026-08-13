@@ -46,9 +46,14 @@ function pruneEmptyDirs(start, stopAt) {
   }
 }
 
+// Files sharing a basename (every skill is a SKILL.md) are backed up within one millisecond.
+let backupSeq = 0;
+
 function backupPathFor(dest) {
-  const ts = Date.now();
-  return path.join(backupsDir, `${path.basename(dest)}.${ts}.bak`);
+  let bak;
+  do { bak = path.join(backupsDir, `${path.basename(dest)}.${Date.now()}-${backupSeq++}.bak`); }
+  while (fs.existsSync(bak));
+  return bak;
 }
 
 function backupBeforeWrite(dest) {
@@ -66,12 +71,11 @@ function backupBeforeWrite(dest) {
 }
 
 function copyFile(src, dest) {
-  const wasMissing = !fs.existsSync(dest);
+  backupBeforeWrite(dest);
   if (!DRY_RUN) {
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.copyFileSync(src, dest);
   }
-  if (wasMissing && !isTracked(dest)) manifest.createdFiles.push(dest);
   written.add(dest);
   log(`  ${logPrefix} ${path.relative(repoDir, src)} → ${dest}`);
 }
