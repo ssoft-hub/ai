@@ -150,15 +150,16 @@ node install.js
 Copies `hooks/`, `tools/`, `skills/`, `agents/`, and `commands/` into `~/.claude/` and
 merges `config/settings.json` into `~/.claude/settings.json` (existing machine-specific
 settings are preserved). `agents/` and `commands/` are optional — installing without
-either is not an error. `CLAUDE.md` and `.git/hooks/pre-commit` are overwritten with
-backups.
+either is not an error. Every file install overwrites is backed up and recorded before it
+is written — `settings.json` alone is exempt, because it is merged and reverted by
+subtracting install's own additions rather than snapshot-replaced.
 
 `install.js` writes a manifest at `~/.claude/.claude-config-manifest.json` recording every
 created file, every backup, and exactly which hooks and permissions it merged into
 `settings.json`. `uninstall.js` reads the manifest and reverses each: created files are
-removed, backed-up files (`CLAUDE.md`, `pre-commit`) are restored, and `settings.json` is
-reverted by **subtracting only the entries install added** — so hooks or permissions added
-to it afterwards by other tools or by hand are kept intact.
+removed, every backed-up file is restored to its pre-install content byte for byte, and
+`settings.json` is reverted by **subtracting only the entries install added** — so hooks
+or permissions added to it afterwards by other tools or by hand are kept intact.
 
 Re-running `install.js` performs an in-place **upgrade**: files are refreshed, files a
 previous install created but the current repo no longer ships are pruned, and the

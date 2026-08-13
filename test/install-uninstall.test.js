@@ -213,6 +213,119 @@ test('install+uninstall restores preexisting CLAUDE.md', () => {
   } finally { rmTmp(dir); }
 });
 
+test('install+uninstall restores a preexisting tools/ file', () => {
+  const dir = mkTmp();
+  try {
+    const toolPath = path.join(dir, 'tools', 'bash-safety.js');
+    const original = "// the user's own bash-safety tool\n";
+    fs.mkdirSync(path.dirname(toolPath), { recursive: true });
+    fs.writeFileSync(toolPath, original);
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+    assert.notStrictEqual(fs.readFileSync(toolPath, 'utf8'), original, 'install overwrites with backup');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    assert.strictEqual(fs.readFileSync(toolPath, 'utf8'), original, 'tools/ file restored');
+  } finally { rmTmp(dir); }
+});
+
+test('install+uninstall restores a preexisting empty file', () => {
+  const dir = mkTmp();
+  try {
+    const toolPath = path.join(dir, 'tools', 'bash-safety.js');
+    fs.mkdirSync(path.dirname(toolPath), { recursive: true });
+    fs.writeFileSync(toolPath, '');
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+    assert.notStrictEqual(fs.readFileSync(toolPath, 'utf8'), '', 'install overwrites with backup');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    assert.strictEqual(fs.readFileSync(toolPath, 'utf8'), '', 'empty file restored');
+  } finally { rmTmp(dir); }
+});
+
+test('install+uninstall restores every preexisting skill file to its own content', () => {
+  const dir = mkTmp();
+  try {
+    // Every skill file is named SKILL.md, so their backups collide on basename alone.
+    const originals = new Map();
+    for (const name of fs.readdirSync(path.join(repoDir, 'skills'))) {
+      const file = path.join(dir, 'skills', name, 'SKILL.md');
+      originals.set(file, `# the user's own ${name} skill\n`);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, originals.get(file));
+    }
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+    const [firstFile, firstContent] = [...originals][0];
+    assert.notStrictEqual(fs.readFileSync(firstFile, 'utf8'), firstContent, 'install overwrites with backup');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    for (const [file, content] of originals)
+      assert.strictEqual(fs.readFileSync(file, 'utf8'), content, `${file} restored`);
+  } finally { rmTmp(dir); }
+});
+
+test('install records a backup holding the pre-install content of a file it overwrote', () => {
+  const dir = mkTmp();
+  try {
+    const toolPath = path.join(dir, 'tools', 'secret-guard.js');
+    const original = "// the user's own secret-guard tool\n";
+    fs.mkdirSync(path.dirname(toolPath), { recursive: true });
+    fs.writeFileSync(toolPath, original);
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+
+    const m = JSON.parse(fs.readFileSync(path.join(dir, '.claude-config-manifest.json'), 'utf8'));
+    const record = m.backups.find(b => b.dest === toolPath);
+    assert.ok(record, 'manifest names a backup for the overwritten path');
+    assert.strictEqual(fs.readFileSync(record.backup, 'utf8'), original, 'backup holds the pre-install content');
+  } finally { rmTmp(dir); }
+});
+
+test('a second install takes no further backup of a path it already owns', () => {
+  const dir = mkTmp();
+  try {
+    const toolPath = path.join(dir, 'tools', 'bash-safety.js');
+    const original = "// the user's own bash-safety tool\n";
+    fs.mkdirSync(path.dirname(toolPath), { recursive: true });
+    fs.writeFileSync(toolPath, original);
+
+    runInstall(dir);
+    const r = runInstall(dir);
+    assert.strictEqual(r.status, 0, r.stderr);
+
+    const m = JSON.parse(fs.readFileSync(path.join(dir, '.claude-config-manifest.json'), 'utf8'));
+    const records = m.backups.filter(b => b.dest === toolPath);
+    assert.strictEqual(records.length, 1, 'a single backup entry after two installs');
+    assert.strictEqual(fs.readFileSync(records[0].backup, 'utf8'), original, 'the first backup still holds the pre-install content');
+  } finally { rmTmp(dir); }
+});
+
+test('a file install created is recorded as created, backed up by nothing, and removed by uninstall', () => {
+  const dir = mkTmp();
+  try {
+    const created = path.join(dir, 'tools', 'bash-safety.js');
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+
+    const m = JSON.parse(fs.readFileSync(path.join(dir, '.claude-config-manifest.json'), 'utf8'));
+    assert.ok(m.createdFiles.includes(created), 'recorded in createdFiles');
+    assert.ok(!m.backups.some(b => b.dest === created), 'no backup entry');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    assert.ok(!fs.existsSync(created), 'removed by uninstall');
+  } finally { rmTmp(dir); }
+});
+
 test('install preserves user defaultMode when repo settings has none', () => {
   const dir = mkTmp();
   try {
@@ -252,6 +365,21 @@ test('dry-run does not write files', () => {
     assert.strictEqual(r.status, 0, r.stderr);
     assert.ok(!fs.existsSync(path.join(dir, 'hooks', 'PreToolUse.js')));
     assert.ok(!fs.existsSync(path.join(dir, '.claude-config-manifest.json')));
+  } finally { rmTmp(dir); }
+});
+
+test('dry-run takes no backup of a file it would overwrite', () => {
+  const dir = mkTmp();
+  try {
+    const toolPath = path.join(dir, 'tools', 'bash-safety.js');
+    const original = "// the user's own bash-safety tool\n";
+    fs.mkdirSync(path.dirname(toolPath), { recursive: true });
+    fs.writeFileSync(toolPath, original);
+
+    const r = runInstall(dir, ['--dry-run']);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.strictEqual(fs.readFileSync(toolPath, 'utf8'), original, 'file left untouched');
+    assert.ok(!fs.existsSync(path.join(dir, '.claude-config-backups')), 'no backup written');
   } finally { rmTmp(dir); }
 });
 
