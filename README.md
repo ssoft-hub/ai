@@ -18,21 +18,22 @@ pipeline of persona agents and commands built on top of them.
 
 ## Hooks
 
-**`PreToolUse`** — runs before every tool call, routed by payload rather than by tool name: any tool carrying a `command` string reaches the four command guards, and any tool naming a write target together with its content reaches the write guards. A command is checked for what it does, not for which tool was asked to run it, so a second shell or an MCP server cannot slip past by being spelled differently:
+**`PreToolUse`** — runs before every tool call, routed by payload rather than by tool name: any tool carrying a `command` string reaches the command guards, and any tool naming a write target together with its content reaches the write guards. A command is checked for what it does, not for which tool was asked to run it, so a second shell or an MCP server cannot slip past by being spelled differently:
 - `bash-safety.js` — blocks destructive shell commands (`rm -rf /`, `format C:`), warns on reversible-but-risky ones (`git reset --hard`, `DROP TABLE`), and prompts before `git push`. Rules read the command as argv, so a prefix (`sudo`, `env`, `VAR=x`), a git global option (`git -C <dir> push`), a git alias, or an interpreter carrying the command (`bash -c`, `powershell -EncodedCommand`, `node -e`) does not hide it, and a command named inside a quoted argument does not trigger it
 - `commit-trailer-guard.js` — blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `review-publish-guard.js` — prompts for confirmation before a `gh` command that publishes review feedback on the spot (`gh pr review --comment/--approve/--request-changes`, `gh pr comment`, REST `in_reply_to`, an `event` field on `POST /pulls/{n}/reviews`, `submitPullRequestReview`, and a thread reply carrying no `pullRequestReviewId`); the pending-review path stays unprompted
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) and shell commands containing private keys, AWS keys, GitHub PATs; warns on probable credentials
 - `skill-gate.js` — on the same write payloads, and on any command that writes a file (redirection, `tee`, `Set-Content`/`Add-Content`/`Out-File`, `cp`/`mv` destination), names the skills that claim the written file (their `paths:` frontmatter) plus the ones they list in `with:`, minus whatever is already loaded this session; the first offending call is denied until the skills are loaded, a repeat of the same file and missing set only warns
 
-**`PostToolUse`** — runs after a write, read off the payload the same way: a path arriving with the content written to it, or one of `Edit` / `Write` / `MultiEdit` / `NotebookEdit` naming a path with no content field. A path named for reading reaches nothing. The three lint tools run only on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
+**`PostToolUse`** — runs after a tool call, on two routes read off the payload the same way: a path arriving with the content written to it, or one of `Edit` / `Write` / `MultiEdit` / `NotebookEdit` naming a path with no content field, reaches the write tools; a call marked `run_in_background: true` reaches the counter. A path named for reading reaches nothing. The three lint tools run only on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
+- `bg-agent-counter.js` — counts a call started in the background, whichever tool made it, as work the `Stop` notification below must wait for. Such a call returns the moment it is launched, so this runs while the work is still going; a call refused at any gate never reaches this hook, and is never counted
 - `comment-check.js` — runs on every file whose comment syntax it knows (`//`, `/* */`, `#`, `--`, `;`, `%`, `<!-- -->`), no config file needed; reminds to check any newly added non-doc comment against the `comments` skill
 - `clang-format.js` — formats in-place; requires `.clang-format` in this repository (searched from the edited file up to the git root, never into a parent repo) — skips silently if missing, or if `clang-format` isn't in PATH
 - `clang-tidy.js` — runs static analysis; requires `.clang-tidy` (uses `compile_commands.json` when found)
 - `cppcheck.js` — runs `cppcheck --enable=warning,style,performance,portability --std=c++20 --error-exitcode=1 …`; requires `.cppcheck`, passed as `--suppressions-list`
 
 **`Stop`** — fires when Claude Code finishes a response turn:
-- `stop-notify.js` — desktop notification (Windows toast / macOS notification / Linux notify-send); deferred until all background agents (`run_in_background: true`) have completed
+- `stop-notify.js` — desktop notification (Windows toast / macOS notification / Linux notify-send); deferred until every call started in the background (`run_in_background: true`) has completed
 
 **`SessionStart`** — fires once when a session begins, warn-only:
 - `submodule-status-check.js` — warns if any git submodule is ahead/uninitialized/conflicted

@@ -18,6 +18,12 @@ function writeTargetOf(input, toolName) {
   return EDIT_TOOLS.has(toolName) || content !== undefined ? target : '';
 }
 
+// A background call returns at launch, so this hook fires while the work is still running.
+// `tools/payload.js` states the same rule, kept in step by a test.
+function startedInBackground(input) {
+  return input?.run_in_background === true;
+}
+
 // Each lint tool runs only when its config file is present in this repository.
 // Without the config the tool is unconfigured here and is skipped silently, so
 // it never produces noise (and never picks up a config from a parent repo).
@@ -66,6 +72,15 @@ process.stdin.on('end', () => {
   let data;
   try { data = JSON.parse(raw); } catch { process.exit(0); }
 
+  // Before the write target is read, since a background call names no file. Nothing the
+  // counter writes is collected: `additionalContext` after every launch would be noise.
+  if (startedInBackground(data.tool_input)) {
+    const bg = spawnSync('node', [path.join(toolsDir, 'bg-agent-counter.js')], {
+      input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 10000,
+    });
+    if (bg.stderr?.trim()) process.stderr.write(bg.stderr.trim() + '\n');
+  }
+
   const filePath = writeTargetOf(data.tool_input, data.tool_name);
   if (!filePath) process.exit(0);
 
@@ -105,4 +120,4 @@ process.stdin.on('end', () => {
 });
 }
 
-module.exports = { writeTargetOf };
+module.exports = { writeTargetOf, startedInBackground };

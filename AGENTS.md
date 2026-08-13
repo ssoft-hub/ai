@@ -23,24 +23,35 @@ Hooks follow dispatcher → tool separation:
 
 `hooks/PreToolUse.js` routes on the payload rather than the tool name: a `command` string
 reaches the command guards (`bash-safety`, `commit-trailer-guard`, `review-publish-guard`,
-`secret-guard`, `skill-gate`), and a write target arriving with its content reaches the
+`secret-guard`, `skill-gate`), a write target arriving with its content reaches the
 write guards (`secret-guard`, `skill-gate`). Tool names are an open set — a second shell, an MCP server,
 a plugin's edit tool — and a name-keyed guard is bypassed silently by anything not on the
 list, since the dispatcher then finds no entry and exits 0. A payload carrying both a
 command and a write target reaches both sets. The name map that remains holds the tools
-whose payload alone would not say what they do: `Agent`, and the four edit tools, whose
-call may name a path with no content beside it.
+whose payload alone would not say what they do: the four edit tools, whose call may name a
+path with no content beside it.
 
 `hooks/PostToolUse.js` reads the same rule for the write it runs after: a path arriving with
 its content, or one of the four edit tools naming a path with no content field. The name
 check it keeps is not a shortcut — `Read` carries `file_path` too, and formatting a file that
-was only read would rewrite it.
+was only read would rewrite it — and it widens that one rule rather than standing in for
+the payload, so no call is hidden from a route by the name it arrived under.
 
-`tools/payload.js` states that rule for the tools, and both dispatchers state it again for
-themselves: a dispatcher requiring a file from `tools/` would throw on every tool call once
-that file went missing, taking the session with it. `test/payload.test.js` runs all three
-copies over every payload shape and fails when they disagree, so the duplication cannot
-drift.
+It carries a second route beside the write one: `run_in_background: true` reaches
+`bg-agent-counter`, which `hooks/Stop.js` reads to hold its notification back until the
+work is done. The route sits before the write target is read, since a background call names
+no file. This is the event for it rather than `PreToolUse`, because a background call
+returns at launch and the hook fires there — early enough that the count is written while
+the work still runs, and never at all for a call that was refused, whether by a guard
+exiting 2, by a JSON deny on exit 0, by a `deny` rule in `settings.json`, or by the user
+declining the prompt. None of those reach `PostToolUse`, so the count needs no knowledge of
+them: it counts calls that ran.
+
+`tools/payload.js` states those rules for the tools, and each dispatcher states the ones it
+routes on again for itself: a dispatcher requiring a file from `tools/` would throw on every
+tool call once that file went missing, taking the session with it. `test/payload.test.js`
+runs every copy over every payload shape and fails when they disagree, so the duplication
+cannot drift.
 
 A guard keyed on a command reads it as argv, never as text. `tools/shell-lex.js` lexes a
 command string into the argv of every command it runs: a transparent prefix (`sudo`,
