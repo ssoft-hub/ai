@@ -43,6 +43,8 @@
 
 ### Changed
 
+- A dot-file or dot-directory is now ignored unless `.gitignore` names it as one this repository tracks. Every tool, editor and agent runtime leaves one behind, and each had to be noticed and added by hand before `git status` was quiet again; an untracked directory nobody has got round to sits next to a file that genuinely should have been committed, and trains the reader to skim past both
+
 - `pr-rules` and `issue-rules` skills: the platform commands moved out into `github-cli` and `gitlab-cli`, leaving each rule stated in exactly one place. The process skills keep the rules and point at the platform skill for the command; a `gh` or `glab` change no longer means editing rules that are not about a CLI, and every other consumer of the same commands reads them from one file
 - `commit-rules` skill: added Branch Naming section — `<user>/<type>/<TRACKER-N>/<subject>` format, TRACKER-N omitted when no issue exists
 - `pr-rules` skill: added Workflow section (issue → branch → commits → PR → merge); PR title now uses tracker ID in place of `Type(scope)` when a tracked issue exists; subject starts with uppercase in all variants

@@ -1,5 +1,8 @@
-# Project-local Claude Code settings (auto-managed by Claude Code)
-.claude/
+# Dot-paths belong to tools, editors and agent runtimes unless this repository says
+# otherwise. Add an exception below for each one it tracks, rather than a rule per tool.
+.*
+!.gitignore
+!.github/
 
 # Node.js
 node_modules/
