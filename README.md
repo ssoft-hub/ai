@@ -119,14 +119,15 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 ## Agents
 
 Persona subagents forming an idea-to-release pipeline. Each is scoped to one stage and
-points at the skills it applies — see `AGENTS.md` → "Adding an agent".
+carries the `Skill` tool to load the skills it applies, rather than restating their rules
+— see `AGENTS.md` → "Adding an agent".
 
 | Agent | Stage | Skills applied |
 |-------|-------|-----------------|
 | `spec-architect` | Idea → spec → architecture | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
 | `implementer` | Implementation (TDD) | `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing` |
-| `code-reviewer` | Review | `code-review-and-quality`, `cpp-encapsulation`, `cpp-api-design`, `comments`, `cpp-doxygen` |
-| `security-auditor` | Security audit | `security-and-hardening` |
+| `code-reviewer` | Review | `code-review-and-quality`, `cpp-encapsulation`, `cpp-api-design`, `comments`, `cpp-doxygen`, `pr-rules` |
+| `security-auditor` | Security audit | `security-and-hardening`, `pr-rules` |
 | `release-manager` | Release | `changelog`, `release`, `shipping-and-launch` |
 
 ## Commands
