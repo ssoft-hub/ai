@@ -5,12 +5,17 @@ Configuration repository for Claude Code.
 ## Repository layout
 
 ```
-hooks/      Event dispatcher scripts (PreToolUse, PostToolUse, Stop)
+hooks/      Event dispatcher scripts (PreToolUse, PostToolUse, Stop, SessionStart,
+            UserPromptSubmit), and hooks/git/ which install writes to .git/ instead
 tools/      Atomic tool scripts invoked by hooks
 skills/     Skill definitions loaded by /skill-name slash commands
 agents/     Persona subagent definitions (one markdown file per agent)
 commands/   Slash command definitions (one markdown file per command)
-settings.json   Portable global Claude Code configuration
+config/     What install deploys as configuration: settings.json, the CLAUDE.md it
+            writes to ~/.claude/, and retired.json — paths this repo no longer ships
+lib/        Pure helpers shared by install.js and uninstall.js
+templates/  Starting points for a new skill, agent or command
+test/       One test file per unit, run by npm test
 install.js  Bootstrap script — copies files to ~/.claude/
 ```
 
@@ -357,13 +362,15 @@ node uninstall.js            # full restore to pre-install state
 
 `settings.json` is JSON-merged into `~/.claude/settings.json`; existing machine-specific settings are preserved (`defaultMode`, user `allow`/`ask`/`deny` entries). Every file install overwrites is copied into `.claude-config-backups` and recorded before it is written — `settings.json` alone is exempt, because it is merged and reverted by subtracting install's own additions rather than snapshot-replaced. A manifest at `~/.claude/.claude-config-manifest.json` records every created file and every backup so `uninstall.js` can restore the exact prior state byte-for-byte.
 
+What the git-hook step installs, and the single repository it applies to, is stated in `README.md` → Installation.
+
 ## Tests
 
 ```
 npm test
 ```
 
-Tests live in `test/<name>.test.js` using node's built-in `node:test` runner. They cover regex correctness (bash-safety, secret-guard), escape functions (stop-notify), and install/uninstall round-trip against a temp `CLAUDE_CONFIG_DIR`.
+Tests live in `test/<name>.test.js` using node's built-in `node:test` runner. What the suite covers is stated in `README.md` → Tests.
 
 ## Commit conventions
 

@@ -14,7 +14,7 @@ pipeline of persona agents and commands built on top of them.
 | `skills/` | Skill definitions (SKILL.md files loaded by `/skill-name`) |
 | `agents/` | Persona subagent definitions (one markdown file per agent) |
 | `commands/` | Slash command definitions (one markdown file per command) |
-| `config/settings.json` | Portable global configuration (hooks, permissions, statusline) |
+| `config/` | What install deploys as configuration: `settings.json` (hooks, permissions, statusline), the `CLAUDE.md` it writes to `~/.claude/`, and `retired.json` - paths this repo no longer ships, which install warns about but never deletes |
 
 ## Hooks
 
@@ -152,8 +152,10 @@ Requires Node.js (no npm packages needed).
 node install.js
 ```
 
-Copies `hooks/`, `tools/`, `skills/`, `agents/`, and `commands/` into `~/.claude/` and
-merges `config/settings.json` into `~/.claude/settings.json` (existing machine-specific
+Copies `hooks/` (without `hooks/git/`, which is not part of `~/.claude/`), `tools/`,
+`agents/` and `commands/` into `~/.claude/`, one `SKILL.md` per skill into
+`~/.claude/skills/<name>/`, and `config/CLAUDE.md` to `~/.claude/CLAUDE.md`;
+`config/settings.json` is merged into `~/.claude/settings.json` (existing machine-specific
 settings are preserved). `agents/` and `commands/` are optional — installing without
 either is not an error. Every file install overwrites is backed up and recorded before it
 is written — `settings.json` alone is exempt, because it is merged and reverted by
@@ -182,31 +184,83 @@ node uninstall.js              # full restore using manifest
 node uninstall.js --dry-run    # preview what would be restored
 ```
 
+`hooks/git/pre-commit` is the one file install writes outside `~/.claude/`, and it goes
+into this checkout's own `.git/hooks/pre-commit`. No other repository on the machine
+receives it, so the checks it carries apply to work on this repository alone - among them
+a refusal to commit at all until `user.name` and `user.email` are set locally, the block
+on committing to a protected branch, and a `clang-format` pass over staged C/C++ files.
+`--no-git-hook` skips that one copy and leaves the rest of the install unchanged.
+
 ## Tests
 
 ```
 npm test
 ```
 
-Uses node's built-in `node:test` runner. Covers safety regexes, shell-escape functions,
-and install/uninstall round-trip in a temporary `CLAUDE_CONFIG_DIR`.
-
-See [install.js](install.js) for details.
+Uses node's built-in `node:test` runner, so there is nothing to install first. Each
+`test/<name>.test.js` takes one unit: a tool, the dispatcher that routes to it, or a step
+of install. Between them they exercise the payloads a guard decides on and the decision it
+returns, the skill and agent frontmatter the routing reads, the `settings.json` merge, and
+an install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than the
+real one.
 
 ## Manual setup
 
-Copy the directories manually:
+For a machine without Node, or to see exactly what lands where. The copies below place
+the same files `node install.js` does; the two steps after them are the ones no copy
+reproduces.
 
-```
+```powershell
 # Windows (PowerShell)
-Copy-Item -Recurse hooks $env:USERPROFILE\.claude\hooks
-Copy-Item -Recurse tools $env:USERPROFILE\.claude\tools
-Copy-Item -Recurse skills $env:USERPROFILE\.claude\skills
-Copy-Item -Recurse agents $env:USERPROFILE\.claude\agents
-Copy-Item -Recurse commands $env:USERPROFILE\.claude\commands
-
-# Linux / macOS
-cp -r hooks tools skills agents commands ~/.claude/
+$dest = "$env:USERPROFILE\.claude"
+foreach ($d in 'hooks', 'tools', 'agents', 'commands', 'skills') {
+    New-Item -ItemType Directory -Force "$dest\$d" | Out-Null
+}
+Get-ChildItem hooks -Exclude git | Copy-Item -Destination "$dest\hooks" -Recurse -Force
+Copy-Item -Recurse -Force tools\*    "$dest\tools"
+Copy-Item -Recurse -Force agents\*   "$dest\agents"
+Copy-Item -Recurse -Force commands\* "$dest\commands"
+Get-ChildItem skills -Directory | ForEach-Object {
+    New-Item -ItemType Directory -Force "$dest\skills\$($_.Name)" | Out-Null
+    Copy-Item "$($_.FullName)\SKILL.md" "$dest\skills\$($_.Name)\SKILL.md"
+}
+Copy-Item config\CLAUDE.md "$dest\CLAUDE.md"
 ```
 
-Then copy or merge `settings.json` into `~/.claude/settings.json`.
+```sh
+# Linux / macOS
+dest=~/.claude
+mkdir -p "$dest"/hooks "$dest"/tools "$dest"/agents "$dest"/commands "$dest"/skills
+for f in hooks/*; do
+    [ "$(basename "$f")" = git ] || cp -R "$f" "$dest/hooks/"
+done
+cp -R tools/* "$dest/tools/"
+cp -R agents/* "$dest/agents/"
+cp -R commands/* "$dest/commands/"
+for d in skills/*/; do
+    [ -f "$d/SKILL.md" ] || continue
+    mkdir -p "$dest/skills/$(basename "$d")"
+    cp "$d/SKILL.md" "$dest/skills/$(basename "$d")/SKILL.md"
+done
+cp config/CLAUDE.md "$dest/CLAUDE.md"
+```
+
+`hooks/git/` is left out on purpose: nothing under `~/.claude/` reads it. Each skill
+contributes its `SKILL.md` and nothing else from its directory, which is why the skills
+are copied one at a time rather than as a tree.
+
+Two steps remain:
+
+- **`config/settings.json`.** Copy it to `~/.claude/settings.json` if that file does not
+  exist yet. If it does, merge by hand: add this repository's `hooks` entries and
+  `permissions` to what is already there, and take over the single `statusLine` slot. A
+  plain copy would drop every machine-local setting the file already holds.
+- **The git pre-commit hook**, if you want it in this checkout: copy `hooks/git/pre-commit`
+  to `.git/hooks/pre-commit` and make it executable. It applies to this repository only,
+  as under `node install.js` above.
+
+Manual setup writes no manifest, so it cannot be undone by `node uninstall.js` - that
+command reverses what `install.js` recorded, and knows nothing about files copied by
+hand. Nothing is backed up either: an existing `~/.claude/CLAUDE.md` or `settings.json` is
+overwritten and gone. Re-running the copies upgrades the files this checkout ships, but
+leaves behind any file an earlier version installed and this one no longer has.
