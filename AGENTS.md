@@ -282,19 +282,69 @@ into a pipeline carrying a task from idea to release:
 idea → /spec (spec-architect) → /build (implementer) → /ship (code-reviewer + security-auditor → release-manager)
 ```
 
-| Stage | Command | Agent(s) | Invoke the agent directly, without the command, when… |
-|-------|---------|----------|---------------------------------------------------------|
-| Spec | `/spec` | `spec-architect` | only a spec or ADR is needed, with no follow-on build |
-| Build | `/build` | `implementer` | resuming work on one task that already has a spec |
-| Review | (part of `/ship`) | `code-reviewer` | reviewing a diff that isn't ready to ship yet |
-| Security audit | (part of `/ship`) | `security-auditor` | auditing a change touching a trust boundary, outside a full ship pass |
-| Release | (part of `/ship`) | `release-manager` | cutting a release whose review/audit already happened elsewhere |
-
 Each command is a thin wrapper — see the corresponding `commands/<name>.md` for the
 exact handoff. Skills keep auto-applying contextually per `config/CLAUDE.md`'s "Skills
 — auto-apply" section regardless of which agent or command is active; an agent exists
 to bundle several skills under one persona for a specific pipeline stage, not to
-replace skill auto-apply.
+replace skill auto-apply. When to invoke a persona directly rather than through its
+command is stated in that persona's own Composition section in `agents/<name>.md`.
+
+### Lifecycle map
+
+That pipeline is one axis of a lifecycle two other files state along their own:
+`pr-rules` → Workflow as seven steps from a new task to a closed issue, and
+`issue-rules` → Lifecycle as the four states the issue passes through. This table is the
+only place the three are lined up against each other; every rule stays in the skill that
+owns it, and a stage with no command, no persona or no step of its own says so rather
+than naming the nearest one.
+
+| Stage | Command / persona | `pr-rules` step | Issue state | Skills |
+|-------|-------------------|-----------------|-------------|--------|
+| Intake | — | before 1 | not created yet | `requirements`, `project-planning` |
+| Spec | `/spec` → `spec-architect` | feeds 1 | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
+| Issue | — | 1 | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
+| Branch | — | 2 | → `In Progress` | `commit-rules` → Branch Naming |
+| Build | `/build` → `implementer` | 3 | `In Progress` | `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
+| PR | — | 4 | → `In Review` | `pr-rules`, `changelog`, `submodule-sync`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
+| Review | `/ship`, or `/review-loop` to iterate → `code-reviewer` | none; step 6 waits on it | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules` |
+| Security audit | `/ship`, or `/review-loop` to iterate → `security-auditor` | none; step 6 waits on it | `In Review` | `security-and-hardening`, `pr-rules` |
+| Pre-merge check | — | 5 | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
+| Merge | — | 6 | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
+| Close | — | 7 | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
+| Release | `/ship` on a go verdict → `release-manager` | after 7 | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
+
+No file assigns issue-state transitions to a role: `issue-rules` → Lifecycle defines each
+state by a condition — branch exists, PR open, merged and deployed — rather than by an
+act with an actor. The acts reserved to the human are the merge (`pr-rules` → Merge
+Strategy 2) and submitting review feedback (Pending by Default), which Merge Strategy 2
+names as the lighter act it follows. The issue comments steps 1, 5 and 7 require
+are the one kind of issue comment `pr-rules` → Pending by Default leaves an agent free to
+publish.
+
+Where the two axes do not line up one-to-one:
+
+- **`/spec` against step 1.** `commands/spec.md` takes an idea or a task description and
+  names no tracker, so the spec may be written before the issue exists or against one
+  that already does. What both sides fix is the issue's content rather than the order: an
+  issue without a test plan (and, for features, acceptance criteria) is not ready to
+  implement against — the criteria from `requirements`, the test plan from `issue-rules`
+  → Description Template.
+- **`/build` against step 3.** It implements one task from the spec, so a branch whose
+  issue holds several tasks runs it several times. It neither names the branch (step 2)
+  nor opens the PR (step 4).
+- **`/ship` against steps 5 and 6.** It neither replaces them nor wraps them: its review
+  pass is what step 6 waits on, its `release-manager` hand-off is the Release row, and
+  steps 5, 6 and 7 sit between the two under no command at all.
+- **Uncovered stages.** Intake, and steps 1, 2, 4, 5, 6 and 7 — issue, branch, PR,
+  pre-merge check, merge, close — have no command and no persona; they are carried out
+  directly under the skill the row names. Only step 6 states why: Merge Strategy 2 gives
+  the merge to the human.
+- **The Release row does not run once per pass.** `changelog` → On Release renames one
+  `[Unreleased]` section covering everything merged since the previous version, so one
+  release gathers the closed issues of many passes.
+- **The changelog entry sits on both axes.** `pr-rules` → Pre-Open Checklist requires
+  `CHANGELOG.md` updated before step 4; `commands/ship.md` has `release-manager` prepare
+  the entry after review. Unresolved — see GH-105.
 
 ## Installation
 
