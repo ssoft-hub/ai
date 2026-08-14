@@ -76,10 +76,10 @@ test('reset writes 0', () => {
   } finally { rmTmp(dir); }
 });
 
-test('stdin handler increments on run_in_background: true', () => {
+test('stdin handler increments on a background shell call', () => {
   const dir = mkTmp();
   try {
-    const input = JSON.stringify({ tool_name: 'Agent', tool_input: { run_in_background: true } });
+    const input = JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'npm test', run_in_background: true } });
     const r = spawnSync('node', [toolPath], {
       input, encoding: 'utf8', stdio: 'pipe',
       env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
@@ -92,7 +92,7 @@ test('stdin handler increments on run_in_background: true', () => {
 test('stdin handler skips when run_in_background is false', () => {
   const dir = mkTmp();
   try {
-    const input = JSON.stringify({ tool_name: 'Agent', tool_input: { run_in_background: false } });
+    const input = JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'npm test', run_in_background: false } });
     const r = spawnSync('node', [toolPath], {
       input, encoding: 'utf8', stdio: 'pipe',
       env: { ...process.env, CLAUDE_CONFIG_DIR: dir },

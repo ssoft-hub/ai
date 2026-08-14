@@ -1,9 +1,9 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { commandIn, writePathIn } = require('../tools/payload');
+const { commandIn, writePathIn, backgroundIn } = require('../tools/payload');
 const { routeFor, BY_NAME, COMMAND_GUARDS, WRITE_GUARDS } = require('../hooks/PreToolUse');
-const { writeTargetOf } = require('../hooks/PostToolUse');
+const { writeTargetOf, startedInBackground } = require('../hooks/PostToolUse');
 
 const PAYLOADS = [
   ['Bash', { command: 'git push' }],
@@ -18,6 +18,11 @@ const PAYLOADS = [
   ['RunAndPatch', { command: 'echo x', file_path: 'a.cpp', content: 'x' }],
   ['PatchFile', { path: 'a.cpp', notebook_path: 'a.ipynb', content: 'x' }],
   ['PatchFile', { notebook_path: 'a.ipynb', path: 'a.cpp', new_source: 'x' }],
+  ['Bash', { command: 'npm test', run_in_background: true }],
+  ['PowerShell', { command: 'npm test', run_in_background: false }],
+  ['Bash', { command: 'npm test', run_in_background: 'true' }],
+  ['mcp__shell__exec', { command: 'sleep 30', run_in_background: true }],
+  ['Agent', { prompt: 'do it', run_in_background: true }],
   ['Unknown', {}],
   ['Unknown', undefined],
 ];
@@ -30,6 +35,17 @@ test('commandIn returns nothing for a blank or non-string command', () => {
   assert.strictEqual(commandIn({ command: '   ' }), '');
   assert.strictEqual(commandIn({ command: ['git', 'push'] }), '');
   assert.strictEqual(commandIn(undefined), '');
+});
+
+test('backgroundIn reads the field marking a call as run in the background', () => {
+  assert.strictEqual(backgroundIn({ command: 'npm test', run_in_background: true }), true);
+});
+
+test('backgroundIn returns false for a payload naming no background run', () => {
+  assert.strictEqual(backgroundIn({ command: 'npm test' }), false);
+  assert.strictEqual(backgroundIn({ run_in_background: false }), false);
+  assert.strictEqual(backgroundIn({ run_in_background: 'true' }), false);
+  assert.strictEqual(backgroundIn(undefined), false);
 });
 
 test('writePathIn takes a path arriving with the content written to it', () => {
@@ -69,6 +85,22 @@ test('both dispatchers read a write payload the same way', () => {
     assert.strictEqual(writeTargetOf(input, toolName), writePathIn(input, toolName),
       `disagreed on ${toolName} ${JSON.stringify(input)}`);
   }
+});
+
+test('the after-the-fact dispatcher reads a background payload the way the payload rule does', () => {
+  for (const [toolName, input] of PAYLOADS) {
+    assert.strictEqual(startedInBackground(input), backgroundIn(input),
+      `disagreed on ${toolName} ${JSON.stringify(input)}`);
+  }
+});
+
+test('a background call reaches no guard before it runs', () => {
+  assert.deepStrictEqual(routeFor({ prompt: 'do it', run_in_background: true }, 'Agent'), []);
+  assert.deepStrictEqual(routeFor({ command: 'npm test', run_in_background: true }, 'Bash'), COMMAND_GUARDS);
+});
+
+test('an agent call naming no background run reaches no guard', () => {
+  assert.deepStrictEqual(routeFor({ prompt: 'do it' }, 'Agent'), []);
 });
 
 test('the name map covers every tool whose payload alone would not say what it does', () => {

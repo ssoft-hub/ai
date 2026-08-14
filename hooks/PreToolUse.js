@@ -11,7 +11,6 @@ const COMMAND_GUARDS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-pub
 const WRITE_GUARDS = ['secret-guard.js', 'skill-gate.js'];
 
 const BY_NAME = {
-  Agent:        ['bg-agent-counter.js'],
   Edit:         WRITE_GUARDS,
   Write:        WRITE_GUARDS,
   MultiEdit:    WRITE_GUARDS,

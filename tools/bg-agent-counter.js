@@ -1,6 +1,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { backgroundIn } = require(path.join(__dirname, 'payload.js'));
 
 function counterPath(dir) {
   return path.join(dir, '.bg-agent-count');
@@ -34,7 +35,7 @@ if (require.main === module) {
   process.stdin.on('end', () => {
     let data;
     try { data = JSON.parse(raw); } catch { process.exit(0); }
-    if (data.tool_input?.run_in_background === true) increment(configDir);
+    if (backgroundIn(data.tool_input)) increment(configDir);
     process.exit(0);
   });
 }
