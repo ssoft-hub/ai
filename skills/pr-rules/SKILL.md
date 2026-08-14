@@ -27,6 +27,8 @@ End-to-end order of actions from a new task to a merged, closed issue. Steps run
 
 Every step that touches the tracker or the PR is carried out with the hosting platform's CLI — `github-cli` for `gh`, `gitlab-cli` for `glab`. This skill states what must be true at each step; the platform skill states the command that gets there.
 
+Where the repository provides one, its `AGENTS.md` → Lifecycle map lines these steps up against the pipeline stage, command and persona behind each, the `issue-rules` state the issue sits in meanwhile, and what runs before step 1 and after step 7. The steps themselves stay here.
+
 **1. Scope and issue** — before any code change:
 - Identify the repository the change belongs to (root repo or a submodule); the issue is created and tracked there, not in the root repo.
 - Search the tracker for an existing issue covering the task. If found, check it has a test plan and, for features, acceptance criteria (`issue-rules` → Description Template); if incomplete for this task, update the issue before writing code.

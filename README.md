@@ -120,15 +120,18 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 
 Persona subagents forming an idea-to-release pipeline. Each is scoped to one stage and
 carries the `Skill` tool to load the skills it applies, rather than restating their rules
-— see `AGENTS.md` → "Adding an agent".
+— see `AGENTS.md` → "Adding an agent". Where each stage sits against the `pr-rules`
+Workflow steps and the issue lifecycle, and which stages no agent or command covers, is
+mapped in `AGENTS.md` → Lifecycle map. When to invoke a persona directly rather than
+through its command is stated in that persona's own Composition section.
 
-| Agent | Stage | Skills applied |
-|-------|-------|-----------------|
-| `spec-architect` | Idea → spec → architecture | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
-| `implementer` | Implementation (TDD) | `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing` |
-| `code-reviewer` | Review | `code-review-and-quality`, `cpp-encapsulation`, `cpp-api-design`, `comments`, `cpp-doxygen`, `pr-rules` |
-| `security-auditor` | Security audit | `security-and-hardening`, `pr-rules` |
-| `release-manager` | Release | `changelog`, `release`, `shipping-and-launch` |
+| Agent | Stage |
+|-------|-------|
+| `spec-architect` | Spec |
+| `implementer` | Build |
+| `code-reviewer` | Review |
+| `security-auditor` | Security audit |
+| `release-manager` | Release |
 
 ## Commands
 
