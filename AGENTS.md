@@ -125,6 +125,13 @@ declared, so there is no second list to keep in sync.
 When several skills fire on one task they are ordered `process` → `domain` → `narrow`.
 The narrower skill rules its own topic and must not restate the wider one.
 
+Neither path reaches a persona agent on its own: a persona invocation is not a user
+prompt, so the reminder never fires for it, and the gate speaks only once the persona is
+already mid-edit. Every persona in `agents/` therefore carries the `Skill` tool and names
+the skills it loads, under the same rule that holds between two skills — it names them
+and does not restate them. The deny-once rule above is for an agent that genuinely cannot
+load a skill, not for a persona.
+
 ## Skill ownership map
 
 One line per skill: the single concern it owns, then what it hands off. A rule belongs to
@@ -240,15 +247,22 @@ the removal to the user rather than deleting a file it may not own.
 ## Adding an agent
 
 1. Copy `templates/AGENT.md` to `agents/<name>.md`
-2. Fill in frontmatter (`name`, `description`, `tools`) and the persona's system prompt
-3. Name the skill(s) the persona must apply in the body, so it doesn't have to
-   rediscover them from scratch each invocation, and state the boundary — what this
-   persona does not do, and which other persona picks that up
+2. Fill in frontmatter (`name`, `description`, `tools`) and the persona's system prompt.
+   `tools` must include `Skill`, or the persona cannot load a single one of the skills
+   step 3 names
+3. Name the skill(s) the persona must apply in the body and the order to load them in, so
+   it doesn't have to rediscover them from scratch each invocation — then stop. A rule
+   restated here is a copy of the one in `skills/<name>/SKILL.md`, and the persona reads
+   only the copy. What the body carries is what no skill does: the boundary — what this
+   persona does not do, and which other persona picks that up — and, for a persona whose
+   output is a verdict or a set of findings rather than the edited files, the report format
 4. Write the Composition section: when to invoke the persona directly, which command
    invokes it otherwise, and the standing rule that it must not invoke another persona
    itself — orchestration between personas belongs to commands only
 5. Add an entry to the agents table in `README.md`
-6. Run `node install.js` to deploy — copied to `~/.claude/agents/<name>.md`
+6. Run `npm test` — `test/agents.test.js` checks the frontmatter of every persona and
+   that each skill a body names still exists under `skills/`
+7. Run `node install.js` to deploy — copied to `~/.claude/agents/<name>.md`
 
 ## Adding a command
 
