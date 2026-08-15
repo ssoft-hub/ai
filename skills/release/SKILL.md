@@ -34,9 +34,10 @@ Git tag format: `vX.Y.Z`.
 
 ## Step 2 — Update CHANGELOG.md
 
-`changelog` skill → On Release owns the edit itself — renaming `[Unreleased]` into the
-new version section and prepending a fresh empty one. What this step adds: confirm every
-notable change since the last release is actually in there before the version is frozen.
+`changelog` skill → On Release owns the edit itself — reconciling the section against the
+previous release, renaming `[Unreleased]` into the new version section, and prepending a
+fresh empty one. What this step adds: confirm every notable change since the last release
+is actually in there before the version is frozen.
 
 ## Step 3 — Bump Version Strings
 
@@ -61,7 +62,8 @@ to users is a separate gate → `shipping-and-launch` skill.
 - [ ] Build passes on all compilers declared in project (check `AGENTS.md`)
 - [ ] All tests pass; CI green on all compiler targets
 - [ ] No breaking API change without `MAJOR` bump (`cpp-api-design` → Breaking Changes)
-- [ ] `CHANGELOG.md` covers all changes since last release, `[Unreleased]` renamed
+- [ ] `CHANGELOG.md` covers all changes since last release, reconciled against the
+      previous release, `[Unreleased]` renamed (`changelog` → On Release)
 - [ ] Version string consistent across **all** version files (grep confirms)
 - [ ] Submodule ref updated in root repo (if applicable)
 - [ ] Commit trailers conform to `commit-rules` skill
