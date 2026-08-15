@@ -38,9 +38,12 @@ Hook event names (exact, case-sensitive): `PreToolUse`, `PostToolUse`, `Stop`, `
 
 ## Dispatcher Skeleton
 
+A tool decides on the payload and states its verdict; the dispatcher turns the verdicts
+into one answer. Each tool is loaded and read inside the try that calls it, so a file that
+is missing, throws, or answers in the wrong shape costs that one tool and a line on stderr.
+
 ```javascript
 'use strict';
-const { spawnSync } = require('child_process');
 const os = require('os'), path = require('path');
 const d = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 
@@ -53,10 +56,15 @@ process.stdin.on('end', () => {
   let data; try { data = JSON.parse(raw); } catch { process.exit(0); }
   const context = [];
   for (const tool of DISPATCH[data.tool_name] ?? []) {
-    const r = spawnSync('node', [path.join(d, 'tools', tool)], { input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 30000 });
-    if (r.stdout?.trim()) context.push(r.stdout.trim());
-    if (r.stderr?.trim()) process.stderr.write(r.stderr);
-    if (r.status === 2) process.exit(2);
+    try {
+      const { verdict } = require(path.join(d, 'tools', tool));
+      if (typeof verdict !== 'function') throw new Error('it exports no verdict');
+      const said = verdict(data);
+      if (said?.block) { process.stderr.write(String(said.block)); process.exit(2); }
+      if (said?.output) context.push(String(said.output).trim());
+    } catch (err) {
+      process.stderr.write(`${tool} did not run — ${String(err?.message).split('\n')[0]}\n`);
+    }
   }
   if (context.length) {
     process.stdout.write(JSON.stringify({
@@ -67,25 +75,43 @@ process.stdin.on('end', () => {
 });
 ```
 
-A dispatcher collects what its tools write instead of forwarding it line by line: on
+A dispatcher collects what its tools state instead of forwarding it line by line: on
 every event but the three below, plain stdout reaches nobody (see Reaching the Model).
 
 ## Tool Skeleton
 
+A tool exports one entry the dispatcher calls, and hands the same function to the runner
+that runs it as a script. Returning the verdict rather than writing it keeps the two paths
+from drifting: the stdin, stdout and exit-code contract exists once, in `tools/guard.js`.
+
 ```javascript
 'use strict';
-let raw = '';
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', c => { raw += c; });
-process.stdin.on('end', () => {
-  let data; try { data = JSON.parse(raw); } catch { process.exit(0); }
+const path = require('path');
+const { runAsScript } = require(path.join(__dirname, 'guard.js'));
+
+// undefined — nothing to say
+// { block: text }  — text on stderr, exit 2
+// { output: text } — text on stdout, exit 0
+function verdict(data) {
   const command  = data.tool_input?.command ?? '';
   const filePath = data.tool_input?.file_path ?? data.tool_input?.path ?? '';
   const content  = data.tool_input?.new_string ?? data.tool_input?.content ?? '';
   // ... logic ...
-  process.exit(0);
-});
+  return undefined;
+}
+
+if (require.main === module) runAsScript(verdict);
+
+module.exports = { verdict };
 ```
+
+A `verdict` runs inside the dispatcher's process with no watchdog in front of it, so it
+must return rather than exit, and return in bounded time: no network call, no unbounded
+read, no synchronous child process. One that never returns costs the whole hook rather than
+itself: it spends the hook's whole timeout, and the guards behind it never decide.
+
+A tool that runs after the fact, or that takes a file path on argv instead of a payload,
+states no verdict and is spawned as a script — `hooks/PostToolUse.js` and its lint tools.
 
 ## Exit Codes
 
@@ -94,7 +120,8 @@ process.stdin.on('end', () => {
 | `0` | Allow / warning | stdout, parsed as JSON output; anything else goes to the debug log |
 | `2` | Deny / block | stderr → the model reads it; `PreToolUse` also blocks the call |
 
-Never use `1` — unpredictable behavior.
+Never use `1` — unpredictable behavior. A tool exporting a verdict states these rather than
+writing them: `{ output }` is the exit-`0` channel and `{ block }` the exit-`2` one.
 
 ## Reaching the Model
 
@@ -141,12 +168,13 @@ prompt, while a guard that does not run where it must is an unchecked `git push`
 carrying both a command and a write target reaches both sets of guards, since either half
 alone would leave the other unchecked.
 
-A dispatcher does not `require` a file from `tools/`: a missing or half-installed tool would
-throw before any payload is read and take every tool call in the session with it, where the
-same file missing under `spawnSync` costs one guard and a line on stderr. When a rule has to
-hold on both sides of that boundary, state it on each side and add a test that runs the two
-copies over the same inputs — a duplication a test holds together beats a dependency that
-can bring the session down.
+A dispatcher does not `require` a file from `tools/` in order to start: a missing or
+half-installed tool would throw before any payload is read and take every tool call in the
+session with it. It may require one where it calls it, inside the try that calls it, since
+that failure costs the one tool and a line on stderr. So the routing rule, which decides
+which tools are called at all, is stated on both sides of the boundary — add a test that
+runs the two copies over the same inputs. A duplication a test holds together beats a
+dependency that can bring the session down.
 
 ## PATH Resolution
 

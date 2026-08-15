@@ -53,10 +53,27 @@ declining the prompt. None of those reach `PostToolUse`, so the count needs no k
 them: it counts calls that ran.
 
 `tools/payload.js` states those rules for the tools, and each dispatcher states the ones it
-routes on again for itself: a dispatcher requiring a file from `tools/` would throw on every
-tool call once that file went missing, taking the session with it. `test/payload.test.js`
-runs every copy over every payload shape and fails when they disagree, so the duplication
-cannot drift.
+routes on again for itself: reading them out of `tools/` would put a require the dispatcher
+needs in order to start in front of every tool call, and one missing file there would take
+the session with it. `test/payload.test.js` runs every copy over every payload shape and
+fails when they disagree, so the duplication cannot drift.
+
+A guard exports one entry, `verdict(payload)`, which returns nothing, `{ block }` for stderr
+and exit 2, or `{ output }` for stdout. `hooks/PreToolUse.js` calls that entry in the
+dispatcher's own process, and the guard's `require.main === module` hands the same function to
+`runAsScript` in `tools/guard.js` — the single place a verdict becomes output, so the two
+paths that reach a guard cannot answer one payload differently. `test/guard.test.js` runs
+both over the same payloads and compares what each wrote and exited with. The dispatcher
+loads a guard where it calls it, inside a try: a file that is missing, throws on load,
+throws on the payload, or exports no `verdict` costs that one guard and a line on stderr
+naming it, never the dispatcher and never the session. A guard that never returns is the one
+failure that try cannot hold — a synchronous `verdict` cannot be interrupted from inside the
+process it runs in, so it spends the hook's whole timeout and no guard decides at all; what
+that costs a guard author is stated in `skills/hook-scripts/SKILL.md` → Tool Skeleton.
+That is what the rule against requiring `tools/` was protecting, kept without a process per
+guard: the pause in front of a guarded call is two node startups rather than one per guard
+on top of two. `hooks/PostToolUse.js` still spawns its tools; they run after the call and
+take no payload verdict.
 
 A guard keyed on a command reads it as argv, never as text. `tools/shell-lex.js` lexes a
 command string into the argv of every command it runs: a transparent prefix (`sudo`,

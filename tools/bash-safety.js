@@ -1,6 +1,7 @@
 'use strict';
 const path = require('path');
 const { gitCalls } = require(path.join(__dirname, 'git-command.js'));
+const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 const { commands, commandName } = require(path.join(__dirname, 'shell-lex.js'));
 
 // A trailing glob names the same target: `rm -rf /*` empties the filesystem `rm -rf /`
@@ -71,41 +72,32 @@ function check(cmd) {
   return { action: warnings.length ? 'warn' : 'pass', warnings };
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('data', c => { raw += c; });
-  process.stdin.on('end', () => {
-    let data;
-    try { data = JSON.parse(raw); } catch { process.exit(0); }
+function verdict(data) {
+  const cmd = data.tool_input?.command ?? '';
+  if (!cmd) return undefined;
 
-    const cmd = data.tool_input?.command ?? '';
-    if (!cmd) process.exit(0);
-
-    const r = check(cmd);
-    if (r.action === 'block') {
-      process.stderr.write(`Blocked: ${r.msg}\nCommand: ${cmd.slice(0, 200)}\n`);
-      process.exit(2);
-    }
-    if (r.action === 'ask') {
-      process.stdout.write(JSON.stringify({
-        hookSpecificOutput: {
-          hookEventName: 'PreToolUse',
-          permissionDecision: 'ask',
-          permissionDecisionReason: r.msg,
-        },
-      }));
-      process.exit(0);
-    }
-    if (r.action === 'warn') {
-      process.stdout.write(
-        'bash-safety warning — destructive command detected:\n' +
-        r.warnings.map(w => `  • ${w.msg}`).join('\n') +
-        `\nCommand: ${cmd.slice(0, 200)}\n`
-      );
-    }
-    process.exit(0);
-  });
+  const r = check(cmd);
+  if (r.action === 'block') {
+    return { block: `Blocked: ${r.msg}\nCommand: ${cmd.slice(0, 200)}\n` };
+  }
+  if (r.action === 'ask') {
+    return { output: JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'ask',
+        permissionDecisionReason: r.msg,
+      },
+    }) };
+  }
+  if (r.action === 'warn') {
+    return { output:
+      'bash-safety warning — destructive command detected:\n' +
+      r.warnings.map(w => `  • ${w.msg}`).join('\n') +
+      `\nCommand: ${cmd.slice(0, 200)}\n` };
+  }
+  return undefined;
 }
 
-module.exports = { BLOCK, GIT_ASK, GIT_WARN, SHELL_WARN, WARN, check };
+if (require.main === module) runAsScript(verdict);
+
+module.exports = { BLOCK, GIT_ASK, GIT_WARN, SHELL_WARN, WARN, check, verdict };
