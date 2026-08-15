@@ -1,4 +1,6 @@
 'use strict';
+const path = require('path');
+const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 
 const VALUE_FLAGS = [
   '-f', '-F', '--field', '--raw-field', '--input',
@@ -169,29 +171,23 @@ function check(cmd) {
   return { action: 'pass' };
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('data', c => { raw += c; });
-  process.stdin.on('end', () => {
-    let data;
-    try { data = JSON.parse(raw); } catch { process.exit(0); }
+function verdict(data) {
+  const cmd = data.tool_input?.command ?? '';
+  if (!cmd) return undefined;
 
-    const cmd = data.tool_input?.command ?? '';
-    if (!cmd) process.exit(0);
-
-    const r = check(cmd);
-    if (r.action === 'ask') {
-      process.stdout.write(JSON.stringify({
-        hookSpecificOutput: {
-          hookEventName: 'PreToolUse',
-          permissionDecision: 'ask',
-          permissionDecisionReason: r.msg,
-        },
-      }));
-    }
-    process.exit(0);
-  });
+  const r = check(cmd);
+  if (r.action === 'ask') {
+    return { output: JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'ask',
+        permissionDecisionReason: r.msg,
+      },
+    }) };
+  }
+  return undefined;
 }
 
-module.exports = { ASK, check, commands, parse };
+if (require.main === module) runAsScript(verdict);
+
+module.exports = { ASK, check, commands, parse, verdict };

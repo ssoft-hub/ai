@@ -2,6 +2,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 const { loadCatalog, matchSkills } = require(path.join(__dirname, 'skill-catalog.js'));
 const { commandIn, writePathIn } = require(path.join(__dirname, 'payload.js'));
 const { lex, TRANSPARENT } = require(path.join(__dirname, 'shell-lex.js'));
@@ -153,40 +154,31 @@ function notice(filePath, missing) {
     + 'Load order: process, then domain, then narrow.';
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('data', c => { raw += c; });
-  process.stdin.on('end', () => {
-    let data;
-    try { data = JSON.parse(raw); } catch { process.exit(0); }
+function verdict(data) {
+  const targets = gateTargets(data.tool_input, data.tool_name);
+  if (!targets.length) return undefined;
 
-    const targets = gateTargets(data.tool_input, data.tool_name);
-    if (!targets.length) process.exit(0);
+  const catalog = loadCatalog(path.join(configDir, 'skills'));
+  const statePath = path.join(configDir, 'session-env', `${data.session_id ?? 'unknown'}.skill-gate.json`);
+  const loaded = new Set(data.transcript_path ? loadedSkills(data.transcript_path, statePath) : []);
+  const hits = targets
+    .map(file => ({ file, missing: matchSkills(catalog, file).filter(name => !loaded.has(name)) }))
+    .filter(hit => hit.missing.length);
+  if (!hits.length) return undefined;
 
-    const catalog = loadCatalog(path.join(configDir, 'skills'));
-    const statePath = path.join(configDir, 'session-env', `${data.session_id ?? 'unknown'}.skill-gate.json`);
-    const loaded = new Set(data.transcript_path ? loadedSkills(data.transcript_path, statePath) : []);
-    const hits = targets
-      .map(file => ({ file, missing: matchSkills(catalog, file).filter(name => !loaded.has(name)) }))
-      .filter(hit => hit.missing.length);
-    if (!hits.length) process.exit(0);
+  const text = hits.map(hit => notice(hit.file, hit.missing)).join('\n');
+  const key = hits.map(hit => `${hit.file}|${hit.missing.join(',')}`).join(';');
+  if (!denyOnce(statePath, key)) return { output: text };
 
-    const text = hits.map(hit => notice(hit.file, hit.missing)).join('\n');
-    const key = hits.map(hit => `${hit.file}|${hit.missing.join(',')}`).join(';');
-    if (denyOnce(statePath, key)) {
-      const blocked = `${text} This call was blocked; load them, then retry it.`;
-      process.stdout.write(JSON.stringify({ hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
-        permissionDecisionReason: blocked,
-        additionalContext: blocked,
-      } }));
-    } else {
-      process.stdout.write(text);
-    }
-    process.exit(0);
-  });
+  const blocked = `${text} This call was blocked; load them, then retry it.`;
+  return { output: JSON.stringify({ hookSpecificOutput: {
+    hookEventName: 'PreToolUse',
+    permissionDecision: 'deny',
+    permissionDecisionReason: blocked,
+    additionalContext: blocked,
+  } }) };
 }
 
-module.exports = { skillsIn, loadedSkills, notice, denyOnce, writeTargets, gateTargets };
+if (require.main === module) runAsScript(verdict);
+
+module.exports = { skillsIn, loadedSkills, notice, denyOnce, writeTargets, gateTargets, verdict };

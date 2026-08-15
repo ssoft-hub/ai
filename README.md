@@ -10,7 +10,7 @@ pipeline of persona agents and commands built on top of them.
 | Directory | Purpose |
 |-----------|---------|
 | `hooks/`  | Claude Code event dispatchers (`PreToolUse`, `PostToolUse`, `Stop`, `SessionStart`, `UserPromptSubmit`) |
-| `tools/`  | Atomic tool scripts invoked by hooks |
+| `tools/`  | Atomic tools, one responsibility each: a guard states a verdict its dispatcher calls for; a tool that runs after the fact is spawned as a script |
 | `skills/` | Skill definitions (SKILL.md files loaded by `/skill-name`) |
 | `agents/` | Persona subagent definitions (one markdown file per agent) |
 | `commands/` | Slash command definitions (one markdown file per command) |
@@ -18,7 +18,7 @@ pipeline of persona agents and commands built on top of them.
 
 ## Hooks
 
-**`PreToolUse`** — runs before every tool call, routed by payload rather than by tool name: any tool carrying a `command` string reaches the command guards, and any tool naming a write target together with its content reaches the write guards. A command is checked for what it does, not for which tool was asked to run it, so a second shell or an MCP server cannot slip past by being spelled differently:
+**`PreToolUse`** — runs before every tool call, routed by payload rather than by tool name: any tool carrying a `command` string reaches the command guards, and any tool naming a write target together with its content reaches the write guards. A command is checked for what it does, not for which tool was asked to run it, so a second shell or an MCP server cannot slip past by being spelled differently. The dispatcher calls each guard inside the dispatcher's own process instead of starting one process per guard, so the pause in front of a guarded call does not grow with the number of guards; a guard whose file is missing or broken costs that guard and a line on stderr, never the session:
 - `bash-safety.js` — blocks destructive shell commands (`rm -rf /`, `format C:`), warns on reversible-but-risky ones (`git reset --hard`, `DROP TABLE`), and prompts before `git push`. Rules read the command as argv, so a prefix (`sudo`, `env`, `VAR=x`), a git global option (`git -C <dir> push`), a git alias, or an interpreter carrying the command (`bash -c`, `powershell -EncodedCommand`, `node -e`) does not hide it, and a command named inside a quoted argument does not trigger it
 - `commit-trailer-guard.js` — blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `review-publish-guard.js` — prompts for confirmation before a `gh` command that publishes review feedback on the spot (`gh pr review --comment/--approve/--request-changes`, `gh pr comment`, REST `in_reply_to`, an `event` field on `POST /pulls/{n}/reviews`, `submitPullRequestReview`, and a thread reply carrying no `pullRequestReviewId`); the pending-review path stays unprompted

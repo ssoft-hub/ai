@@ -1,5 +1,6 @@
 'use strict';
 const path = require('path');
+const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 
 const BINARY_EXTS = new Set([
   '.png', '.jpg', '.jpeg', '.gif', '.ico', '.bmp', '.webp',
@@ -36,45 +37,36 @@ function check(content, filePath) {
   return { action: warnings.length ? 'warn' : 'pass', warnings };
 }
 
-if (require.main === module) {
-  let raw = '';
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('data', c => { raw += c; });
-  process.stdin.on('end', () => {
-    let data;
-    try { data = JSON.parse(raw); } catch { process.exit(0); }
+function verdict(data) {
+  const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path ?? '';
+  const command = typeof data.tool_input?.command === 'string' ? data.tool_input.command : '';
 
-    const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path ?? '';
-    const command = typeof data.tool_input?.command === 'string' ? data.tool_input.command : '';
+  // The written path decides how the written content is read and says nothing about a
+  // command the same call carries, so the two are checked apart.
+  const checked = [
+    { source: 'file content', r: check(extractContent(data.tool_input), filePath) },
+    { source: 'command', r: command ? check(command, '') : { action: 'pass', warnings: [] } },
+  ];
 
-    // The written path decides how the written content is read and says nothing about a
-    // command the same call carries, so the two are checked apart.
-    const checked = [
-      { source: 'file content', r: check(extractContent(data.tool_input), filePath) },
-      { source: 'command', r: command ? check(command, '') : { action: 'pass', warnings: [] } },
-    ];
+  const blocked = checked.find(({ r }) => r.action === 'block');
+  if (blocked) {
+    return { block:
+      `Blocked: possible secret in ${blocked.source} — ${blocked.r.name}\n` +
+      `${filePath ? `File: ${filePath}\n` : ''}` +
+      `Use env vars or a secrets manager instead of hardcoded values.\n` };
+  }
 
-    const blocked = checked.find(({ r }) => r.action === 'block');
-    if (blocked) {
-      process.stderr.write(
-        `Blocked: possible secret in ${blocked.source} — ${blocked.r.name}\n` +
-        `${filePath ? `File: ${filePath}\n` : ''}` +
-        `Use env vars or a secrets manager instead of hardcoded values.\n`
-      );
-      process.exit(2);
-    }
-
-    const warned = checked.filter(({ r }) => r.action === 'warn');
-    if (warned.length) {
-      process.stdout.write(
-        `secret-guard warning — possible credentials in ${warned.map(w => w.source).join(' and ')}:\n` +
-        warned.flatMap(({ r }) => r.warnings.map(w => `  • ${w.name}`)).join('\n') +
-        `\n${filePath ? `File: ${filePath}\n` : ''}` +
-        `Verify these are not real secrets before committing.\n`
-      );
-    }
-    process.exit(0);
-  });
+  const warned = checked.filter(({ r }) => r.action === 'warn');
+  if (warned.length) {
+    return { output:
+      `secret-guard warning — possible credentials in ${warned.map(w => w.source).join(' and ')}:\n` +
+      warned.flatMap(({ r }) => r.warnings.map(w => `  • ${w.name}`)).join('\n') +
+      `\n${filePath ? `File: ${filePath}\n` : ''}` +
+      `Verify these are not real secrets before committing.\n` };
+  }
+  return undefined;
 }
 
-module.exports = { BINARY_EXTS, BLOCK, WARN, check, extractContent };
+if (require.main === module) runAsScript(verdict);
+
+module.exports = { BINARY_EXTS, BLOCK, WARN, check, extractContent, verdict };

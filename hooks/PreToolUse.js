@@ -1,5 +1,4 @@
 'use strict';
-const { spawnSync } = require('child_process');
 const os = require('os');
 const path = require('path');
 
@@ -18,8 +17,8 @@ const BY_NAME = {
 };
 
 // Tool names are an open set, so the payload decides which guards run. `tools/payload.js`
-// states the same rule for the tools, kept in step by a test: a dispatcher requiring a tool
-// file would die on every call once that file went missing.
+// states the same rule for the tools, kept in step by a test rather than by a require this
+// file depends on to start.
 function guardsFor(input) {
   const command = typeof input?.command === 'string' && input.command.trim();
   const target = input?.file_path ?? input?.path ?? input?.notebook_path;
@@ -53,6 +52,16 @@ function readOutput(out, tool) {
     : { note: `${tool} named no permission decision: ${out}` };
 }
 
+// A guard is loaded where it is called, inside the caller's try, so a file that is missing
+// or throws on load costs that one guard and a line on stderr. Required at the top of this
+// file instead, the same file would throw before any payload is read and take every tool
+// call in the session with it.
+function verdictOf(tool, data) {
+  const { verdict } = require(path.join(toolsDir, tool));
+  if (typeof verdict !== 'function') throw new Error('it exports no verdict');
+  return verdict(data);
+}
+
 function strictest(decisions) {
   return decisions.reduce((a, b) =>
     RANK[b.hookSpecificOutput.permissionDecision] >
@@ -73,22 +82,26 @@ process.stdin.on('end', () => {
   const notes = [];
   const decisions = [];
 
+  // Reading the verdict runs inside the try as well as reaching it: a guard stating one
+  // the wrong way round is the same broken file as one that throws, and costs the same.
   for (const tool of tools) {
-    const r = spawnSync('node', [path.join(toolsDir, tool)], {
-      input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 30000,
-    });
-    if (r.stderr?.trim()) process.stderr.write(`${r.stderr.trim()}\n`);
-    if (r.status === 2) {
-      // A blocked call has no JSON output left to carry a warning: stderr is the only
-      // channel exit 2 leaves open, and it reaches the model as well as the user.
-      if (notes.length) process.stderr.write(`${notes.join('\n')}\n`);
-      process.exit(2);
+    try {
+      const said = verdictOf(tool, data);
+      if (said?.block) {
+        // A blocked call has no JSON output left to carry a warning: stderr is the only
+        // channel exit 2 leaves open, and it reaches the model as well as the user.
+        process.stderr.write(`${String(said.block).trim()}\n`);
+        if (notes.length) process.stderr.write(`${notes.join('\n')}\n`);
+        process.exit(2);
+      }
+      const out = said?.output === undefined ? '' : String(said.output).trim();
+      if (!out) continue;
+      const { decision, note } = readOutput(out, tool);
+      if (decision) decisions.push(decision);
+      else notes.push(note);
+    } catch (err) {
+      process.stderr.write(`PreToolUse: ${tool} did not run — ${String(err?.message).split('\n')[0]}\n`);
     }
-    const out = r.stdout?.trim() ?? '';
-    if (!out) continue;
-    const { decision, note } = readOutput(out, tool);
-    if (decision) decisions.push(decision);
-    else notes.push(note);
   }
 
   if (!decisions.length && !notes.length) process.exit(0);

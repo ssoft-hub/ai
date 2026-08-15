@@ -22,7 +22,8 @@ function run(command, configDir = repoDir, toolName = 'Bash') {
 function mkGateConfig() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
   fs.mkdirSync(path.join(dir, 'tools'));
-  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js', 'payload.js', 'shell-lex.js']) {
+  for (const tool of ['skill-gate.js', 'skill-catalog.js', 'secret-guard.js', 'payload.js',
+    'shell-lex.js', 'guard.js']) {
     fs.copyFileSync(path.join(repoDir, 'tools', tool), path.join(dir, 'tools', tool));
   }
   const skillDir = path.join(dir, 'skills', 'comments');
@@ -45,20 +46,32 @@ const BASH_TOOLS = ['bash-safety.js', 'commit-trailer-guard.js', 'review-publish
 
 // A spec is a decision name, `{ decision, reason: false }` for a tool that decides
 // without stating a reason, `{ decision, context }` for one that speaks to the model
-// alongside its decision, `{ warn }` for plain warning text, `{ block }` for a tool that
-// blocks, or null for a tool that decides nothing.
-function deciding(spec) {
-  if (!spec) return "'use strict';";
-  if (spec.warn) return `'use strict';process.stdout.write(${JSON.stringify(spec.warn)});`;
-  if (spec.block) {
-    return `'use strict';process.stderr.write(${JSON.stringify(spec.block)});process.exit(2);`;
-  }
+// alongside its decision, `{ warn }` for plain warning text, `{ malformed }` for output
+// that is not text, `{ block }` for a tool that blocks, or null for a tool that decides
+// nothing.
+function verdictFor(spec) {
+  if (!spec) return undefined;
+  if (spec.malformed !== undefined) return { output: spec.malformed };
+  if (spec.warn) return { output: spec.warn };
+  if (spec.block) return { block: spec.block };
   const { decision, reason = true, context } = typeof spec === 'string' ? { decision: spec } : spec;
   const hookSpecificOutput = { hookEventName: 'PreToolUse', permissionDecision: decision };
   if (reason) hookSpecificOutput.permissionDecisionReason = `${decision} fixture`;
   if (context) hookSpecificOutput.additionalContext = context;
-  return `'use strict';process.stdout.write(${
-    JSON.stringify(JSON.stringify({ hookSpecificOutput }))});`;
+  return { output: JSON.stringify({ hookSpecificOutput }) };
+}
+
+// `{ broken: 'message' }` is a guard file that throws where a guard would have been
+// loaded — the failure a half-installed tools directory produces, not a stand-in for it.
+// `{ throws: 'message' }` is a guard file that loads and throws on the payload instead,
+// the failure raised inside the dispatcher's own process rather than before it.
+function deciding(spec) {
+  if (spec?.broken) return `'use strict';throw new Error(${JSON.stringify(spec.broken)});`;
+  if (spec?.throws) {
+    return `'use strict';module.exports={verdict:()=>{throw new Error(${JSON.stringify(spec.throws)})}};`;
+  }
+  const said = verdictFor(spec);
+  return `'use strict';module.exports={verdict:()=>(${said ? JSON.stringify(said) : 'undefined'})};`;
 }
 
 function mkConfig(decisions) {
@@ -327,6 +340,73 @@ test('names the tool behind output that decides nothing', () => {
     const context = JSON.parse(run('anything', dir).stdout).hookSpecificOutput.additionalContext;
     assert.match(context, /bash-safety\.js/);
     assert.match(context, /maybe fixture/);
+  } finally { rmConfig(dir); }
+});
+
+test('keeps the decision of another guard when one throws where it is loaded', () => {
+  const dir = mkConfig([{ broken: 'broken fixture' }, 'ask', null]);
+  try {
+    const r = run('anything', dir);
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(JSON.parse(r.stdout).hookSpecificOutput.permissionDecision, 'ask');
+  } finally { rmConfig(dir); }
+});
+
+test('names the guard that threw where it is loaded', () => {
+  const dir = mkConfig([{ broken: 'broken fixture' }, 'ask', null]);
+  try {
+    const r = run('anything', dir);
+    assert.match(r.stderr, /bash-safety\.js.*broken fixture/);
+  } finally { rmConfig(dir); }
+});
+
+test('keeps the decision of another guard when one throws on the payload', () => {
+  const dir = mkConfig([{ throws: 'thrown fixture' }, 'ask', null]);
+  try {
+    const r = run('anything', dir);
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(JSON.parse(r.stdout).hookSpecificOutput.permissionDecision, 'ask');
+  } finally { rmConfig(dir); }
+});
+
+test('names the guard that threw on the payload', () => {
+  const dir = mkConfig([{ throws: 'thrown fixture' }, 'ask', null]);
+  try {
+    const r = run('anything', dir);
+    assert.match(r.stderr, /bash-safety\.js.*thrown fixture/);
+  } finally { rmConfig(dir); }
+});
+
+test('stops at the first block instead of reaching the guards behind it', () => {
+  const dir = mkConfig([{ block: 'first block' }, { block: 'second block' }, null]);
+  try {
+    const r = run('anything', dir);
+    assert.match(r.stderr, /first block/);
+    assert.doesNotMatch(r.stderr, /second block/);
+  } finally { rmConfig(dir); }
+});
+
+test('keeps the decision of another guard when one states output that is not text', () => {
+  const dir = mkConfig([{ malformed: 42 }, 'ask', null]);
+  try {
+    const r = run('anything', dir);
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(JSON.parse(r.stdout).hookSpecificOutput.permissionDecision, 'ask');
+  } finally { rmConfig(dir); }
+});
+
+test('names a guard whose file is missing from the config dir', () => {
+  const dir = mkConfig(['ask', null, null]);
+  try {
+    assert.match(run('anything', dir).stderr, /secret-guard\.js did not run/);
+  } finally { rmConfig(dir); }
+});
+
+test('names a guard whose file exports no verdict', () => {
+  const dir = mkConfig([null, null, null]);
+  try {
+    fs.writeFileSync(path.join(dir, 'tools', 'bash-safety.js'), "'use strict';module.exports={};");
+    assert.match(run('anything', dir).stderr, /bash-safety\.js did not run — it exports no verdict/);
   } finally { rmConfig(dir); }
 });
 
