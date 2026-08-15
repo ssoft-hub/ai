@@ -101,6 +101,11 @@ cost never reaches the rendering path.
    (see `skills/node-testing/SKILL.md` for conventions: flat `test()`, fixtures, `CLAUDE_CONFIG_DIR` isolation)
 4. Run `npm test`
 
+Retiring one is the same list read backwards: drop it from the dispatcher, delete it and
+its test, update every reference to it (`README.md` lists every tool under its hook
+event), and add its installed path (`tools/<name>.js`) to `config/retired.json` — for
+the same reason a retired skill goes there, stated under "Renaming or retiring a skill".
+
 See `skills/hook-scripts/SKILL.md` for full hook development conventions.
 
 ## How a skill reaches the agent
@@ -131,11 +136,13 @@ When several skills fire on one task they are ordered `process` → `domain` →
 The narrower skill rules its own topic and must not restate the wider one.
 
 Neither path reaches a persona agent on its own: a persona invocation is not a user
-prompt, so the reminder never fires for it, and the gate speaks only once the persona is
-already mid-edit. Every persona in `agents/` therefore carries the `Skill` tool and names
-the skills it loads, under the same rule that holds between two skills — it names them
-and does not restate them. The deny-once rule above is for an agent that genuinely cannot
-load a skill, not for a persona.
+prompt, so the every-prompt reminder never reaches one. The edit-time gate is the only
+mechanism that can, and it fires only for a persona that edits files — for a read-only
+persona such as `code-reviewer` or `security-auditor`, neither does, and the skills its
+body names are the only ones it starts from. Every persona in `agents/` therefore
+carries the `Skill` tool and names the skills it loads, under the same rule that holds
+between two skills — it names them and does not restate them. The deny-once rule above is
+for an agent that genuinely cannot load a skill, not for a persona.
 
 ## Skill ownership map
 
@@ -214,11 +221,7 @@ task through a `cpp-` prefixed skill for one line would cost more than the dupli
 5. Add an entry to the skill table in `README.md`
 6. Add the skill's line to the skill ownership map above — the concern it owns and what it
    hands off, plus a hand-off line in every skill it takes a concern from
-7. Add the skill's trigger line to `config/CLAUDE.md`'s "Skills — auto-apply" section
-   (this file is static prose, not regenerated — `tools/skills-reminder.js` reads
-   `skills/` directly so it never goes stale, but this file must be updated by hand;
-   `tools/claude-md-skills-sync-check.js` warns at session start if you forget)
-8. Run `node install.js` to deploy
+7. Run `node install.js` to deploy
 
 A skill is one file: `install.js` copies `skills/<name>/SKILL.md` and nothing else from
 the skill directory, so a sibling reference file never reaches `~/.claude/` and the
@@ -235,10 +238,10 @@ for the machines that already carry the old name.
 1. `git mv skills/<old> skills/<new>`, and set `name:` in the frontmatter to match the
    new directory — `tools/skill-catalog.js` keys the catalog on the directory, so a
    mismatch between the two is silent
-2. Update every reference: `config/CLAUDE.md`, `README.md`, this file, `agents/*.md`,
-   `commands/*.md`, the cross-reference lines of other skills, the `with:` frontmatter
-   of any skill naming it, and tool comments. `grep -rn '<old>'` must come back empty
-   outside `CHANGELOG.md` history
+2. Update every reference: `README.md`, this file, `agents/*.md`, `commands/*.md`, the
+   cross-reference lines of other skills, the `with:` frontmatter of any skill naming
+   it, and tool comments. `grep -rn '<old>'` must come back empty outside
+   `CHANGELOG.md` history
 3. Add the old install path to `config/retired.json`
 4. Record the rename in `CHANGELOG.md` under `### Changed`
 5. Run `node install.js`
@@ -255,12 +258,13 @@ the removal to the user rather than deleting a file it may not own.
 2. Fill in frontmatter (`name`, `description`, `tools`) and the persona's system prompt.
    `tools` must include `Skill`, or the persona cannot load a single one of the skills
    step 3 names
-3. Name the skill(s) the persona must apply in the body and the order to load them in, so
-   it doesn't have to rediscover them from scratch each invocation — then stop. A rule
-   restated here is a copy of the one in `skills/<name>/SKILL.md`, and the persona reads
-   only the copy. What the body carries is what no skill does: the boundary — what this
-   persona does not do, and which other persona picks that up — and, for a persona whose
-   output is a verdict or a set of findings rather than the edited files, the report format
+3. Name the skill(s) the persona must apply in the body and the order to load them in —
+   a skill the body leaves out is one the persona may never load at all, for the reason
+   "How a skill reaches the agent" states — then stop. A rule restated here is a copy of
+   the one in `skills/<name>/SKILL.md`, and the persona reads only the copy. What the
+   body carries is what no skill does: the boundary — what this persona does not do, and
+   which other persona picks that up — and, for a persona whose output is a verdict or a
+   set of findings rather than the edited files, the report format
 4. Write the Composition section: when to invoke the persona directly, which command
    invokes it otherwise, and the standing rule that it must not invoke another persona
    itself — orchestration between personas belongs to commands only
@@ -288,11 +292,11 @@ idea → /spec (spec-architect) → /build (implementer) → /ship (code-reviewe
 ```
 
 Each command is a thin wrapper — see the corresponding `commands/<name>.md` for the
-exact handoff. Skills keep auto-applying contextually per `config/CLAUDE.md`'s "Skills
-— auto-apply" section regardless of which agent or command is active; an agent exists
-to bundle several skills under one persona for a specific pipeline stage, not to
-replace skill auto-apply. When to invoke a persona directly rather than through its
-command is stated in that persona's own Composition section in `agents/<name>.md`.
+exact handoff. An agent exists to bundle several skills under one persona for a specific
+pipeline stage, not to replace the way skills arrive; which of the two paths reaches a
+persona at all, and which persona it leaves with nothing, is stated in "How a skill
+reaches the agent". When to invoke a persona directly rather than through its command is
+stated in that persona's own Composition section in `agents/<name>.md`.
 
 ### Lifecycle map
 
@@ -311,7 +315,7 @@ than naming the nearest one.
 | Branch | — | 2 | → `In Progress` | `commit-rules` → Branch Naming |
 | Build | `/build` → `implementer` | 3 | `In Progress` | `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
 | PR | — | 4 | → `In Review` | `pr-rules`, `changelog`, `submodule-sync`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
-| Review | `/ship`, or `/review-loop` to iterate → `code-reviewer` | none; step 6 waits on it | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules` |
+| Review | `/ship`, or `/review-loop` to iterate → `code-reviewer` | none; step 6 waits on it | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
 | Security audit | `/ship`, or `/review-loop` to iterate → `security-auditor` | none; step 6 waits on it | `In Review` | `security-and-hardening`, `pr-rules` |
 | Pre-merge check | — | 5 | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
 | Merge | — | 6 | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |

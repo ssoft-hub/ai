@@ -1,8 +1,9 @@
 {
-  "$comment": "Paths, relative to the Claude config dir, that this repo shipped once and no longer does. install.js warns when one survives untracked, so a machine whose manifest was lost is not left with a renamed skill live under both names. See AGENTS.md -> Renaming or retiring a skill.",
+  "$comment": "Paths, relative to the Claude config dir, that this repo shipped once and no longer does. install.js warns when one survives untracked, so a machine whose manifest was lost is not left with a file this repo no longer ships: a retired skill stays loadable, and a retired tool stays on disk. See AGENTS.md -> Renaming or retiring a skill, and Adding a new tool check for a tool.",
   "retired": [
     "skills/api-design/SKILL.md",
     "skills/doxygen/SKILL.md",
-    "skills/encapsulation/SKILL.md"
+    "skills/encapsulation/SKILL.md",
+    "tools/claude-md-skills-sync-check.js"
   ]
 }
