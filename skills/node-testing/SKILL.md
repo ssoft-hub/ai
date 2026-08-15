@@ -142,5 +142,17 @@ directory behind, and must not skip cleanup either.
 ```bash
 npm test
 # equivalent to:
-node --test "test/**/*.test.js"
+node --test
 ```
+
+Pass no path. `node --test` walks the tree itself: anywhere under a directory named
+`test` it loads every `.js`, `.cjs` and `.mjs` file whatever its name, and elsewhere the
+files matching `*.test.js`, `*-test.js`, `*_test.js`, `test-*.js` or `test.js`. Every
+file under `test/` therefore has to stand alone as a test file — a shared helper put
+there is loaded and run as one, giving a passing test nobody wrote, or a red suite when
+its top-level code throws. That is why the fixture helpers above are repeated in each
+file, and `test/test-layout.test.js` holds the directory to it.
+
+A glob written into the script is expanded by the shell instead: `cmd.exe`, which npm
+runs a script through on Windows, does not expand one, and node does so itself only from
+version 22 — so on node 18 and 20 a script carrying a glob finds no test file at all.

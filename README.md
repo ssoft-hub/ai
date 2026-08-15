@@ -199,9 +199,10 @@ npm test
 Uses node's built-in `node:test` runner, so there is nothing to install first. Each
 `test/<name>.test.js` takes one unit: a tool, the dispatcher that routes to it, or a step
 of install. Between them they exercise the payloads a guard decides on and the decision it
-returns, the skill and agent frontmatter the routing reads, the `settings.json` merge, and
-an install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than the
-real one.
+returns, the skill and agent frontmatter the routing reads, the `settings.json` merge, an
+install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than the real
+one, and the rule that every file under `test/` is a test file, since the runner loads
+each of them as one.
 
 ## Manual setup
 
