@@ -9,7 +9,7 @@ const toolsDir = path.join(configDir, 'tools');
 // Clear stale background-agent counter from any prior crashed session
 try { require('fs').writeFileSync(path.join(configDir, '.bg-agent-count'), '0'); } catch {}
 
-const CHECKS = ['submodule-status-check.js', 'claude-md-skills-sync-check.js'];
+const CHECKS = ['submodule-status-check.js'];
 
 let raw = '';
 process.stdin.setEncoding('utf8');

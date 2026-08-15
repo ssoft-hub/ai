@@ -25,6 +25,9 @@ this file:
    documentation a new public header owes.
 5. `pr-rules` skill — how a finding is worded, and where review feedback may be published
    at all.
+6. `changelog` skill — on a change that touches `CHANGELOG.md`. The entry is part of the
+   diff under review, and `pr-rules` → Pre-Merge Checklist expects one for every
+   user-visible change.
 
 For anything touching a trust boundary, secrets, or auth, defer the security verdict to
 `security-auditor` rather than rendering it yourself.

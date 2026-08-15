@@ -37,7 +37,6 @@ pipeline of persona agents and commands built on top of them.
 
 **`SessionStart`** — fires once when a session begins, warn-only:
 - `submodule-status-check.js` — warns if any git submodule is ahead/uninitialized/conflicted
-- `claude-md-skills-sync-check.js` — warns if `CLAUDE.md`'s skill list has drifted from `skills/`
 
 **`UserPromptSubmit`** — runs on every user message:
 - `skills-reminder.js` — injects a reminder of the available skills, generated live from `skills/*/SKILL.md` frontmatter; a skill declaring `reminder: false` is left to `skill-gate.js` alone

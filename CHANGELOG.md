@@ -15,7 +15,7 @@
 - `templates/SKILL.md` template for consistent skill authoring
 - Skills: `architecture` (ADRs, design tradeoffs), `node-testing` (`test/*.test.js` conventions), `project-planning` (scoping, estimation, milestones), `requirements` (user stories, acceptance criteria)
 - `commit-trailer-guard` tool: blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
-- `SessionStart` hook: warn-only `submodule-status-check` (flags ahead/uninitialized/conflicted submodules) and `claude-md-skills-sync-check` (flags skills missing from CLAUDE.md's auto-apply list)
+- `SessionStart` hook: warn-only `submodule-status-check` (flags ahead/uninitialized/conflicted submodules)
 - `bg-agent-counter` tool: tracks pending background agents; `Stop` notification deferred until all `run_in_background` agents complete, preventing premature "Task complete" toasts
 - `issue-rules` skill: title format (`Type(scope): Subject`), description templates for features and bugs (Goal, Acceptance criteria, Test plan), labels, priority levels (P0–P3), and lifecycle states
 - Skills: `comments` (non-Doxygen comment style — brief, general, no fix narration), `cpp-encapsulation` (public/protected/private access-specifier discipline)
@@ -42,6 +42,8 @@
 - The statusline keeps whatever the displaced `statusLine` command drew, in front of its own badges. Claude Code registers one such command, so a plugin's statusline would otherwise disappear on install; the command string install recorded is all the tool knows about it — no path, no file, no plugin name — and uninstall hands the slot back untouched. That command never runs while the line is being rendered: each render prints the text the previous run cached and, once that text is older than two seconds, leaves a detached process behind to refresh it, so a command taking a third of a second costs nothing per keystroke and its badge trails by one render at most. A failing or slow command leaves its text absent and changes nothing else
 
 ### Changed
+
+- The global `CLAUDE.md` no longer restates the skill list and its triggers, and the session-start check that policed that copy against `skills/` is gone with it. The reminder injected on each prompt is generated from the same frontmatter that decides how a skill is triggered, so it cannot fall behind. A subagent never sees that reminder: the skills its persona in `agents/` names are the only list it starts from, and a skill tied to a kind of file is announced when that file is edited rather than on every prompt
 
 - `CONTRIBUTING.md` no longer carries a branch pattern and a commit-type list that contradict `commit-rules`, nor a five-step recipe for adding a skill that left it reaching no agent at all - the template it started from ships an opt-out from the every-prompt reminder and a placeholder path glob, and the recipe named neither. Each rule now comes from the file that owns it, and the order of work from `pr-rules` -> Workflow and the lifecycle map rather than a third partial account. `README.md`'s manual setup installs what `node install.js` installs and names what it cannot cover: nothing is backed up, and `uninstall.js` has no record to reverse. The git pre-commit hook is stated to apply to this checkout alone
 

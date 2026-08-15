@@ -36,12 +36,13 @@ A skill is one file, `skills/<name>/SKILL.md`, plain Markdown loaded at runtime 
 build step. Keep its content to rules and patterns, not explanations of why Claude Code
 behaves the way it does.
 
-Creating that file is not the whole job: the frontmatter decides when the skill is
-triggered and at which tier, the ownership map states its boundary against its
-neighbours, and `config/CLAUDE.md` carries its auto-apply line, which the session-start
-check warns about while it is missing. `AGENTS.md` -> Adding a skill carries the steps,
-from the pre-flight check against that map through to `node install.js`;
-`AGENTS.md` -> Renaming or retiring a skill covers the other direction.
+Creating that file is not the whole job: the frontmatter is the only place a skill's
+triggers are declared - the tier it loads in, whether it is announced on every prompt or
+only when a file it owns is edited, and the skills that must arrive with it - and the
+ownership map states its boundary against its neighbours. `AGENTS.md` -> Adding a skill
+carries the steps, from the pre-flight check against that map through to
+`node install.js`; `AGENTS.md` -> Renaming or retiring a skill covers the other
+direction.
 
 ## Tests
 
