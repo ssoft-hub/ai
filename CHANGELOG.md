@@ -111,3 +111,7 @@
 ### CI
 
 - GitHub Actions workflow running `npm test` on Node 18, 20, 22 on every push and PR to `main`
+
+- The suite runs on Windows as well as Linux, on every node version in the matrix. This repository installs into a Windows config directory and is developed there, so a green run on Linux alone said nothing about the platform the code is written for. Every combination reports as its own job and none cancels another, so a failure names the platform it belongs to
+
+- `npm test` no longer depends on the shell to expand a glob. The script carried `test/*.test.js`, which npm hands to `cmd.exe` unexpanded on Windows, so on node 18 and 20 no test ran at all. `node --test` finds the test files itself, whichever shell ran the script
