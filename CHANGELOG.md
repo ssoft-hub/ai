@@ -43,6 +43,8 @@
 
 ### Changed
 
+- `CONTRIBUTING.md` no longer carries a branch pattern and a commit-type list that contradict `commit-rules`, nor a five-step recipe for adding a skill that left it reaching no agent at all - the template it started from ships an opt-out from the every-prompt reminder and a placeholder path glob, and the recipe named neither. Each rule now comes from the file that owns it, and the order of work from `pr-rules` -> Workflow and the lifecycle map rather than a third partial account. `README.md`'s manual setup installs what `node install.js` installs and names what it cannot cover: nothing is backed up, and `uninstall.js` has no record to reverse. The git pre-commit hook is stated to apply to this checkout alone
+
 - The development lifecycle was stated twice along axes that never referenced each other — `pr-rules` → Workflow's seven steps, and `AGENTS.md`'s pipeline of commands and personas — so nothing said whether `/build` is step 3 or steps 2 to 4, or where planning and release sit. `AGENTS.md` → Idea-to-Release Pipeline now carries a lifecycle map: one row per stage against the seven steps, the `issue-rules` state the issue is in, and the skills that apply there. Both ends are on it, and a stage no command or persona covers says so rather than naming the nearest one; `pr-rules` → Workflow points at it
 
 - A dot-file or dot-directory is now ignored unless `.gitignore` names it as one this repository tracks. Every tool, editor and agent runtime leaves one behind, and each had to be noticed and added by hand before `git status` was quiet again; an untracked directory nobody has got round to sits next to a file that genuinely should have been committed, and trains the reader to skim past both

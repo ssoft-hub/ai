@@ -1,45 +1,49 @@
 # Contributing
 
-## Commit format
+## Workflow
 
-Conventional Commits — see `skills/commit-rules/SKILL.md` for full rules.
+The order of work - issue, branch, commits, PR, pre-merge check, merge, close - is stated
+in full in `skills/pr-rules/SKILL.md` -> Workflow, and lined up against the pipeline
+stage, the state the issue is in and the skills that apply in `AGENTS.md` -> Lifecycle
+map. Follow those two; this file does not carry a third version of them.
 
-```
-type(scope): subject
-```
+## Commits and branches
 
-Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `ci`.
-Subject: imperative mood, lowercase after colon, ≤ 72 chars total.
-Body: describe what changed and why. Do not enumerate file names or reference commit hashes.
+Conventional Commits. The message format, the type vocabulary, the body and the branch
+name pattern are owned by `skills/commit-rules/SKILL.md` - read it before the first
+commit rather than copying the shape of a nearby one.
 
-No `Co-Authored-By` or AI-attribution trailers.
+Two of its rules are enforced rather than left to the reader: this checkout's pre-commit
+hook rejects a commit made directly on a protected branch (`main`, `master`, `dev`,
+`develop`), and the `commit-trailer-guard` tool blocks
+a `git commit` an agent runs with an AI-attribution trailer in the message.
 
 ## Hook and tool scripts
 
-- Node.js built-ins only — no npm, no third-party `require`
-- No hardcoded paths — use `process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude')`
-- Exit codes: `0` = allow/warn (stdout), `2` = block (stderr). Never `1`.
+Node built-ins only, and no shell logic inside a script - the only shell is the `node -e`
+launcher in `settings.json`; no hardcoded paths, `process.env.CLAUDE_CONFIG_DIR ||
+path.join(os.homedir(), '.claude')` instead; exit `0` to allow or warn on stdout and `2`
+to block on stderr, never `1`. That is the short form of
+`skills/hook-scripts/SKILL.md` -> Hard Rules and Exit Codes, which the rest of a patch to
+`hooks/` or `tools/` is read against.
 
-See `skills/hook-scripts/SKILL.md` for full conventions.
+A new tool also has to be routed to and covered by a test, or nothing ever runs it - see
+`AGENTS.md` -> Adding a new tool check for the steps.
 
 ## Skills
 
-Each skill lives in `skills/<name>/SKILL.md`. Skills are plain Markdown loaded
-by Claude Code at runtime — no build step.
+A skill is one file, `skills/<name>/SKILL.md`, plain Markdown loaded at runtime with no
+build step. Keep its content to rules and patterns, not explanations of why Claude Code
+behaves the way it does.
 
-Keep skill content focused on rules and patterns, not explanations of why
-Claude Code works the way it does.
+Creating that file is not the whole job: the frontmatter decides when the skill is
+triggered and at which tier, the ownership map states its boundary against its
+neighbours, and `config/CLAUDE.md` carries its auto-apply line, which the session-start
+check warns about while it is missing. `AGENTS.md` -> Adding a skill carries the steps,
+from the pre-flight check against that map through to `node install.js`;
+`AGENTS.md` -> Renaming or retiring a skill covers the other direction.
 
-Use `templates/SKILL.md` as the starting template when creating a new skill:
+## Tests
 
-1. Copy `templates/SKILL.md` to `skills/<name>/SKILL.md`
-2. Fill in frontmatter (name, description, tags)
-3. Write rules sections following the template structure
-4. Add entry to the skill table in `README.md`
-5. Run `node install.js` to deploy
-
-## Branches
-
-Work on feature branches. Direct commits to `main` are blocked by the pre-commit hook.
-
-Branch naming: `<owner>/feat/<topic>`, `<owner>/fix/<topic>`, `<owner>/chore/<topic>`.
+Run `npm test` before opening a PR. Conventions for the files under `test/` are in
+`skills/node-testing/SKILL.md`.
