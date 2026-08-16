@@ -5,10 +5,12 @@ const path = require('path');
 const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 const { loadCatalog, matchSkills } = require(path.join(__dirname, 'skill-catalog.js'));
 const { commandIn, writePathIn } = require(path.join(__dirname, 'payload.js'));
-const { lex, TRANSPARENT } = require(path.join(__dirname, 'shell-lex.js'));
+const { lex, TRANSPARENT, readableBodies } = require(path.join(__dirname, 'shell-lex.js'));
 
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 
+// a session id names a state file, so only these characters may reach a path
+const SESSION_ID = /^[\w.-]{1,64}$/;
 const SKILL_CALL = /"name"\s*:\s*"Skill"\s*,\s*"input"\s*:\s*\{\s*"skill"\s*:\s*"([^"]+)"/g;
 
 function skillsIn(text) {
@@ -114,7 +116,15 @@ function powershellTarget(operands) {
   return lastFlagValue;
 }
 
+// A here-document body a shell runs writes the files its commands name, so the gate reads
+// the bodies `shell-lex` hands to `commands()` as well as the command it was given.
 function writeTargets(command) {
+  const found = targetsIn(String(command));
+  for (const body of readableBodies(command)) found.push(...targetsIn(body));
+  return [...new Set(found)];
+}
+
+function targetsIn(command) {
   const tokens = lex(String(command));
   const targets = [];
   let commandPosition = true;
@@ -159,8 +169,14 @@ function verdict(data) {
   if (!targets.length) return undefined;
 
   const catalog = loadCatalog(path.join(configDir, 'skills'));
-  const statePath = path.join(configDir, 'session-env', `${data.session_id ?? 'unknown'}.skill-gate.json`);
-  const loaded = new Set(data.transcript_path ? loadedSkills(data.transcript_path, statePath) : []);
+  // The id names a file, so it is checked rather than trusted: `..` in one would place that
+  // file outside `session-env/`, and a shared fallback would let one session's spent deny
+  // suppress another's. Without a usable id there is no per-session state to keep.
+  const session = SESSION_ID.test(data.session_id ?? '') ? data.session_id : null;
+  const statePath = session
+    && path.join(configDir, 'session-env', `${session}.skill-gate.json`);
+  const loaded = new Set(data.transcript_path && statePath
+    ? loadedSkills(data.transcript_path, statePath) : []);
   const hits = targets
     .map(file => ({ file, missing: matchSkills(catalog, file).filter(name => !loaded.has(name)) }))
     .filter(hit => hit.missing.length);
@@ -168,7 +184,7 @@ function verdict(data) {
 
   const text = hits.map(hit => notice(hit.file, hit.missing)).join('\n');
   const key = hits.map(hit => `${hit.file}|${hit.missing.join(',')}`).join(';');
-  if (!denyOnce(statePath, key)) return { output: text };
+  if (!statePath || !denyOnce(statePath, key)) return { output: text };
 
   const blocked = `${text} This call was blocked; load them, then retry it.`;
   return { output: JSON.stringify({ hookSpecificOutput: {

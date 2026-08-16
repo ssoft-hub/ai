@@ -82,6 +82,68 @@ a quoted argument stays one opaque token so prose naming a command gates nothing
 interpreter's own argument is read as a command string in its own right — `bash -c`,
 `cmd /c`, `powershell -Command` and its base64 `-EncodedCommand`, and the string a
 `node -e` or `python -c` script hands to its exec function, three quoting levels deep.
+A here-document is quoting too, but a body is skipped only where the lexer can prove both
+ends: the marker is a form it reads — `<<EOF`, `<<'EOF'`, `<<"EOF"`, `<<\EOF`, and
+`<<-EOF` whose terminator is reached past leading tabs — and a later line closes it.
+Everything else stays lexed as commands: a body no line closes, a marker form not
+modelled, `<<$'EOF'` whose escapes the shell processes into a shorter delimiter than the
+text spells, and a `<<` the shell never reads as a redirection at all — inside `$(( ))` or
+`(( ))` arithmetic, where it shifts, inside a `#` comment, or inside a `${ }`, `$[ ]` or
+array subscript. That is the direction to
+fail in, since an unmodelled shape then costs a guard that runs where it need not rather
+than one blind to the rest of the input, and it bounds the shapes nobody has found yet
+instead of the ones already listed. It bounds the cost as well: an unclosed marker leaves
+the search where it began, so a command built of them would search its own remainder once
+per line, and the search stops skipping anything once it has spent its budget. What surrounds a skipped body stays a command: the
+redirection on the marker's line, the rest of that line once a `\` continuation and a
+`$( )` or backtick run spanning newlines are joined onto it, and whatever follows the
+terminator. `<<<` carries one word and no body at all.
+
+A body belongs to the line that names it. It starts on the line after the marker, so a
+marker whose newline arrives where no body can start — inside a frame, or after the frames
+stopped adding up — is dropped unread rather than held for a later newline, which would
+skip lines the shell runs.
+
+Whether a body is data is decided by two questions, and neither is answered by the command
+word owning the `<<`. The first is who executes it: not the owner but every stage of the
+pipeline it sits in, since `cat <<EOF | bash` hands the body along and is the ordinary
+installer idiom rather than an adversarial spelling. The second is whether the shell got
+there first: an unquoted delimiter has it expand the body, so a `$( )` or backtick written
+there runs before any reader sees it, and those spans are commands even when the reader is
+`cat`. The literal lines around them stay data, which is what keeps a document quiet.
+
+So the body is skipped whole only for a name in `DATA_SINKS`, whose standard input is data
+and stays data. Every other name hands its body to `commands()` — an interpreter because it
+is the program, and an unrecognised name because a list of interpreters guarding the unsafe
+direction is blind to every name nobody wrote down: `timeout 5 bash`, `env -u FOO bash` and
+`. /dev/stdin` all read one. That is the same reason the dispatcher keys on the payload
+rather than on the tool name, and it holds for the *form* of the reader as well as its
+name: a compound command owns a redirection and is a pipeline stage while its head is
+punctuation rather than a word, so `(bash) <<EOF` and `cat <<EOF | (cd /tmp && bash)` name
+nothing the lexer can look up. A body whose readers do not account for every stage of its
+pipeline is therefore read as commands, which covers the forms nobody has named. A name in
+the sink list that the same string redefines as a function is not a sink for that string. A here-string (`bash <<<'…'`) is outside all of this: its data
+reaches the interpreter by another path and is not read as a program.
+
+A body is the only span skipped, and that is the rule rather than an accident: every span
+stepped over is a span no guard reads, so the ones that are not here are read through
+instead. Arithmetic is one of them — `$(( ))` and `(( ))` suppress the `<<`, `<`, `>` and
+`#` inside them, which mean shift, comparison and radix there, while the span itself stays
+lexed, because the shell runs a `$( )` or backtick written inside it before evaluating
+anything. Its operands are dropped only once an adjacent `))` closes the span, that being
+the spelling the shell reads as arithmetic: `((cmd); (cmd))` and `((cmd) )` are nested
+subshells it runs, so what they carry is kept. A `#` comment is another — it is read in
+order to bar a `<<` inside it from opening a body, and never to skip what it covers, since
+the dialect of a command handed to the lexer is not provable and `cmd` has no comment at
+all. Barring one the shell would have honoured only leaves text lexed, so that reading is
+safe in both directions where skipping was not. A token opened inside a comment ends with
+the line, or an apostrophe in ordinary prose would quote every command after it. Frames are
+the fourth, and they err the same way: a `case` pattern's `)` closes none, and a `)`
+matching nothing at all bars a body from starting for the rest of the command rather than
+letting one start, since only an empty frame stack permits it. A backslash takes the shell
+meaning off the metacharacter behind it, so an escaped `)` joins the word it sits in rather
+than closing a substitution the shell still has open — and stays literal before anything
+else, since `C:\Tools\git.exe` names git to the Windows shell the same payload can reach.
 `tools/git-command.js` reads that argv as a git call: the global options git accepts
 before the subcommand (`-C <dir>`, `-c <name>=<value>`, `--git-dir=<path>`, …) are skipped
 and an alias is resolved to the subcommand it stands for, whether it was defined with
@@ -92,7 +154,7 @@ commit message.
 
 Only rules whose subject is not a command stay on the raw text — the SQL warnings in
 `bash-safety`, since `psql -c "DROP TABLE users"` carries its subject inside the quotes
-that argv makes opaque.
+that argv makes opaque, and `psql <<EOF` carries it in a body argv leaves out entirely.
 
 All paths resolved via `process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude')`.
 No hardcoded user paths anywhere. No npm dependencies.

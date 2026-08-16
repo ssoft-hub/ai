@@ -19,7 +19,7 @@ pipeline of persona agents and commands built on top of them.
 ## Hooks
 
 **`PreToolUse`** — runs before every tool call, routed by payload rather than by tool name: any tool carrying a `command` string reaches the command guards, and any tool naming a write target together with its content reaches the write guards. A command is checked for what it does, not for which tool was asked to run it, so a second shell or an MCP server cannot slip past by being spelled differently. The dispatcher calls each guard inside the dispatcher's own process instead of starting one process per guard, so the pause in front of a guarded call does not grow with the number of guards; a guard whose file is missing or broken costs that guard and a line on stderr, never the session:
-- `bash-safety.js` — blocks destructive shell commands (`rm -rf /`, `format C:`), warns on reversible-but-risky ones (`git reset --hard`, `DROP TABLE`), and prompts before `git push`. Rules read the command as argv, so a prefix (`sudo`, `env`, `VAR=x`), a git global option (`git -C <dir> push`), a git alias, or an interpreter carrying the command (`bash -c`, `powershell -EncodedCommand`, `node -e`) does not hide it, and a command named inside a quoted argument does not trigger it
+- `bash-safety.js` — blocks destructive shell commands (`rm -rf /`, `format C:`), warns on reversible-but-risky ones (`git reset --hard`, `DROP TABLE`), and prompts before `git push`. Rules read the command as argv, so a prefix (`sudo`, `env`, `VAR=x`), a git global option (`git -C <dir> push`), a git alias, or an interpreter carrying the command (`bash -c`, `powershell -EncodedCommand`, `node -e`) does not hide it, and a command named inside a quoted argument or a here-document body does not trigger it
 - `commit-trailer-guard.js` — blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `review-publish-guard.js` — prompts for confirmation before a `gh` command that publishes review feedback on the spot (`gh pr review --comment/--approve/--request-changes`, `gh pr comment`, REST `in_reply_to`, an `event` field on `POST /pulls/{n}/reviews`, `submitPullRequestReview`, and a thread reply carrying no `pullRequestReviewId`); the pending-review path stays unprompted
 - `secret-guard.js` — blocks writes (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`) and shell commands containing private keys, AWS keys, GitHub PATs; warns on probable credentials
@@ -203,6 +203,25 @@ returns, the skill and agent frontmatter the routing reads, the `settings.json` 
 install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than the real
 one, and the rule that every file under `test/` is a test file, since the runner loads
 each of them as one.
+
+`test/shell-lex-differential.test.js` is the exception to one file per unit: it reads the
+shell lexer against the shell itself, running each shape under `bash` and through
+`tools/shell-lex.js` to compare what the two make of it. Its criterion is deliberately
+asymmetric — bash running a command the lexer never sees fails the test, since every guard
+keyed on that command goes blind, while the lexer reading a command bash does not run is
+reported and passes, because it costs a prompt. Each shape runs in a temporary directory
+and is detected by a file the payload creates rather than by its output, since bash quotes
+the offending source text in its own diagnostics. The file skips itself where `bash` is not
+on `PATH`.
+
+`test/shell-lex-generated.test.js` applies the same comparison to a generated space rather
+than a written list: a grammar of wrappers, payload positions, marker forms, redirection
+owners and terminator positions, crossed. It exists because a written list keeps missing the
+mechanism nobody thought of, so a new one is added to it as a dimension rather than as
+another example — and because the dimensions interact, terminator position most of all.
+Neither the passing count nor the false-positive count is asserted; the space is meant to
+grow. A shape the lexer is known to miss is listed against its issue and fails once it
+starts being read correctly, so the space is never quietly narrowed.
 
 ## Manual setup
 

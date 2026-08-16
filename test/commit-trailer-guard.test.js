@@ -50,6 +50,22 @@ test('blocks a trailer behind sudo git commit', () => {
   assert.strictEqual(r.action, 'block');
 });
 
+test("blocks a trailer on the line after a <<$'EOF' here-document", () => {
+  const r = check(["cat <<$'EOF'", 'body', 'EOF',
+    'git commit -m "x" -m "Co-Authored-By: A <a@b>"'].join('\n'));
+  assert.strictEqual(r.action, 'block');
+});
+
+test('blocks a trailer on a commit run from inside arithmetic', () => {
+  const r = check('echo $(( $(git commit -m "x" -m "Co-Authored-By: A <a@b>") ))');
+  assert.strictEqual(r.action, 'block');
+});
+
+test('blocks a trailer on a commit in (( )) the shell rereads as subshells', () => {
+  const r = check('((git commit -m "x" -m "Co-Authored-By: A <a@b>"); (:))');
+  assert.strictEqual(r.action, 'block');
+});
+
 test('passes non-commit Bash command', () => {
   const r = check('echo "Co-Authored-By: Bot"');
   assert.strictEqual(r.action, 'pass');

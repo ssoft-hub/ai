@@ -232,6 +232,40 @@ test('writeTargets finds the file behind an output redirection', () => {
   assert.deepStrictEqual(writeTargets('echo x >> "logs of work.md"'), ['logs of work.md']);
 });
 
+test('writeTargets ignores a redirection named inside a here-document body', () => {
+  const command = ["cat > doc.md <<'EOF'", 'Example: echo x > note.cpp', 'EOF'].join('\n');
+  assert.deepStrictEqual(writeTargets(command), ['doc.md']);
+});
+
+test('writeTargets finds the redirection following a marker that carries a body', () => {
+  const command = ['cat <<EOF > src/a.cpp', 'int main() { return 0; }', 'EOF'].join('\n');
+  assert.deepStrictEqual(writeTargets(command), ['src/a.cpp']);
+});
+
+test('writeTargets finds a tee after a comment that names a here-document', () => {
+  const command = ['echo hi   # write it with cat <<EOF', 'tee src/a.cpp'].join('\n');
+  assert.deepStrictEqual(writeTargets(command), ['src/a.cpp']);
+});
+
+test('writeTargets finds a tee on the line after an unclosed here-document', () => {
+  const command = ['cat <<EOF', 'body', 'tee src/a.cpp'].join('\n');
+  assert.deepStrictEqual(writeTargets(command), ['src/a.cpp']);
+});
+
+test('writeTargets finds a write inside a body an interpreter runs', () => {
+  const command = ["bash <<'EOF'", 'tee skills/x/SKILL.md', 'EOF'].join('\n');
+  assert.deepStrictEqual(writeTargets(command), ['skills/x/SKILL.md']);
+});
+
+test('writeTargets finds a write inside a body a pipeline stage runs', () => {
+  const command = ["cat <<'EOF' | bash", 'tee src/a.cpp', 'EOF'].join('\n');
+  assert.deepStrictEqual(writeTargets(command), ['src/a.cpp']);
+});
+
+test('writeTargets finds a tee in (( )) the shell rereads as nested subshells', () => {
+  assert.deepStrictEqual(writeTargets('((tee src/a.cpp); (:))'), ['src/a.cpp']);
+});
+
 test('writeTargets leaves descriptor and null redirections alone', () => {
   assert.deepStrictEqual(writeTargets('cmd > /dev/null 2>&1'), []);
   assert.deepStrictEqual(writeTargets('cmd 2> /dev/null'), []);
@@ -317,6 +351,32 @@ test('gate denies a bash write to a file a skill claims', () => {
     const r = runGate(dir, {
       tool_name: 'Bash',
       tool_input: { command: 'cat <<EOF > src/a.cpp' },
+      session_id: 's1',
+    });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate stays silent for a here-document body naming a claimed path', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'Bash',
+      tool_input: { command: ["cat > doc.md <<'EOF'", 'Example: echo x > note.cpp', 'EOF'].join('\n') },
+      session_id: 's1',
+    });
+    assert.strictEqual(r.stdout.trim(), '');
+  } finally { rmTmp(dir); }
+});
+
+test('gate denies a here-document written into a file a skill claims', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, {
+      tool_name: 'Bash',
+      tool_input: { command: ['cat > src/a.cpp <<EOF', 'int main() { return 0; }', 'EOF'].join('\n') },
       session_id: 's1',
     });
     const out = JSON.parse(r.stdout);
