@@ -199,6 +199,10 @@ test('blocks rm -rf / behind a transparent prefix', () => {
   assert.strictEqual(check('xargs rm -rf /').action, 'block');
 });
 
+test('blocks rm -rf / behind an escaped transparent prefix', () => {
+  assert.strictEqual(check('\\sudo rm -rf /').action, 'block');
+});
+
 test('does not block rm -rf / named inside a quoted argument', () => {
   assert.strictEqual(check('gh issue comment 84 -b "never run rm -rf / on a host"').action, 'pass');
 });

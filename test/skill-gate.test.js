@@ -162,6 +162,39 @@ test('gate denies a fresh file even after another file was denied', () => {
   } finally { rmTmp(dir); }
 });
 
+test('gate warns rather than denying a payload that carries no session id', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const r = runGate(dir, { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' } });
+    assert.throws(() => JSON.parse(r.stdout));
+    assert.ok(r.stdout.includes('cpp-coding'));
+  } finally { rmTmp(dir); }
+});
+
+test('gate writes no state file outside session-env for an id naming a parent directory', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    runGate(dir, { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: '../escaped' });
+    const stray = fs.readdirSync(dir).filter(entry => entry.endsWith('.skill-gate.json'));
+    assert.deepStrictEqual(stray, []);
+  } finally { rmTmp(dir); }
+});
+
+test('gate keeps no session state at all for an id holding a path separator', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const transcript = path.join(dir, 't.jsonl');
+    fs.writeFileSync(transcript, transcriptLine('cpp-coding') + '\n');
+    runGate(dir, {
+      tool_name: 'Edit',
+      tool_input: { file_path: 'D:/repo/a.cpp' },
+      session_id: 'a/b',
+      transcript_path: transcript,
+    });
+    assert.deepStrictEqual(fs.readdirSync(path.join(dir, 'session-env')), []);
+  } finally { rmTmp(dir); }
+});
+
 test('gate names the skills claiming the edited file', () => {
   const dir = mkConfigDir({
     'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n  with: [comments]\n',

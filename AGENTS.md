@@ -143,7 +143,11 @@ every prompt:
   repeat of the same file and missing set warns instead, so an agent without the
   Skill tool is slowed once, never deadlocked. Loaded skills and spent denies are
   tracked per session in `session-env/<session_id>.skill-gate.json` against a
-  transcript byte cursor.
+  transcript byte cursor. The id names that file, so it is checked against
+  `[\w.-]{1,64}` before it reaches a path: a separator in one would write outside
+  `session-env/`, and a shared fallback for the payloads carrying no id would let one
+  context's spent deny suppress another's. Without a usable id there is no state to
+  spend, so such a call warns rather than being denied.
 
 Both read `tools/skill-catalog.js`, which parses `tier`/`paths`/`with` out of each
 `SKILL.md` frontmatter — the frontmatter is the only place a skill's triggers are

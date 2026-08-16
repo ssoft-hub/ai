@@ -204,6 +204,19 @@ install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than
 one, and the rule that every file under `test/` is a test file, since the runner loads
 each of them as one.
 
+Two of them take no unit: `shell-lex-differential` and `shell-lex-generated` run each
+shape under bash as well as through `tools/shell-lex.js` and compare the two readings, the
+first over a written corpus and the second over a generated space. The criterion is
+asymmetric — bash running a command the lexer never sees fails the run, while the lexer
+reading a command bash does not run is reported and does not — and a bypass already known
+is pinned inverted, so it goes red when it starts being read correctly.
+
+Each shape costs a bash process, which is most of what a full run takes, so those two are
+opt-in: `SHELL_LEX_CORPUS=1 npm test` runs them and a plain `npm test` reports them as
+skipped, naming the variable. CI sets it on every cell of the matrix, so a branch push
+runs them whether or not anyone ran them locally. They skip themselves where bash is not
+on PATH.
+
 ## Manual setup
 
 For a machine without Node, or to see exactly what lands where. The copies below place

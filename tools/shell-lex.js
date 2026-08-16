@@ -150,7 +150,8 @@ function commands(command, depth = 0, budget = { left: MAX_NESTED }) {
     if (token.op === 'redir' || token.consumesWord) { k += 1; continue; }
     if (token.op === 'skip') continue;
     if (argv) { argv.push(token); continue; }
-    if (!token.quoted && (/^\w+=/.test(token.word) || TRANSPARENT.has(token.word.toLowerCase()))) continue;
+    // `\sudo` and `/usr/bin/sudo` run sudo, so the prefix test reads the name, not the word
+    if (!token.quoted && (/^\w+=/.test(token.word) || TRANSPARENT.has(commandName(token)))) continue;
     argv = [token];
     calls.push(argv);
   }

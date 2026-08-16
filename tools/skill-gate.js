@@ -9,6 +9,8 @@ const { lex, TRANSPARENT } = require(path.join(__dirname, 'shell-lex.js'));
 
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 
+// a session id names a state file, so only these characters may reach a path
+const SESSION_ID = /^[\w.-]{1,64}$/;
 const SKILL_CALL = /"name"\s*:\s*"Skill"\s*,\s*"input"\s*:\s*\{\s*"skill"\s*:\s*"([^"]+)"/g;
 
 function skillsIn(text) {
@@ -22,9 +24,11 @@ function gateTargets(input, toolName) {
 }
 
 // The transcript only grows, so a run scans the bytes appended since the previous one.
+// A null state path is a supported caller, not an impossible one: there is then no cursor
+// to keep and the scan starts from zero, so both guards below are load-bearing.
 function loadedSkills(transcriptPath, statePath) {
   let state = { size: 0, skills: [] };
-  try { state = JSON.parse(fs.readFileSync(statePath, 'utf8')); } catch {}
+  if (statePath) { try { state = JSON.parse(fs.readFileSync(statePath, 'utf8')); } catch {} }
 
   let size;
   try { size = fs.statSync(transcriptPath).size; } catch { return []; }
@@ -46,10 +50,12 @@ function loadedSkills(transcriptPath, statePath) {
   }
 
   const skills = [...new Set([...state.skills, ...skillsIn(chunk)])];
-  try {
-    fs.mkdirSync(path.dirname(statePath), { recursive: true });
-    fs.writeFileSync(statePath, JSON.stringify({ ...state, size: consumed, skills }));
-  } catch {}
+  if (statePath) {
+    try {
+      fs.mkdirSync(path.dirname(statePath), { recursive: true });
+      fs.writeFileSync(statePath, JSON.stringify({ ...state, size: consumed, skills }));
+    } catch {}
+  }
   return skills;
 }
 
@@ -159,7 +165,11 @@ function verdict(data) {
   if (!targets.length) return undefined;
 
   const catalog = loadCatalog(path.join(configDir, 'skills'));
-  const statePath = path.join(configDir, 'session-env', `${data.session_id ?? 'unknown'}.skill-gate.json`);
+  // No usable id means no state rather than a shared one, which two contexts would
+  // spend each other's deny out of.
+  const session = SESSION_ID.test(data.session_id ?? '') ? data.session_id : null;
+  const statePath = session
+    && path.join(configDir, 'session-env', `${session}.skill-gate.json`);
   const loaded = new Set(data.transcript_path ? loadedSkills(data.transcript_path, statePath) : []);
   const hits = targets
     .map(file => ({ file, missing: matchSkills(catalog, file).filter(name => !loaded.has(name)) }))
@@ -168,7 +178,7 @@ function verdict(data) {
 
   const text = hits.map(hit => notice(hit.file, hit.missing)).join('\n');
   const key = hits.map(hit => `${hit.file}|${hit.missing.join(',')}`).join(';');
-  if (!denyOnce(statePath, key)) return { output: text };
+  if (!statePath || !denyOnce(statePath, key)) return { output: text };
 
   const blocked = `${text} This call was blocked; load them, then retry it.`;
   return { output: JSON.stringify({ hookSpecificOutput: {

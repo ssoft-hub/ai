@@ -20,3 +20,5 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm test
+        env:
+          SHELL_LEX_CORPUS: 1
