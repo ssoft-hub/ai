@@ -138,12 +138,47 @@ every prompt:
   and on any tool carrying a shell command for the file that command writes to — a redirection, `tee`,
   `Set-Content`/`Add-Content`/`Out-File`, or a `cp`/`mv` destination) matches the
   written file against every skill's `paths:`, adds the skills named in their `with:`,
-  and subtracts the ones already loaded in this session's transcript. The first call
+  and subtracts the ones the agent making the call has already loaded. The first call
   left with missing skills is denied with instructions to load them and retry; a
   repeat of the same file and missing set warns instead, so an agent without the
-  Skill tool is slowed once, never deadlocked. Loaded skills and spent denies are
-  tracked per session in `session-env/<session_id>.skill-gate.json` against a
-  transcript byte cursor.
+  Skill tool is slowed once, never deadlocked.
+
+  Loaded skills and spent denies are tracked per agent, against a transcript byte
+  cursor. Which agent is making the call comes from `agent_id` in the payload, which
+  Claude Code sets only inside a subagent — so the main thread keeps
+  `session-env/<session_id>.skill-gate.json` and a subagent gets
+  `session-env/<session_id>.<agent_id>.skill-gate.json`. Both halves of that split are
+  needed: a subagent's turns are not written to `transcript_path` at all but to
+  `<dirname(transcript_path)>/<session_id>/subagents/agent-<agent_id>.jsonl`, so a gate
+  reading the session transcript sees every skill the main agent loaded and none of the
+  ones the subagent did. Keyed on the session alone it answers the wrong agent in both
+  directions — vouching for a persona's edit with the main agent's loads, and spending a
+  persona's deny against the main agent's next call. That path is the construction Claude
+  Code makes rather than a guess at it: it builds the session transcript as
+  `<project dir>/<session_id>.jsonl` and the subagents directory as
+  `<project dir>/<session_id>/subagents`, so the directory holding `transcript_path` is
+  the project directory in both.
+
+  One detail of that transcript is read off what Claude Code writes rather than off a
+  documented contract: the skill name arrives under `input.skill` on a main thread but
+  under `input.command` from a subagent, so both keys are read. It fails safe — a shape
+  neither key matches leaves the transcript unreadable, which costs a deny and then
+  warns, so the gate loses precision, never the ability to let work through.
+
+  Every id the gate puts in one of those paths must be a plain identifier, and one that
+  is not is carried as a digest of itself: `session_id` names a directory and part of a
+  file name, `agent_id` names both a file and part of one, and neither may walk out of
+  the tree it belongs to. Hashing rather than dropping keeps each agent distinct — an id
+  dropped for being unplain would pool that agent back into the session, which is the
+  case the check exists for.
+
+  A state file carries a `version`. Version 1 is the first whose `denied` map belongs to
+  a single agent; a file without one predates the agent key and pooled every agent in the
+  session into that map, so the read that stamps it drops `denied` and keeps `size` and
+  `skills`, which were the main agent's own all along. Dropping errs the safe way: a
+  cleared key costs one extra deny and is then rewritten, while a kept one would credit
+  the main agent with a persona's denial and downgrade its next genuine deny to a
+  warning.
 
 Both read `tools/skill-catalog.js`, which parses `tier`/`paths`/`with` out of each
 `SKILL.md` frontmatter — the frontmatter is the only place a skill's triggers are

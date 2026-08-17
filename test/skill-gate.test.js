@@ -5,9 +5,16 @@ const { spawnSync } = require('node:child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { skillsIn, notice, loadedSkills, writeTargets } = require('../tools/skill-gate');
+const { skillsIn, notice, loadedSkills, writeTargets, stateOf, denyOnce } = require('../tools/skill-gate');
 
 const gateJs = path.join(__dirname, '..', 'tools', 'skill-gate.js');
+const sessionEnv = path.join(
+  process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'session-env');
+
+function insideSessionEnv(target) {
+  const rel = path.relative(sessionEnv, path.resolve(target));
+  return rel !== '' && !rel.startsWith('..') && !path.isAbsolute(rel);
+}
 
 function mkTmp() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'skill-gate-'));
@@ -26,6 +33,27 @@ function transcriptLine(skill) {
     message: { content: [{ type: 'tool_use', name: 'Skill', input: { skill } }] },
   });
 }
+// A subagent's Skill call, copied from a 2.1.229 record: the name arrives under `command`.
+function agentTranscriptLine(skill) {
+  return JSON.stringify({
+    parentUuid: '79f23d27-52fa-446d-a3c6-e46c1ef3963c',
+    isSidechain: true,
+    agentId: 'af038186435975e46',
+    message: {
+      role: 'assistant',
+      content: [{
+        type: 'tool_use',
+        id: 'toolu_01CWvSycYBgFkwV7hhjzARA2',
+        name: 'Skill',
+        input: { command: skill },
+        caller: { type: 'direct' },
+      }],
+    },
+    type: 'assistant',
+    attributionAgent: 'implementer',
+    version: '2.1.229',
+  });
+}
 // A config dir holding the skills the gate matches against, plus the session-env
 // directory it keeps its transcript cursor in.
 function mkConfigDir(skills) {
@@ -35,6 +63,12 @@ function mkConfigDir(skills) {
     writeSkill(path.join(dir, 'skills'), name, frontmatter);
   }
   return dir;
+}
+// Claude Code writes a subagent's turns to `<session transcript's dir>/<session id>/subagents/`.
+function writeAgentTranscript(transcript, sessionId, agentId, text) {
+  const dir = path.join(path.dirname(transcript), sessionId, 'subagents');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, `agent-${agentId}.jsonl`), text);
 }
 function runGate(configDir, input) {
   return spawnSync('node', [gateJs], {
@@ -50,8 +84,19 @@ test('skillsIn finds each Skill invocation in a transcript chunk', () => {
   assert.deepStrictEqual(skillsIn(text), ['debugging', 'editing']);
 });
 
+test('skillsIn finds a skill a subagent recorded under command', () => {
+  assert.deepStrictEqual(skillsIn(agentTranscriptLine('test-driven-development')), ['test-driven-development']);
+});
+
 test('skillsIn ignores other tool calls', () => {
   const text = JSON.stringify({ message: { content: [{ name: 'Read', input: { file_path: 'a.cpp' } }] } });
+  assert.deepStrictEqual(skillsIn(text), []);
+});
+
+test('skillsIn ignores a shell command, which carries the same input key', () => {
+  const text = JSON.stringify({
+    message: { content: [{ type: 'tool_use', name: 'Bash', input: { command: 'npm test' } }] },
+  });
   assert.deepStrictEqual(skillsIn(text), []);
 });
 
@@ -61,6 +106,12 @@ test('notice names the file and every missing skill', () => {
   assert.ok(text.includes('cpp-coding'));
   assert.ok(text.includes('comments'));
   assert.ok(text.includes('Skill tool'));
+});
+
+test('notice addresses the agent making the call, not the session', () => {
+  const text = notice('D:/repo/src/a.cpp', ['cpp-coding']);
+  assert.match(text, /you have not loaded/);
+  assert.ok(!/session/i.test(text));
 });
 
 test('notice orders every named skill loaded instead of offering candidates', () => {
@@ -125,6 +176,55 @@ test('loadedSkills returns nothing for a missing transcript', () => {
   const dir = mkTmp();
   try {
     assert.deepStrictEqual(loadedSkills(path.join(dir, 'absent.jsonl'), path.join(dir, 's.json')), []);
+  } finally { rmTmp(dir); }
+});
+
+test('denyOnce denies again on a key pooled by a state file predating the agent key', () => {
+  const dir = mkTmp();
+  try {
+    const state = path.join(dir, 's.json');
+    fs.writeFileSync(state, JSON.stringify({ size: 10, skills: ['editing'], denied: { 'a.cpp|comments': true } }));
+    assert.strictEqual(denyOnce(state, 'a.cpp|comments'), true);
+  } finally { rmTmp(dir); }
+});
+
+test('the drop keeps the cursor and loaded skills of the file it clears', () => {
+  const dir = mkTmp();
+  try {
+    const state = path.join(dir, 's.json');
+    fs.writeFileSync(state, JSON.stringify({ size: 10, skills: ['editing'], denied: { 'a.cpp|comments': true } }));
+    denyOnce(state, 'a.cpp|comments');
+    const after = JSON.parse(fs.readFileSync(state, 'utf8'));
+    assert.strictEqual(after.size, 10);
+    assert.deepStrictEqual(after.skills, ['editing']);
+  } finally { rmTmp(dir); }
+});
+
+test('denyOnce warns on a repeat once the file it cleared carries the marker', () => {
+  const dir = mkTmp();
+  try {
+    const state = path.join(dir, 's.json');
+    fs.writeFileSync(state, JSON.stringify({ size: 10, skills: [], denied: { 'a.cpp|comments': true } }));
+    denyOnce(state, 'a.cpp|comments');
+    assert.strictEqual(denyOnce(state, 'a.cpp|comments'), false);
+  } finally { rmTmp(dir); }
+});
+
+test('denyOnce keeps a denial recorded by a file already carrying the marker', () => {
+  const dir = mkTmp();
+  try {
+    const state = path.join(dir, 's.json');
+    fs.writeFileSync(state, JSON.stringify({ version: 1, denied: { 'a.cpp|comments': true } }));
+    assert.strictEqual(denyOnce(state, 'a.cpp|comments'), false);
+  } finally { rmTmp(dir); }
+});
+
+test('the drop leaves a subagent state file, which starts with no denials, alone', () => {
+  const dir = mkTmp();
+  try {
+    const state = path.join(dir, 's1.a1.json');
+    assert.strictEqual(denyOnce(state, 'a.cpp|comments'), true);
+    assert.strictEqual(denyOnce(state, 'a.cpp|comments'), false);
   } finally { rmTmp(dir); }
 });
 
@@ -224,6 +324,136 @@ test('gate stays silent once every matching skill is loaded', () => {
       session_id: 's1',
     });
     assert.strictEqual(r.stdout.trim(), '');
+  } finally { rmTmp(dir); }
+});
+
+test('stateOf leaves the main agent on the name the session already uses', () => {
+  assert.strictEqual(path.basename(stateOf('s1', undefined)), 's1.skill-gate.json');
+});
+
+test('stateOf gives a subagent a name of its own beside the session', () => {
+  assert.strictEqual(path.basename(stateOf('s1', 'a1')), 's1.a1.skill-gate.json');
+});
+
+test('gate denies a subagent edit whose claiming skill only the main agent loaded', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const transcript = path.join(dir, 't.jsonl');
+    fs.writeFileSync(transcript, transcriptLine('cpp-coding') + '\n');
+    const r = runGate(dir, {
+      tool_name: 'Edit',
+      tool_input: { file_path: 'D:/repo/a.cpp' },
+      transcript_path: transcript,
+      session_id: 's1',
+      agent_id: 'a1',
+    });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate stays silent once the subagent itself loaded the claiming skill', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const transcript = path.join(dir, 't.jsonl');
+    fs.writeFileSync(transcript, '');
+    writeAgentTranscript(transcript, 's1', 'a1', transcriptLine('cpp-coding') + '\n');
+    const r = runGate(dir, {
+      tool_name: 'Edit',
+      tool_input: { file_path: 'D:/repo/a.cpp' },
+      transcript_path: transcript,
+      session_id: 's1',
+      agent_id: 'a1',
+    });
+    assert.strictEqual(r.stdout.trim(), '');
+  } finally { rmTmp(dir); }
+});
+
+test('gate stays silent once a subagent loaded the skill in the shape its build records', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const transcript = path.join(dir, 't.jsonl');
+    fs.writeFileSync(transcript, '');
+    writeAgentTranscript(transcript, 's1', 'a1', agentTranscriptLine('cpp-coding') + '\n');
+    const r = runGate(dir, {
+      tool_name: 'Edit',
+      tool_input: { file_path: 'D:/repo/a.cpp' },
+      transcript_path: transcript,
+      session_id: 's1',
+      agent_id: 'a1',
+    });
+    assert.strictEqual(r.stdout.trim(), '');
+  } finally { rmTmp(dir); }
+});
+
+test('gate denies each subagent on its own account for one file', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const input = { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: 's1' };
+    runGate(dir, { ...input, agent_id: 'a1' });
+    const r = runGate(dir, { ...input, agent_id: 'a2' });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+  } finally { rmTmp(dir); }
+});
+
+test('gate still denies the main agent a file a subagent was already denied', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const input = { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: 's1' };
+    runGate(dir, { ...input, agent_id: 'a1' });
+    const r = runGate(dir, input);
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+  } finally { rmTmp(dir); }
+});
+
+test('gate downgrades a subagent repeating its own denied edit to a warning', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const input = {
+      tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' },
+      session_id: 's1', agent_id: 'a1',
+    };
+    runGate(dir, input);
+    const r = runGate(dir, input);
+    assert.strictEqual(r.status, 0);
+    assert.throws(() => JSON.parse(r.stdout));
+    assert.ok(r.stdout.includes('cpp-coding'));
+  } finally { rmTmp(dir); }
+});
+
+test('gate keeps an agent id it had to rewrite off the main agent state', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const input = { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: 's1' };
+    runGate(dir, input);
+    const r = runGate(dir, { ...input, agent_id: '../../../evil' });
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+  } finally { rmTmp(dir); }
+});
+
+test('stateOf keeps a session id carrying a traversal inside session-env', () => {
+  assert.ok(insideSessionEnv(stateOf('../../../evil', undefined)));
+});
+
+test('stateOf keeps an agent id carrying a traversal inside session-env', () => {
+  assert.ok(insideSessionEnv(stateOf('s1', '../../../evil')));
+});
+
+test('gate keeps its state inside session-env for an agent id carrying a traversal', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    runGate(dir, {
+      tool_name: 'Edit',
+      tool_input: { file_path: 'D:/repo/a.cpp' },
+      session_id: 's1',
+      agent_id: '../../../evil',
+    });
+    const stray = fs.readdirSync(dir).filter(entry => entry.endsWith('.skill-gate.json'));
+    assert.deepStrictEqual(stray, []);
   } finally { rmTmp(dir); }
 });
 
