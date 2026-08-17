@@ -4,6 +4,7 @@
     "skills/api-design/SKILL.md",
     "skills/doxygen/SKILL.md",
     "skills/encapsulation/SKILL.md",
+    "tools/bg-agent-counter.js",
     "tools/claude-md-skills-sync-check.js"
   ]
 }

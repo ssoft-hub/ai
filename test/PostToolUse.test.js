@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { get: count } = require('../tools/bg-agent-counter');
+const { get: count } = require('../tools/background-call-counter');
 
 const repoDir = path.join(__dirname, '..');
 const HOOK = path.join(repoDir, 'hooks', 'PostToolUse.js');
@@ -16,7 +16,7 @@ const HOOK = path.join(repoDir, 'hooks', 'PostToolUse.js');
 function mkCounterConfig() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
   fs.mkdirSync(path.join(dir, 'tools'));
-  for (const tool of ['bg-agent-counter.js', 'payload.js']) {
+  for (const tool of ['background-call-counter.js', 'payload.js']) {
     fs.copyFileSync(path.join(repoDir, 'tools', tool), path.join(dir, 'tools', tool));
   }
   return dir;

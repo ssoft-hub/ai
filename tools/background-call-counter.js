@@ -8,7 +8,7 @@ const { backgroundIn } = require(path.join(__dirname, 'payload.js'));
 const MARK = 0x2e;
 
 function counterPath(dir) {
-  return path.join(dir, '.bg-agent-count');
+  return path.join(dir, '.background-call-count');
 }
 
 function get(dir) {
@@ -37,7 +37,7 @@ if (require.main === module) {
     try {
       if (backgroundIn(data.tool_input)) increment(configDir);
     } catch (err) {
-      process.stderr.write(`bg-agent-counter: the call was not counted — ${String(err?.message).split('\n')[0]}\n`);
+      process.stderr.write(`background-call-counter: the call was not counted — ${String(err?.message).split('\n')[0]}\n`);
     }
     process.exit(0);
   });

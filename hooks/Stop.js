@@ -5,9 +5,9 @@ const os = require('os');
 const path = require('path');
 
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
-const counterFile = path.join(configDir, '.bg-agent-count');
+const counterFile = path.join(configDir, '.background-call-count');
 
-// One marker byte per pending call, the representation `tools/bg-agent-counter.js` writes.
+// One marker byte per pending call, the representation `tools/background-call-counter.js` writes.
 const MARK = 0x2e;
 
 function callPending() {
