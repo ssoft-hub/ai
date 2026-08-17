@@ -3,27 +3,26 @@ const fs = require('fs');
 const path = require('path');
 const { backgroundIn } = require(path.join(__dirname, 'payload.js'));
 
+// One marker byte per pending call: the count is how many of them the file holds. Taking a
+// call back off is the truncation in `hooks/Stop.js`, which owns that half of this file.
+const MARK = 0x2e;
+
 function counterPath(dir) {
   return path.join(dir, '.bg-agent-count');
 }
 
 function get(dir) {
   try {
-    const n = parseInt(fs.readFileSync(counterPath(dir), 'utf8').trim(), 10);
-    return Number.isFinite(n) && n > 0 ? n : 0;
+    let n = 0;
+    for (const byte of fs.readFileSync(counterPath(dir))) if (byte === MARK) n++;
+    return n;
   } catch { return 0; }
 }
 
+// Appended rather than rewritten: calls launched in one message count concurrently, and a
+// read-modify-write between them loses one.
 function increment(dir) {
-  fs.writeFileSync(counterPath(dir), String(get(dir) + 1));
-}
-
-function decrement(dir) {
-  fs.writeFileSync(counterPath(dir), String(Math.max(0, get(dir) - 1)));
-}
-
-function reset(dir) {
-  fs.writeFileSync(counterPath(dir), '0');
+  fs.appendFileSync(counterPath(dir), Buffer.from([MARK]));
 }
 
 if (require.main === module) {
@@ -35,9 +34,13 @@ if (require.main === module) {
   process.stdin.on('end', () => {
     let data;
     try { data = JSON.parse(raw); } catch { process.exit(0); }
-    if (backgroundIn(data.tool_input)) increment(configDir);
+    try {
+      if (backgroundIn(data.tool_input)) increment(configDir);
+    } catch (err) {
+      process.stderr.write(`bg-agent-counter: the call was not counted — ${String(err?.message).split('\n')[0]}\n`);
+    }
     process.exit(0);
   });
 }
 
-module.exports = { counterPath, get, increment, decrement, reset };
+module.exports = { counterPath, get, increment };

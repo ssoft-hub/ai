@@ -1,11 +1,11 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { spawnSync } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { counterPath, get, increment, decrement, reset } = require('../tools/bg-agent-counter');
+const { counterPath, get, increment } = require('../tools/bg-agent-counter');
 
 const toolPath = path.resolve(__dirname, '../tools/bg-agent-counter.js');
 
@@ -45,34 +45,6 @@ test('increment adds to existing count', () => {
     increment(dir);
     increment(dir);
     assert.strictEqual(get(dir), 2);
-  } finally { rmTmp(dir); }
-});
-
-test('decrement subtracts one', () => {
-  const dir = mkTmp();
-  try {
-    increment(dir);
-    increment(dir);
-    decrement(dir);
-    assert.strictEqual(get(dir), 1);
-  } finally { rmTmp(dir); }
-});
-
-test('decrement floors at 0', () => {
-  const dir = mkTmp();
-  try {
-    decrement(dir);
-    assert.strictEqual(get(dir), 0);
-  } finally { rmTmp(dir); }
-});
-
-test('reset writes 0', () => {
-  const dir = mkTmp();
-  try {
-    increment(dir);
-    increment(dir);
-    reset(dir);
-    assert.strictEqual(get(dir), 0);
   } finally { rmTmp(dir); }
 });
 
@@ -124,4 +96,48 @@ test('stdin handler exits 0 on malformed JSON', () => {
     });
     assert.strictEqual(r.status, 0);
   } finally { rmTmp(dir); }
+});
+
+test('stdin handler exits 0 when the count cannot be written', () => {
+  const dir = mkTmp();
+  try {
+    fs.mkdirSync(counterPath(dir));
+    const input = JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'npm test', run_in_background: true } });
+    const r = spawnSync('node', [toolPath], {
+      input, encoding: 'utf8', stdio: 'pipe',
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
+    });
+    assert.strictEqual(r.status, 0);
+    assert.match(r.stderr, /not counted/);
+  } finally { rmTmp(dir); }
+});
+
+test('concurrent increments from separate processes all land', async () => {
+  const dir = mkTmp();
+  const calls = 4;
+  const started = [];
+  try {
+    const input = JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'npm test', run_in_background: true } });
+    const finished = [];
+    for (let i = 0; i < calls; i++) {
+      const child = spawn('node', [toolPath], {
+        stdio: ['pipe', 'ignore', 'ignore'],
+        env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
+      });
+      // A child that exits before the write makes it an EPIPE, which with no handler here
+      // takes the runner down instead of failing this test.
+      child.stdin.on('error', () => {});
+      started.push(child);
+      finished.push(new Promise(resolve => child.on('exit', resolve)));
+    }
+    // Started first and fed together, so the counts overlap instead of following startup order.
+    await new Promise(resolve => setTimeout(resolve, 300));
+    for (const child of started) child.stdin.end(input);
+    await Promise.all(finished);
+
+    assert.strictEqual(get(dir), calls);
+  } finally {
+    for (const child of started) child.kill();
+    rmTmp(dir);
+  }
 });
