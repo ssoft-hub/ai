@@ -6,8 +6,9 @@ const path = require('path');
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 const toolsDir = path.join(configDir, 'tools');
 
-// Clear stale background-agent counter from any prior crashed session
-try { require('fs').writeFileSync(path.join(configDir, '.bg-agent-count'), '0'); } catch {}
+// Clear stale background-agent counter from any prior crashed session: the file holds one
+// marker byte per pending call, so an empty one is a count of zero.
+try { require('fs').writeFileSync(path.join(configDir, '.bg-agent-count'), ''); } catch {}
 
 const CHECKS = ['submodule-status-check.js'];
 
