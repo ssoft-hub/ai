@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { counterPath, get: count, increment } = require('../tools/bg-agent-counter');
+const { counterPath, get: count, increment } = require('../tools/background-call-counter');
 
 const HOOK = path.join(__dirname, '..', 'hooks', 'Stop.js');
 

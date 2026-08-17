@@ -75,10 +75,10 @@ process.stdin.on('end', () => {
   // Before the write target is read, since a background call names no file. Nothing the
   // counter writes is collected: `additionalContext` after every launch would be noise.
   if (startedInBackground(data.tool_input)) {
-    const bg = spawnSync('node', [path.join(toolsDir, 'bg-agent-counter.js')], {
+    const counter = spawnSync('node', [path.join(toolsDir, 'background-call-counter.js')], {
       input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 10000,
     });
-    if (bg.stderr?.trim()) process.stderr.write(bg.stderr.trim() + '\n');
+    if (counter.stderr?.trim()) process.stderr.write(counter.stderr.trim() + '\n');
   }
 
   const filePath = writeTargetOf(data.tool_input, data.tool_name);

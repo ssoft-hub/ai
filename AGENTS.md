@@ -43,9 +43,9 @@ was only read would rewrite it — and it widens that one rule rather than stand
 the payload, so no call is hidden from a route by the name it arrived under.
 
 It carries a second route beside the write one: `run_in_background: true` reaches
-`bg-agent-counter`, which `hooks/Stop.js` reads to hold its notification back until the
-work is done. The route sits before the write target is read, since a background call names
-no file. This is the event for it rather than `PreToolUse`, because a background call
+`background-call-counter`, which `hooks/Stop.js` reads to hold its notification back until
+the work is done. The route sits before the write target is read, since a background call
+names no file. This is the event for it rather than `PreToolUse`, because a background call
 returns at launch and the hook fires there — early enough that the count is written while
 the work still runs, and never at all for a call that was refused, whether by a guard
 exiting 2, by a JSON deny on exit 0, by a `deny` rule in `settings.json`, or by the user

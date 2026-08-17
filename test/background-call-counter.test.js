@@ -5,12 +5,12 @@ const { spawn, spawnSync } = require('node:child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { counterPath, get, increment } = require('../tools/bg-agent-counter');
+const { counterPath, get, increment } = require('../tools/background-call-counter');
 
-const toolPath = path.resolve(__dirname, '../tools/bg-agent-counter.js');
+const toolPath = path.resolve(__dirname, '../tools/background-call-counter.js');
 
 function mkTmp() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'bg-agent-test-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'background-call-test-'));
 }
 function rmTmp(dir) {
   try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
