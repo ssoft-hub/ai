@@ -172,6 +172,38 @@ test('loadedSkills rereads from the start when the transcript shrank', () => {
   } finally { rmTmp(dir); }
 });
 
+test('loadedSkills rebuilds the cursor and the skills of a state file taken away', () => {
+  const dir = mkTmp();
+  try {
+    const transcript = path.join(dir, 't.jsonl');
+    const state = path.join(dir, 'state.json');
+    fs.writeFileSync(transcript, transcriptLine('debugging') + '\n');
+    loadedSkills(transcript, state);
+    const before = JSON.parse(fs.readFileSync(state, 'utf8'));
+
+    fs.rmSync(state);
+    const skills = loadedSkills(transcript, state);
+
+    assert.deepStrictEqual(skills, ['debugging']);
+    const after = JSON.parse(fs.readFileSync(state, 'utf8'));
+    assert.strictEqual(after.size, before.size);
+    assert.deepStrictEqual(after.skills, before.skills);
+  } finally { rmTmp(dir); }
+});
+
+test('denyOnce spends a deny again once its state file is taken away', () => {
+  const dir = mkTmp();
+  try {
+    const state = path.join(dir, 's.json');
+    assert.strictEqual(denyOnce(state, 'a.cpp|comments'), true);
+    assert.strictEqual(denyOnce(state, 'a.cpp|comments'), false);
+
+    fs.rmSync(state);
+
+    assert.strictEqual(denyOnce(state, 'a.cpp|comments'), true);
+  } finally { rmTmp(dir); }
+});
+
 test('loadedSkills returns nothing for a missing transcript', () => {
   const dir = mkTmp();
   try {
@@ -454,6 +486,20 @@ test('gate keeps its state inside session-env for an agent id carrying a travers
     });
     const stray = fs.readdirSync(dir).filter(entry => entry.endsWith('.skill-gate.json'));
     assert.deepStrictEqual(stray, []);
+  } finally { rmTmp(dir); }
+});
+
+test('gate leaves the state of every other session alone, however old it is', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const other = path.join(dir, 'session-env', 's0.skill-gate.json');
+    fs.writeFileSync(other, '{}');
+    const lastYear = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+    fs.utimesSync(other, lastYear, lastYear);
+
+    runGate(dir, { tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: 's1' });
+
+    assert.ok(fs.existsSync(other));
   } finally { rmTmp(dir); }
 });
 

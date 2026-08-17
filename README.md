@@ -35,7 +35,8 @@ pipeline of persona agents and commands built on top of them.
 **`Stop`** — fires when Claude Code finishes a response turn:
 - `stop-notify.js` — desktop notification (Windows toast / macOS notification / Linux notify-send); deferred until every call started in the background (`run_in_background: true`) has completed
 
-**`SessionStart`** — fires once when a session begins, warn-only:
+**`SessionStart`** — fires once when a session begins:
+- `session-env-prune.js` — removes the `skill-gate.js` state of every session that has gone a week without a gated call, keeping the state of the session being started whatever its age; it runs here rather than in the gate so that no gated call ever pays for a directory listing, and it takes only the files the gate wrote, never the per-session directory Claude Code keeps beside them
 - `submodule-status-check.js` — warns if any git submodule is ahead/uninitialized/conflicted
 
 **`UserPromptSubmit`** — runs on every user message:
@@ -201,8 +202,9 @@ Uses node's built-in `node:test` runner, so there is nothing to install first. E
 of install. Between them they exercise the payloads a guard decides on and the decision it
 returns, the skill and agent frontmatter the routing reads, the `settings.json` merge, an
 install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than the real
-one, and the rule that every file under `test/` is a test file, since the runner loads
-each of them as one.
+one, the rule that every file under `test/` is a test file, since the runner loads each of
+them as one, and the rule that no path `config/retired.json` retires is one install still
+ships.
 
 ## Manual setup
 

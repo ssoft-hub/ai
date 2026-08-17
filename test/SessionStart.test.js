@@ -10,11 +10,18 @@ const { get: count, increment } = require('../tools/background-call-counter');
 
 const HOOK = path.join(__dirname, '..', 'hooks', 'SessionStart.js');
 
-// A config dir whose checks do nothing, so a session start says nothing about this machine.
+// The dispatcher spawns each tool out of the config dir, so a stub standing in for one
+// records that it ran without the real tool's dependencies reaching the fixture.
+function stubTool(dir, name, body = '') {
+  fs.writeFileSync(path.join(dir, 'tools', name), body);
+}
+
+// A config dir whose tools do nothing, so a session start says nothing about this machine.
 function mkConfig() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
   fs.mkdirSync(path.join(dir, 'tools'));
-  fs.writeFileSync(path.join(dir, 'tools', 'submodule-status-check.js'), '');
+  stubTool(dir, 'submodule-status-check.js');
+  stubTool(dir, 'session-env-prune.js');
   return dir;
 }
 
@@ -40,6 +47,20 @@ test('clears a count left behind by a crashed session', () => {
 
     assert.strictEqual(r.status, 0);
     assert.strictEqual(count(dir), 0);
+  } finally { rmConfig(dir); }
+});
+
+test('runs the prune that clears state left by sessions that are over', () => {
+  const dir = mkConfig();
+  try {
+    const marker = path.join(dir, 'pruned');
+    stubTool(dir, 'session-env-prune.js',
+      `require('fs').writeFileSync(${JSON.stringify(marker)}, '');\n`);
+
+    const r = runSessionStart(dir);
+
+    assert.strictEqual(r.status, 0);
+    assert.ok(fs.existsSync(marker));
   } finally { rmConfig(dir); }
 });
 
