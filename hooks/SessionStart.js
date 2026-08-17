@@ -10,13 +10,15 @@ const toolsDir = path.join(configDir, 'tools');
 // marker byte per pending call, so an empty one is a count of zero.
 try { require('fs').writeFileSync(path.join(configDir, '.background-call-count'), ''); } catch {}
 
-const CHECKS = ['submodule-status-check.js'];
+// `settings.json` gives this event 30s and each tool below takes at most 10 of them: a
+// third one needs that budget raised, or a stalled tool leaves the next no run at all.
+const TOOLS = ['session-env-prune.js', 'submodule-status-check.js'];
 
 let raw = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', c => { raw += c; });
 process.stdin.on('end', () => {
-  for (const tool of CHECKS) {
+  for (const tool of TOOLS) {
     const r = spawnSync('node', [path.join(toolsDir, tool)], {
       input: raw, encoding: 'utf8', stdio: 'pipe', timeout: 10000,
     });

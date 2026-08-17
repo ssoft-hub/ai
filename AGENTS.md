@@ -111,9 +111,14 @@ cost never reaches the rendering path.
 
 1. Create `tools/<name>.js` — reads stdin JSON, writes plain text to stdout (warn) or
    stderr+exit(2) (block)
-2. Add it to the appropriate dispatcher in `hooks/PreToolUse.js` or `hooks/PostToolUse.js`
-   — the dispatcher, not the tool, wraps that text in the `additionalContext` the model
-   reads (see `skills/hook-scripts/SKILL.md` → Reaching the Model)
+2. Add it to the dispatcher of the event it belongs to — `hooks/PreToolUse.js`,
+   `hooks/PostToolUse.js`, `hooks/SessionStart.js`, `hooks/UserPromptSubmit.js` or
+   `hooks/Stop.js`. Which channel carries the text to the model is the event's, not the
+   tool's: on `PreToolUse` and `PostToolUse` the dispatcher wraps it in the
+   `additionalContext` the model reads, while on `SessionStart` and `UserPromptSubmit`
+   plain stdout on exit 0 reaches the model as written and the dispatcher forwards it
+   unchanged — so a tool that wrapped its own output there would have the wrapper read
+   back as the text (see `skills/hook-scripts/SKILL.md` → Reaching the Model)
 3. Export pure logic (regexes, helpers) and add tests under `test/<name>.test.js`
    (see `skills/node-testing/SKILL.md` for conventions: flat `test()`, fixtures, `CLAUDE_CONFIG_DIR` isolation)
 4. Run `npm test`
@@ -171,6 +176,20 @@ every prompt:
   the tree it belongs to. Hashing rather than dropping keeps each agent distinct — an id
   dropped for being unplain would pool that agent back into the session, which is the
   case the check exists for.
+
+  `tools/session-env-prune.js` takes a state file away once its session has gone a week
+  without a gated call, and it runs on `SessionStart` rather than on the write. A sweep in
+  the gate would put a directory listing in front of every gated call, growing with the
+  files it exists to remove; session start costs the gate nothing and fires exactly when
+  the directory can have grown, since a machine that starts no further session writes no
+  further state either. The state of the session being started is kept whatever its age,
+  including the `unknown` name a payload carrying no session id writes to, so resuming an
+  old session does not spend its denials a second time. Only the two
+  `.skill-gate.json` names above are taken: `session-env/` is Claude Code's directory, and
+  the per-session directory it keeps there is not this repository's to delete. Losing a
+  state file early costs a full transcript rescan and one deny spent again, never more —
+  `size` and `skills` are a cache over the transcript and are rebuilt from it, and an empty
+  `denied` denies where it would have warned, never the reverse.
 
   A state file carries a `version`. Version 1 is the first whose `denied` map belongs to
   a single agent; a file without one predates the agent key and pooled every agent in the

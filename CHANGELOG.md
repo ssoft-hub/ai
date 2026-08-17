@@ -15,7 +15,7 @@
 - `templates/SKILL.md` template for consistent skill authoring
 - Skills: `architecture` (ADRs, design tradeoffs), `node-testing` (`test/*.test.js` conventions), `project-planning` (scoping, estimation, milestones), `requirements` (user stories, acceptance criteria)
 - `commit-trailer-guard` tool: blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
-- `SessionStart` hook: warn-only `submodule-status-check` (flags ahead/uninitialized/conflicted submodules)
+- `SessionStart` hook: `submodule-status-check` flags ahead/uninitialized/conflicted submodules, and `session-env-prune` removes the skill-gate state of every session that has gone a week without a gated call, keeping the state of the session being started whatever its age
 - `background-call-counter` tool: tracks pending background agents; `Stop` notification deferred until all `run_in_background` agents complete, preventing premature "Task complete" toasts
 - `issue-rules` skill: title format (`Type(scope): Subject`), description templates for features and bugs (Goal, Acceptance criteria, Test plan), labels, priority levels (P0–P3), and lifecycle states
 - Skills: `comments` (non-Doxygen comment style — brief, general, no fix narration), `cpp-encapsulation` (public/protected/private access-specifier discipline)
@@ -119,3 +119,5 @@
 - The suite runs on Windows as well as Linux, on every node version in the matrix. This repository installs into a Windows config directory and is developed there, so a green run on Linux alone said nothing about the platform the code is written for. Every combination reports as its own job and none cancels another, so a failure names the platform it belongs to
 
 - `npm test` no longer depends on the shell to expand a glob. The script carried `test/*.test.js`, which npm hands to `cmd.exe` unexpanded on Windows, so on node 18 and 20 no test ran at all. `node --test` finds the test files itself, whichever shell ran the script
+
+- `npm test` now fails when `config/retired.json` lists a path this repository still ships, naming the entry to remove. Install writes that path, and its retired-path warning fires only for one install does not own, so the path was shipped and retired at once with nothing saying so - the shape a half-finished rename leaves behind

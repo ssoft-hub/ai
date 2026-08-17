@@ -186,12 +186,16 @@ function transcriptOf(transcriptPath, sessionId, agentId) {
   return path.join(path.dirname(transcriptPath), session, 'subagents', `agent-${agent}.jsonl`);
 }
 
+// Exported, so `session-env-prune.js` knows which files are this repo's without
+// spelling the name a second time.
+const STATE_SUFFIX = '.skill-gate.json';
+
 // `agent_id` is absent on the main thread, which therefore keeps the session's own name.
 function stateOf(sessionId, agentId) {
   const session = plain(sessionId, 'unknown');
   const agent = plain(agentId);
   const scope = agent ? `${session}.${agent}` : session;
-  return path.join(configDir, 'session-env', `${scope}.skill-gate.json`);
+  return path.join(configDir, 'session-env', `${scope}${STATE_SUFFIX}`);
 }
 
 function verdict(data) {
@@ -224,4 +228,5 @@ if (require.main === module) runAsScript(verdict);
 
 module.exports = {
   skillsIn, loadedSkills, notice, denyOnce, writeTargets, gateTargets, stateOf, verdict,
+  STATE_SUFFIX,
 };
