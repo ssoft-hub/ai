@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -9,7 +10,8 @@ const { lex, TRANSPARENT } = require(path.join(__dirname, 'shell-lex.js'));
 
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 
-const SKILL_CALL = /"name"\s*:\s*"Skill"\s*,\s*"input"\s*:\s*\{\s*"skill"\s*:\s*"([^"]+)"/g;
+// A main thread records the skill under `skill`, a subagent under `command`.
+const SKILL_CALL = /"name"\s*:\s*"Skill"\s*,\s*"input"\s*:\s*\{\s*"(?:skill|command)"\s*:\s*"([^"]+)"/g;
 
 function skillsIn(text) {
   return [...text.matchAll(SKILL_CALL)].map(m => m[1]);
@@ -21,14 +23,26 @@ function gateTargets(input, toolName) {
   return [...(command ? writeTargets(command) : []), ...(declared ? [declared] : [])];
 }
 
+// Version 1 is the first whose `denied` belongs to one agent; an unversioned file pooled
+// the whole session into it, so those denials are dropped on the read that stamps it.
+const STATE_VERSION = 1;
+
+function readState(statePath) {
+  const base = { size: 0, skills: [], denied: {}, version: STATE_VERSION };
+  let stored;
+  try { stored = JSON.parse(fs.readFileSync(statePath, 'utf8')); } catch { return base; }
+  if (stored?.version === STATE_VERSION) return { ...base, ...stored };
+  const { denied, ...kept } = stored ?? {};
+  return { ...base, ...kept, version: STATE_VERSION };
+}
+
 // The transcript only grows, so a run scans the bytes appended since the previous one.
 function loadedSkills(transcriptPath, statePath) {
-  let state = { size: 0, skills: [] };
-  try { state = JSON.parse(fs.readFileSync(statePath, 'utf8')); } catch {}
+  let state = readState(statePath);
 
   let size;
   try { size = fs.statSync(transcriptPath).size; } catch { return []; }
-  if (size < state.size) state = { size: 0, skills: [] };
+  if (size < state.size) state = { ...state, size: 0, skills: [] };
 
   let chunk = '';
   let consumed = state.size;
@@ -57,9 +71,8 @@ function loadedSkills(transcriptPath, statePath) {
 // skills, harmless to one that cannot. A deny that fails to persist warns instead —
 // deny-every-time would deadlock an agent with no Skill tool.
 function denyOnce(statePath, key) {
-  let state = {};
-  try { state = JSON.parse(fs.readFileSync(statePath, 'utf8')); } catch {}
-  const denied = state.denied ?? {};
+  const state = readState(statePath);
+  const denied = state.denied;
   if (denied[key]) return false;
   denied[key] = true;
   try {
@@ -148,10 +161,37 @@ function writeTargets(command) {
 }
 
 function notice(filePath, missing) {
-  return `${path.basename(filePath)} is claimed by skills this session has not loaded: `
+  return `${path.basename(filePath)} is claimed by skills you have not loaded: `
     + `${missing.join(', ')}. Load each of them with the Skill tool before editing — `
     + 'the path match is the trigger, not a suggestion; do not skip one as irrelevant. '
     + 'Load order: process, then domain, then narrow.';
+}
+
+// Each id below names a directory or a file, so an unplain one is hashed rather than
+// dropped: dropping it would pool that agent with the session, the case this guard is for.
+const PLAIN_ID = /^[A-Za-z0-9_-]+$/;
+
+function plain(id, fallback) {
+  if (typeof id !== 'string' || !id) return fallback;
+  if (PLAIN_ID.test(id)) return id;
+  return crypto.createHash('sha256').update(id).digest('hex').slice(0, 16);
+}
+
+// A subagent's transcript sits under the project directory and session id Claude Code
+// builds the session's own path from.
+function transcriptOf(transcriptPath, sessionId, agentId) {
+  const session = plain(sessionId);
+  const agent = plain(agentId);
+  if (!transcriptPath || !session || !agent) return transcriptPath;
+  return path.join(path.dirname(transcriptPath), session, 'subagents', `agent-${agent}.jsonl`);
+}
+
+// `agent_id` is absent on the main thread, which therefore keeps the session's own name.
+function stateOf(sessionId, agentId) {
+  const session = plain(sessionId, 'unknown');
+  const agent = plain(agentId);
+  const scope = agent ? `${session}.${agent}` : session;
+  return path.join(configDir, 'session-env', `${scope}.skill-gate.json`);
 }
 
 function verdict(data) {
@@ -159,8 +199,9 @@ function verdict(data) {
   if (!targets.length) return undefined;
 
   const catalog = loadCatalog(path.join(configDir, 'skills'));
-  const statePath = path.join(configDir, 'session-env', `${data.session_id ?? 'unknown'}.skill-gate.json`);
-  const loaded = new Set(data.transcript_path ? loadedSkills(data.transcript_path, statePath) : []);
+  const statePath = stateOf(data.session_id, data.agent_id);
+  const transcript = transcriptOf(data.transcript_path, data.session_id, data.agent_id);
+  const loaded = new Set(transcript ? loadedSkills(transcript, statePath) : []);
   const hits = targets
     .map(file => ({ file, missing: matchSkills(catalog, file).filter(name => !loaded.has(name)) }))
     .filter(hit => hit.missing.length);
@@ -181,4 +222,6 @@ function verdict(data) {
 
 if (require.main === module) runAsScript(verdict);
 
-module.exports = { skillsIn, loadedSkills, notice, denyOnce, writeTargets, gateTargets, verdict };
+module.exports = {
+  skillsIn, loadedSkills, notice, denyOnce, writeTargets, gateTargets, stateOf, verdict,
+};
