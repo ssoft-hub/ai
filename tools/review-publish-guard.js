@@ -1,6 +1,5 @@
 'use strict';
 const path = require('path');
-const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 
 const VALUE_FLAGS = [
   '-f', '-F', '--field', '--raw-field', '--input',
@@ -188,6 +187,6 @@ function verdict(data) {
   return undefined;
 }
 
-if (require.main === module) runAsScript(verdict);
+if (require.main === module) require(path.join(__dirname, 'guard.js')).runAsScript(verdict);
 
 module.exports = { ASK, check, commands, parse, verdict };

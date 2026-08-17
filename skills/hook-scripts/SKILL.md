@@ -49,6 +49,11 @@ const d = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 
 const DISPATCH = { ToolName: ['tool-name.js'], OtherTool: ['other-tool.js'] };
 
+// `String()` throws on a value with no primitive conversion, and so does a hostile
+// `.message`: both reads belong inside a try, or one guard's verdict takes the hook down.
+const asText = v => { try { return String(v); } catch { return null; } };
+const asReason = e => { try { return String(e?.message ?? e).split('\n')[0]; } catch { return null; } };
+
 let raw = '';
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', c => { raw += c; });
@@ -59,11 +64,21 @@ process.stdin.on('end', () => {
     try {
       const { verdict } = require(path.join(d, 'tools', tool));
       if (typeof verdict !== 'function') throw new Error('it exports no verdict');
+      // Each field read once, and the block acted on before `output` is read: a throw
+      // reading `output` must not discard a block already stated.
       const said = verdict(data);
-      if (said?.block) { process.stderr.write(String(said.block)); process.exit(2); }
-      if (said?.output) context.push(String(said.output).trim());
+      const block = said?.block;
+      if (block) {
+        const stated = asText(block)?.trim();
+        process.stderr.write(`${stated || `${tool} blocked the call without stating why`}\n`);
+        process.exit(2);
+      }
+      const output = said?.output;
+      const out = output === undefined ? '' : asText(output);
+      if (out === null) process.stderr.write(`${tool} stated output it could not write\n`);
+      else if (out.trim()) context.push(out.trim());
     } catch (err) {
-      process.stderr.write(`${tool} did not run — ${String(err?.message).split('\n')[0]}\n`);
+      process.stderr.write(`${tool} did not run — ${asReason(err) ?? 'it stated no reason'}\n`);
     }
   }
   if (context.length) {
@@ -87,7 +102,6 @@ from drifting: the stdin, stdout and exit-code contract exists once, in `tools/g
 ```javascript
 'use strict';
 const path = require('path');
-const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 
 // undefined — nothing to say
 // { block: text }  — text on stderr, exit 2
@@ -100,10 +114,18 @@ function verdict(data) {
   return undefined;
 }
 
-if (require.main === module) runAsScript(verdict);
+if (require.main === module) require(path.join(__dirname, 'guard.js')).runAsScript(verdict);
 
 module.exports = { verdict };
 ```
+
+Require a module where it is first needed rather than at the top, unless every payload
+reads it: the dispatcher loads a guard in front of every call the payload routes to it, so
+a module that guard never reaches on this payload is startup spent for nothing — `guard.js`
+above is reached only by a direct run of the tool. It also narrows a failure, which matters
+more: a module required where it is used costs the guard on the payloads that needed it
+rather than on all of them, so a missing file takes the guard off a shell command without
+taking it off an edit.
 
 A `verdict` runs inside the dispatcher's process with no watchdog in front of it, so it
 must return rather than exit, and return in bounded time: no network call, no unbounded

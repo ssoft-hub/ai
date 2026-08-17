@@ -1,7 +1,6 @@
 'use strict';
 const path = require('path');
 const { gitCalls } = require(path.join(__dirname, 'git-command.js'));
-const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 
 const BANNED_TRAILERS = [
   { name: 'Co-Authored-By', re: /\bco-authored-by\s*:/i },
@@ -33,6 +32,6 @@ function verdict(data) {
   return undefined;
 }
 
-if (require.main === module) runAsScript(verdict);
+if (require.main === module) require(path.join(__dirname, 'guard.js')).runAsScript(verdict);
 
 module.exports = { BANNED_TRAILERS, isCommit, check, verdict };

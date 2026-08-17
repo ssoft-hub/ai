@@ -6,7 +6,16 @@ const path = require('path');
 const TIERS = ['process', 'domain', 'narrow'];
 const DEFAULT_TIER = 'domain';
 
+// Wildcards sharing one segment each split it independently, so a near miss costs
+// exponentially in their number. Real patterns use one or two; past the cap nothing matches.
+const WILDCARDS_PER_SEGMENT = 4;
+
+function crowded(glob) {
+  return glob.split('/').some(seg => (seg.match(/[*?]/g) ?? []).length > WILDCARDS_PER_SEGMENT);
+}
+
 function globToRegExp(glob) {
+  if (crowded(glob)) return /(?!)/;
   let re = '';
   for (let i = 0; i < glob.length; i++) {
     const c = glob[i];
@@ -36,8 +45,34 @@ function globToRegExp(glob) {
   return new RegExp(`^${re}$`, 'i');
 }
 
+// Indentation is spaces and tabs; `\s` matches the newline too, so at every line start it
+// would rescan the block. Only the indentation narrows — what follows a colon is unchanged.
+const INDENT = '[ \\t]*';
+
+// Built on first use and kept: one regex per key per process, with no list of keys to fall off.
+const SCALAR = new Map();
+function scalarPattern(key) {
+  if (!SCALAR.has(key)) SCALAR.set(key, new RegExp(`^${INDENT}${key}:\\s*(.+)$`, 'm'));
+  return SCALAR.get(key);
+}
+
+const SEQUENCE = new Map();
+function sequencePatterns(key) {
+  if (!SEQUENCE.has(key)) {
+    SEQUENCE.set(key, {
+      inline: new RegExp(`^${INDENT}${key}:\\s*\\[(.*)\\]\\s*$`, 'm'),
+      header: new RegExp(`^${INDENT}${key}:\\s*$`),
+    });
+  }
+  return SEQUENCE.get(key);
+}
+
+const SEQUENCE_ITEM = /^[ \t]+-\s+(.*)$/;
+const OPENING = /^---\r?$/;
+
 function readSequence(block, key) {
-  const inline = block.match(new RegExp(`^\\s*${key}:\\s*\\[(.*)\\]\\s*$`, 'm'));
+  const { inline: inlineRe, header: headerRe } = sequencePatterns(key);
+  const inline = block.match(inlineRe);
   if (inline) {
     // A glob may itself contain a comma, so only a comma outside quotes separates items
     return [...inline[1].matchAll(/(?:^|,)\s*(?:"([^"]*)"|'([^']*)'|([^,]*))/g)]
@@ -45,11 +80,11 @@ function readSequence(block, key) {
       .filter(Boolean);
   }
   const lines = block.split('\n');
-  const start = lines.findIndex(l => new RegExp(`^\\s*${key}:\\s*$`).test(l));
+  const start = lines.findIndex(l => headerRe.test(l));
   if (start === -1) return undefined;
   const items = [];
   for (const line of lines.slice(start + 1)) {
-    const m = line.match(/^\s+-\s+(.*)$/);
+    const m = line.match(SEQUENCE_ITEM);
     if (!m) break;
     items.push(m[1].trim().replace(/^["']|["']$/g, ''));
   }
@@ -57,12 +92,17 @@ function readSequence(block, key) {
 }
 
 function parseFrontmatter(source) {
+  const text = String(source);
+  const firstBreak = text.indexOf('\n');
+  if (firstBreak === -1 || !OPENING.test(text.slice(0, firstBreak))) return {};
+  const blockStart = firstBreak + 1;
+  const closing = text.indexOf('\n---', blockStart);
+  if (closing === -1) return {};
   // A skill file checked out on Windows carries CRLF; every pattern below anchors on \n
-  const text = String(source).replace(/\r\n/g, '\n');
-  const m = text.match(/^---\n([\s\S]*?)\n---/);
-  if (!m) return {};
-  const block = m[1];
-  const scalar = key => block.match(new RegExp(`^\\s*${key}:\\s*(.+)$`, 'm'))?.[1].trim();
+  const block = text
+    .slice(blockStart, text[closing - 1] === '\r' ? closing - 1 : closing)
+    .replace(/\r\n/g, '\n');
+  const scalar = key => block.match(scalarPattern(key))?.[1].trim();
   const fm = {};
   const description = scalar('description');
   if (description !== undefined) fm.description = description;
@@ -78,11 +118,11 @@ function parseFrontmatter(source) {
 }
 
 function loadCatalog(skillsDir) {
-  if (!fs.existsSync(skillsDir)) return [];
+  let names;
+  try { names = fs.readdirSync(skillsDir); } catch { return []; }
   const catalog = [];
-  for (const name of fs.readdirSync(skillsDir).sort()) {
+  for (const name of names.sort()) {
     const skillFile = path.join(skillsDir, name, 'SKILL.md');
-    if (!fs.existsSync(skillFile)) continue;
     let text;
     try { text = fs.readFileSync(skillFile, 'utf8'); } catch { continue; }
     const fm = parseFrontmatter(text);

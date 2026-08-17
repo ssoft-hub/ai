@@ -1,12 +1,9 @@
 'use strict';
-const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { runAsScript } = require(path.join(__dirname, 'guard.js'));
-const { loadCatalog, matchSkills } = require(path.join(__dirname, 'skill-catalog.js'));
+// Past the built-ins above, only this is read for every payload; the rest load where needed.
 const { commandIn, writePathIn } = require(path.join(__dirname, 'payload.js'));
-const { lex, TRANSPARENT } = require(path.join(__dirname, 'shell-lex.js'));
 
 const configDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 
@@ -18,9 +15,15 @@ function skillsIn(text) {
 }
 
 function gateTargets(input, toolName) {
-  const command = commandIn(input);
   const declared = writePathIn(input, toolName);
-  return [...(command ? writeTargets(command) : []), ...(declared ? [declared] : [])];
+  const command = commandIn(input);
+  let written = [];
+  if (command) {
+    // The lexer loads inside `writeTargets`, so the command half failing must not take the
+    // declared target with it. With nothing else to gate, the failure is the guard's own.
+    try { written = writeTargets(command); } catch (err) { if (!declared) throw err; }
+  }
+  return [...written, ...(declared ? [declared] : [])];
 }
 
 // Version 1 is the first whose `denied` belongs to one agent; an unversioned file pooled
@@ -128,6 +131,7 @@ function powershellTarget(operands) {
 }
 
 function writeTargets(command) {
+  const { lex, TRANSPARENT } = require(path.join(__dirname, 'shell-lex.js'));
   const tokens = lex(String(command));
   const targets = [];
   let commandPosition = true;
@@ -174,7 +178,7 @@ const PLAIN_ID = /^[A-Za-z0-9_-]+$/;
 function plain(id, fallback) {
   if (typeof id !== 'string' || !id) return fallback;
   if (PLAIN_ID.test(id)) return id;
-  return crypto.createHash('sha256').update(id).digest('hex').slice(0, 16);
+  return require('crypto').createHash('sha256').update(id).digest('hex').slice(0, 16);
 }
 
 // A subagent's transcript sits under the project directory and session id Claude Code
@@ -202,6 +206,7 @@ function verdict(data) {
   const targets = gateTargets(data.tool_input, data.tool_name);
   if (!targets.length) return undefined;
 
+  const { loadCatalog, matchSkills } = require(path.join(__dirname, 'skill-catalog.js'));
   const catalog = loadCatalog(path.join(configDir, 'skills'));
   const statePath = stateOf(data.session_id, data.agent_id);
   const transcript = transcriptOf(data.transcript_path, data.session_id, data.agent_id);
@@ -224,7 +229,7 @@ function verdict(data) {
   } }) };
 }
 
-if (require.main === module) runAsScript(verdict);
+if (require.main === module) require(path.join(__dirname, 'guard.js')).runAsScript(verdict);
 
 module.exports = {
   skillsIn, loadedSkills, notice, denyOnce, writeTargets, gateTargets, stateOf, verdict,

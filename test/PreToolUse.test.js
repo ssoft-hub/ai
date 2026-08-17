@@ -67,6 +67,8 @@ function verdictFor(spec) {
 // the failure raised inside the dispatcher's own process rather than before it.
 function deciding(spec) {
   if (spec?.broken) return `'use strict';throw new Error(${JSON.stringify(spec.broken)});`;
+  // `{ body }` is the verdict as source: JSON cannot carry a thrown string or a throwing getter.
+  if (spec?.body) return `'use strict';module.exports={verdict:${spec.body}};`;
   if (spec?.throws) {
     return `'use strict';module.exports={verdict:()=>{throw new Error(${JSON.stringify(spec.throws)})}};`;
   }
@@ -98,6 +100,69 @@ test('blocks a command carrying a secret', () => {
   const r = run(`curl -H "Authorization: token ghp_${'a'.repeat(36)}" https://api.github.com`);
   assert.strictEqual(r.status, 2);
   assert.match(r.stderr, /GitHub PAT/);
+});
+
+const UNREADABLE_MESSAGE = '() => { throw Object.defineProperty(new Error("x"), "message",'
+  + ' { get() { throw new Error("nope"); } }); }';
+
+test('keeps an earlier decision when a later guard throws an unreadable error', () => {
+  const dir = mkConfig([null, null, 'ask', { body: UNREADABLE_MESSAGE }]);
+  try {
+    const r = run('gh pr comment 49 -b x', dir);
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(JSON.parse(r.stdout).hookSpecificOutput.permissionDecision, 'ask');
+    assert.match(r.stderr, /did not run — it stated no reason/);
+  } finally { rmConfig(dir); }
+});
+
+test('keeps an earlier decision when a later guard throws a string', () => {
+  const dir = mkConfig([null, null, 'ask', { body: '() => { throw "gone missing"; }' }]);
+  try {
+    const r = run('gh pr comment 49 -b x', dir);
+    assert.strictEqual(JSON.parse(r.stdout).hookSpecificOutput.permissionDecision, 'ask');
+    assert.match(r.stderr, /did not run — gone missing/);
+  } finally { rmConfig(dir); }
+});
+
+const AWS_KEY = 'AKIAIOSFODNN7EXAMPLE';
+const PAT = `ghp_${'a'.repeat(36)}`;
+
+test('blocks a secret written by a tool naming its target as a string', () => {
+  const dir = mkGateConfig();
+  try {
+    const r = gateInput(dir, {
+      tool_name: 'mcp__fs__write',
+      tool_input: { file_path: 'a.txt', content: `key = "${AWS_KEY}"` },
+    }, 's1');
+    assert.strictEqual(r.status, 2);
+  } finally { rmConfig(dir); }
+});
+
+test('loses no guard to a write target that is not a string', () => {
+  const dir = mkGateConfig();
+  try {
+    const r = gateInput(dir, {
+      tool_name: 'mcp__fs__write',
+      tool_input: { file_path: ['a.txt'], content: `key = "${AWS_KEY}"` },
+    }, 's1');
+    assert.doesNotMatch(r.stderr, /did not run/);
+  } finally { rmConfig(dir); }
+});
+
+test('still scans the command when the same call names a target that is not a string', () => {
+  const dir = mkGateConfig();
+  try {
+    const r = gateInput(dir, {
+      tool_name: 'mcp__fs__exec',
+      tool_input: {
+        command: `curl -H "Authorization: token ${PAT}" https://api.github.com`,
+        file_path: ['a.txt'],
+        content: 'hello',
+      },
+    }, 's1');
+    assert.strictEqual(r.status, 2);
+    assert.match(r.stderr, /GitHub PAT/);
+  } finally { rmConfig(dir); }
 });
 
 test('keeps every reason when two guards decide on one command', () => {

@@ -13,7 +13,7 @@ const toolsDir = path.join(configDir, 'tools');
 // would rewrite it. `tools/payload.js` states the same rule, kept in step by a test.
 function writeTargetOf(input, toolName) {
   const target = input?.file_path ?? input?.path ?? input?.notebook_path ?? '';
-  if (!target) return '';
+  if (typeof target !== 'string' || !target) return '';
   const content = input?.content ?? input?.new_string ?? input?.new_source ?? input?.edits;
   return EDIT_TOOLS.has(toolName) || content !== undefined ? target : '';
 }

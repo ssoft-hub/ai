@@ -10,9 +10,10 @@ function commandIn(input) {
   return typeof command === 'string' && command.trim() ? command : '';
 }
 
+// The guards behind this hand the path to `path.extname`, which throws on anything else.
 function writePathIn(input, toolName) {
   const target = input?.file_path ?? input?.path ?? input?.notebook_path ?? '';
-  if (!target) return '';
+  if (typeof target !== 'string' || !target) return '';
   const content = input?.content ?? input?.new_string ?? input?.new_source ?? input?.edits;
   return EDIT_TOOLS.has(toolName) || content !== undefined ? target : '';
 }

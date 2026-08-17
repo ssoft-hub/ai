@@ -23,6 +23,11 @@ const PAYLOADS = [
   ['Bash', { command: 'npm test', run_in_background: 'true' }],
   ['mcp__shell__exec', { command: 'sleep 30', run_in_background: true }],
   ['Agent', { prompt: 'do it', run_in_background: true }],
+  ['PatchFile', { file_path: ['a.cpp'], content: 'x' }],
+  ['PatchFile', { file_path: 7, content: 'x' }],
+  ['Edit', { file_path: { toString: () => 'a.cpp' } }],
+  ['RunAndPatch', { command: 'echo x', file_path: ['a.cpp'], content: 'x' }],
+  ['Edit', { file_path: 'a.cpp', new_string: 'x', command: 'rm -rf /' }],
   ['Unknown', {}],
   ['Unknown', undefined],
 ];
@@ -65,13 +70,21 @@ test('writePathIn returns nothing for a bare path from any other tool', () => {
   assert.strictEqual(writePathIn(undefined, 'Read'), '');
 });
 
+// The guards behind it hand the path to `path.extname`, which throws on anything else.
+test('writePathIn returns nothing for a target that is not a string', () => {
+  assert.strictEqual(writePathIn({ file_path: ['a.cpp'], content: 'x' }, 'PatchFile'), '');
+  assert.strictEqual(writePathIn({ file_path: 7, content: 'x' }, 'PatchFile'), '');
+  assert.strictEqual(writePathIn({ file_path: { toString: () => 'a.cpp' } }, 'Edit'), '');
+});
+
 test('writePathIn reads a write target that arrives beside a command', () => {
   assert.strictEqual(writePathIn({ command: 'echo x', file_path: 'a.cpp', content: 'x' }, 'RunAndPatch'), 'a.cpp');
 });
 
 test('the dispatcher routes every payload shape the way the payload rule reads it', () => {
   for (const [toolName, input] of PAYLOADS) {
-    const expected = BY_NAME[toolName] ?? [
+    const expected = [
+      ...(BY_NAME[toolName] ?? []),
       ...(commandIn(input) ? COMMAND_GUARDS : []),
       ...(writePathIn(input, toolName) ? WRITE_GUARDS : []),
     ].filter((guard, i, all) => all.indexOf(guard) === i);
@@ -106,4 +119,13 @@ test('an agent call naming no background run reaches no guard', () => {
 test('the name map covers every tool whose payload alone would not say what it does', () => {
   assert.deepStrictEqual(routeFor({ file_path: 'a.cpp' }, 'Edit'), WRITE_GUARDS);
   assert.deepStrictEqual(routeFor({ file_path: 'a.cpp' }, 'PatchFile'), []);
+});
+
+// The name map adds to what the payload says rather than standing in for it.
+test('a named edit tool carrying a command reaches both sets of guards', () => {
+  const routed = routeFor({ file_path: 'a.cpp', new_string: 'x', command: 'rm -rf /' }, 'Edit');
+  for (const guard of [...COMMAND_GUARDS, ...WRITE_GUARDS]) {
+    assert.ok(routed.includes(guard), `${guard} was not routed`);
+  }
+  assert.strictEqual(routed.length, new Set(routed).size);
 });

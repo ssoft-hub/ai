@@ -21,7 +21,8 @@ const BY_NAME = {
 // file depends on to start.
 function guardsFor(input) {
   const command = typeof input?.command === 'string' && input.command.trim();
-  const target = input?.file_path ?? input?.path ?? input?.notebook_path;
+  const named = input?.file_path ?? input?.path ?? input?.notebook_path;
+  const target = typeof named === 'string' ? named : '';
   const content = input?.content ?? input?.new_string ?? input?.new_source ?? input?.edits;
   const guards = command ? [...COMMAND_GUARDS] : [];
   if (target && content !== undefined) {
@@ -30,8 +31,12 @@ function guardsFor(input) {
   return guards;
 }
 
+// The name map adds to what the payload says rather than standing in for it.
 function routeFor(input, toolName) {
-  return BY_NAME[toolName] ?? guardsFor(input);
+  const named = BY_NAME[toolName] ?? [];
+  const routed = [...named];
+  for (const guard of guardsFor(input)) if (!routed.includes(guard)) routed.push(guard);
+  return routed;
 }
 
 // Claude Code reads this hook's stdout as a single JSON document; anything else it
@@ -40,6 +45,18 @@ function routeFor(input, toolName) {
 // on one command, so a run keeps the strictest decision and every reason behind it.
 // These three are the whole vocabulary a decision can name.
 const RANK = { allow: 0, ask: 1, deny: 2 };
+
+// `String()` throws on a value with no primitive conversion, and a guard that cannot say why
+// still decided. `tools/guard.js` states this same fallback for the other path a guard is
+// reached by, kept in step by a test rather than by a require this file depends on to start.
+function asText(value) {
+  try { return String(value); } catch { return null; }
+}
+
+// The `.message` read is inside the try too: a hostile error object throws on it.
+function asReason(err) {
+  try { return String(err?.message ?? err).split('\n')[0]; } catch { return null; }
+}
 
 // Output that names none of the three is text: unparseable output as written, and output
 // that parses behind a line naming the tool it came from, so that a run whose only output
@@ -86,21 +103,33 @@ process.stdin.on('end', () => {
   // the wrong way round is the same broken file as one that throws, and costs the same.
   for (const tool of tools) {
     try {
+      // Each field read once, and the block acted on before `output` is read: a throw
+      // reading `output` must not discard a block already stated.
       const said = verdictOf(tool, data);
-      if (said?.block) {
+      const block = said?.block;
+      if (block) {
         // A blocked call has no JSON output left to carry a warning: stderr is the only
         // channel exit 2 leaves open, and it reaches the model as well as the user.
-        process.stderr.write(`${String(said.block).trim()}\n`);
+        // The fallback replaces the guard's own reason, so it carries no hook prefix.
+        const stated = asText(block)?.trim();
+        process.stderr.write(`${stated || `${tool} blocked the call without stating why`}\n`);
         if (notes.length) process.stderr.write(`${notes.join('\n')}\n`);
         process.exit(2);
       }
-      const out = said?.output === undefined ? '' : String(said.output).trim();
+      const output = said?.output;
+      const rendered = output === undefined ? '' : asText(output);
+      if (rendered === null) {
+        process.stderr.write(`PreToolUse: ${tool} stated output it could not write\n`);
+        continue;
+      }
+      const out = rendered.trim();
       if (!out) continue;
       const { decision, note } = readOutput(out, tool);
       if (decision) decisions.push(decision);
       else notes.push(note);
     } catch (err) {
-      process.stderr.write(`PreToolUse: ${tool} did not run — ${String(err?.message).split('\n')[0]}\n`);
+      process.stderr.write(
+        `PreToolUse: ${tool} did not run — ${asReason(err) ?? 'it stated no reason'}\n`);
     }
   }
 
