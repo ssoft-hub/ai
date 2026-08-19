@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  bound-to:
+    - cpp
   reminder: false
   paths:
     - "**/*.h"

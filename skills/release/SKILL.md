@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - universal
   tags:
     - git
     - release
@@ -61,12 +63,13 @@ to users is a separate gate → `shipping-and-launch` skill.
 
 - [ ] Build passes on all compilers declared in project (check `AGENTS.md`)
 - [ ] All tests pass; CI green on all compiler targets
-- [ ] No breaking API change without `MAJOR` bump (`cpp-api-design` → Breaking Changes)
+- [ ] No breaking API change without `MAJOR` bump, breaking as the API-design skill of
+      the language being written defines it in its breaking-changes section
 - [ ] `CHANGELOG.md` covers all changes since last release, reconciled against the
       previous release, `[Unreleased]` renamed (`changelog` → On Release)
 - [ ] Version string consistent across **all** version files (grep confirms)
-- [ ] Every module ref recorded in this release is the module state it ships
-      (`submodule-sync` → Merge Order Across Repositories)
+- [ ] Every module ref recorded in this release is the module state it ships, under the
+      merge order the module-sync skill of the version control system fixes
 - [ ] Commit trailers conform to `commit-rules` skill
 
 ## Step 5 — Commit and Tag
@@ -83,4 +86,4 @@ git push --tags    # separate push — triggers CI release workflow
 
 If this library is a submodule in a superproject:
 1. After pushing the tag, update the submodule ref in the superproject
-2. See `submodule-sync` skill for the exact workflow
+2. See the module-sync skill of the version control system for the exact workflow

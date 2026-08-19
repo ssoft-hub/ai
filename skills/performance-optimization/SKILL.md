@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - universal
   tags:
     - performance
     - quality
@@ -15,9 +17,10 @@ metadata:
 
 Apply when diagnosing or fixing a reported performance problem, or evaluating whether a
 change is worth its performance cost. This skill covers the *process* of finding and
-validating a performance fix. The default C++ idioms to write by (avoiding copies,
-preferring views, hot-path allocation discipline) are always in effect regardless of a
-specific problem → `cpp-coding` skill (Performance section) — do not restate them here.
+validating a performance fix. The default idioms to write by (avoiding copies, preferring
+views, hot-path allocation discipline) are always in effect regardless of a specific
+problem → the coding-conventions skill of the language being written — do not restate
+them here.
 
 - Performance depth during review → `code-review-and-quality` skill (Performance axis).
 - Production performance regressions surfaced via metrics → `observability-and-instrumentation` skill.
@@ -70,7 +73,7 @@ don't assume" spirit applied to performance instead of correctness.
 |--------|----------------|
 | Algorithm | Big-O of the hot path relative to the actual input size |
 | I/O | Network/disk calls inside a loop that could be batched |
-| Allocation | Allocations per iteration of a hot loop (see `cpp-coding` → Performance) |
+| Allocation | Allocations per iteration of a hot loop |
 | Copies | Values copied where a reference/view/move would do |
 | Synchronization | Lock contention or false sharing under concurrent load |
 | Cache locality | Data layout causing avoidable cache misses on a hot path |

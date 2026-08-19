@@ -114,6 +114,8 @@ function parseFrontmatter(source) {
   if (paths !== undefined) fm.paths = paths;
   const companions = readSequence(block, 'with');
   if (companions !== undefined) fm.with = companions;
+  const boundTo = readSequence(block, 'bound-to');
+  if (boundTo !== undefined) fm.boundTo = boundTo;
   return fm;
 }
 
@@ -133,6 +135,9 @@ function loadCatalog(skillsDir) {
       tier: TIERS.includes(fm.tier) ? fm.tier : DEFAULT_TIER,
       paths: fm.paths ?? [],
       companions: fm.with ?? [],
+      // Empty rather than defaulted to `universal`, which would report a context the
+      // file does not declare.
+      boundTo: fm.boundTo ?? [],
       // Design work precedes the file it produces, so paths alone never opt a skill out.
       reminder: fm.reminder ?? true,
     });

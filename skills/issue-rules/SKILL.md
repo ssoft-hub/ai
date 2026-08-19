@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  bound-to:
+    - tracker
   tags:
     - git
     - issues
@@ -17,7 +19,7 @@ metadata:
 Apply when creating or reviewing tracker issues (GitHub Issues, Jira, Linear, …).
 
 This skill states what an issue must contain. The command that creates it, labels it, or
-comments on it belongs to the platform: `github-cli` for `gh`, `gitlab-cli` for `glab`.
+comments on it belongs to the CLI skill of the hosting platform.
 
 ## Project Overrides
 
@@ -112,10 +114,10 @@ Title types other than these three (see Types above) carry no label — the titl
 
 Every issue also gets a few **topic** labels (2-4, not a tag cloud) — named after the
 actual subject matter (component, subsystem, domain concept), not drawn from a fixed
-list. Before creating one, list the tracker's existing labels (`github-cli` /
-`gitlab-cli` → Issues) and reuse one covering the same topic; create a new topic label
-only the first time a topic has no match. Topic labels grow organically with the
-project.
+list. Before creating one, list the tracker's existing labels — the CLI skill of the
+hosting platform states the command, in its issues section — and reuse one covering the
+same topic; create a new topic label only the first time a topic has no match. Topic
+labels grow organically with the project.
 
 ```
 Feat(threat-analysis): Add short-term conflict alert algorithm
@@ -178,5 +180,4 @@ A reader should be able to reconstruct, from comments alone, which PR/MR impleme
 
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
 - `pr-rules` — PR title and description mirror the issue being resolved; Pre-Merge Checklist gates merge on this issue's checkbox state.
-- `github-cli` — the `gh` commands that create, label, and comment on an issue.
-- `gitlab-cli` — the `glab` commands for the same.
+- The CLI skill of the hosting platform — the commands that create, label, and comment on an issue.

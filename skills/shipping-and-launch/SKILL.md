@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - universal
   tags:
     - release
     - operations

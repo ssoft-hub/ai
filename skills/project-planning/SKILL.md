@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: process
+  bound-to:
+    - universal
   tags:
     - planning
     - project-management

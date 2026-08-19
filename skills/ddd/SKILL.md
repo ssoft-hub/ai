@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - universal
   tags:
     - cpp
     - ddd
@@ -16,7 +18,8 @@ metadata:
 
 Apply when designing domain models, domain APIs, or structuring a module around a business domain.
 
-C++ mechanics → `cpp-coding`, `cpp-api-design`. This skill covers domain modelling only.
+The mechanics of writing it down → the coding-conventions and API-design skills of the
+language being written. This skill covers domain modelling only.
 
 Reference: Eric Evans, *Domain-Driven Design* (2003). Patterns below are the strategic and tactical core.
 

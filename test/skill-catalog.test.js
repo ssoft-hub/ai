@@ -74,6 +74,11 @@ test('parseFrontmatter reads an inline sequence', () => {
   assert.deepStrictEqual(fm.with, ['comments', 'cpp-encapsulation']);
 });
 
+test('parseFrontmatter reads the contexts a skill is bound to', () => {
+  const fm = parseFrontmatter('---\nname: x\nmetadata:\n  bound-to:\n    - node\n    - claude-code\n---\nbody\n');
+  assert.deepStrictEqual(fm.boundTo, ['node', 'claude-code']);
+});
+
 test('parseFrontmatter keeps a comma that sits inside a quoted inline item', () => {
   const fm = parseFrontmatter('---\nname: x\nmetadata:\n  paths: ["**/a,b.md", "**/c.md"]\n---\nbody\n');
   assert.deepStrictEqual(fm.paths, ['**/a,b.md', '**/c.md']);
@@ -107,8 +112,16 @@ test('loadCatalog defaults tier to domain and leaves paths empty', () => {
   try {
     writeSkill(tmp, 'alpha', 'description: Apply when alpha\n');
     assert.deepStrictEqual(loadCatalog(tmp), [
-      { name: 'alpha', description: 'Apply when alpha', tier: 'domain', paths: [], companions: [], reminder: true },
+      { name: 'alpha', description: 'Apply when alpha', tier: 'domain', paths: [], companions: [], boundTo: [], reminder: true },
     ]);
+  } finally { rmTmp(tmp); }
+});
+
+test('loadCatalog carries every context a skill declares', () => {
+  const tmp = mkTmp();
+  try {
+    writeSkill(tmp, 'alpha', 'description: d\nmetadata:\n  bound-to: [node, claude-code]\n');
+    assert.deepStrictEqual(loadCatalog(tmp)[0].boundTo, ['node', 'claude-code']);
   } finally { rmTmp(tmp); }
 });
 

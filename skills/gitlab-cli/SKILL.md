@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - gitlab
   tags:
     - gitlab
     - cli
@@ -24,7 +26,6 @@ help is silent or misleading. No rule about *when* an action is allowed lives he
 - MR title, description, review comment wording, merge strategy, who authorises a merge,
   the rule that an agent's own review feedback stays unpublished, and the commands that
   publish it on the spot → `pr-rules` skill.
-- The `gh` equivalents of everything below → `github-cli` skill.
 
 ## Project Overrides
 
@@ -244,4 +245,3 @@ overall comment — see trap 1.
 - `pr-rules` — MR title, description, review comment wording, merge strategy, and the
   rules governing which of these commands may be run.
 - `issue-rules` — issue title, description templates, label scheme, lifecycle.
-- `github-cli` — the same mechanics for `gh`.
