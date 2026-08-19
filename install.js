@@ -135,17 +135,75 @@ function installSettings() {
     log(`      registered ${cmds.length} hook${cmds.length === 1 ? '' : 's'} for ${ev}`);
 }
 
-function installCLAUDEmd() {
-  const src = path.join(repoDir, 'config', 'CLAUDE.md');
+// This repository's own rules install as their own file, and `<config dir>/CLAUDE.md` is
+// left the user's: install adds one import line to it and keeps everything else. Replacing
+// it, as install once did, silently suspended the user's global instructions for as long as
+// this configuration stayed installed. So CLAUDE.md is merge-shaped like settings.json —
+// uninstall subtracts exactly the text install appended — rather than snapshot-shaped.
+const RULES_FILE = 'claude-config-rules.md';
+const IMPORT_LINE = `@${RULES_FILE}`;
+
+// Keyed on the import target, not on the whole line: a user who wrote prose around the
+// import, or re-indented it, must not be handed a second copy on the next install.
+function importsRules(text) {
+  return text.split('\n').some(line => line.includes(IMPORT_LINE));
+}
+
+function recordClaudeMd(dest, preexisted, appended) {
+  manifest.claudeMd = { dest, preexisted, appended };
+}
+
+function installClaudeRules() {
+  const src = path.join(repoDir, 'config', RULES_FILE);
   if (!fs.existsSync(src)) { warn(`source not found: ${src}`); return; }
+  copyFile(src, path.join(claudeDir, RULES_FILE));
+
   const dest = path.join(claudeDir, 'CLAUDE.md');
-  backupBeforeWrite(dest);
+  written.add(dest);
+
+  // An install predating this change owned CLAUDE.md outright. Hand it back before adding
+  // the import line: a backup is the user's own file, and a created one is only ever the
+  // copy install itself put there.
+  const snapshot = manifest.backups.find(b => b.dest === dest);
+  if (snapshot) {
+    if (fs.existsSync(snapshot.backup)) {
+      if (!DRY_RUN) {
+        fs.copyFileSync(snapshot.backup, dest);
+        fs.unlinkSync(snapshot.backup);
+      }
+      log(`  ${logPrefix} restored ${dest} ← ${snapshot.backup} (no longer replaced)`);
+    } else {
+      warn(`backup missing: ${snapshot.backup} — ${dest} keeps whatever it holds now`);
+    }
+    manifest.backups = manifest.backups.filter(b => b.dest !== dest);
+  } else if (manifest.createdFiles.includes(dest)) {
+    if (!DRY_RUN && fs.existsSync(dest)) fs.unlinkSync(dest);
+    manifest.createdFiles = manifest.createdFiles.filter(f => f !== dest);
+    log(`  ${logPrefix} dropped ${dest} (install's own copy, no longer shipped there)`);
+  }
+
+  const prior = manifest.claudeMd?.dest === dest ? manifest.claudeMd : null;
+  const existed = fs.existsSync(dest);
+  const current = existed ? fs.readFileSync(dest, 'utf8') : '';
+  const preexisted = prior ? prior.preexisted : (existed && current.trim() !== '');
+
+  if (importsRules(current)) {
+    recordClaudeMd(dest, preexisted, prior ? prior.appended : '');
+    log(`  ${logPrefix} ${dest} already imports ${RULES_FILE}`);
+    return;
+  }
+
+  // The exact text appended is what uninstall subtracts, so the file comes back byte for
+  // byte rather than approximately.
+  const appended = current.trim() === ''
+    ? `${IMPORT_LINE}\n`
+    : `${current.endsWith('\n') ? '' : '\n'}\n${IMPORT_LINE}\n`;
   if (!DRY_RUN) {
     fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.copyFileSync(src, dest);
+    fs.writeFileSync(dest, current.trim() === '' ? appended : current + appended);
   }
-  written.add(dest);
-  log(`  ${logPrefix} config/CLAUDE.md → ${dest}`);
+  recordClaudeMd(dest, preexisted, appended);
+  log(`  ${logPrefix} ${dest} ${preexisted ? 'imports' : 'created importing'} ${RULES_FILE}`);
 }
 
 function installGitHook() {
@@ -201,7 +259,7 @@ log('\nsettings.json');
 installSettings();
 
 log('\nCLAUDE.md');
-installCLAUDEmd();
+installClaudeRules();
 
 if (!SKIP_GIT) {
   log('\ngit hooks');

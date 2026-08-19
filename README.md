@@ -154,12 +154,16 @@ node install.js
 
 Copies `hooks/` (without `hooks/git/`, which is not part of `~/.claude/`), `tools/`,
 `agents/` and `commands/` into `~/.claude/`, one `SKILL.md` per skill into
-`~/.claude/skills/<name>/`, and `config/CLAUDE.md` to `~/.claude/CLAUDE.md`;
+`~/.claude/skills/<name>/`, and `config/claude-config-rules.md` to
+`~/.claude/claude-config-rules.md`;
 `config/settings.json` is merged into `~/.claude/settings.json` (existing machine-specific
 settings are preserved). `agents/` and `commands/` are optional — installing without
 either is not an error. Every file install overwrites is backed up and recorded before it
-is written — `settings.json` alone is exempt, because it is merged and reverted by
-subtracting install's own additions rather than snapshot-replaced.
+is written — `settings.json` and `CLAUDE.md` are the two exemptions, because each is
+merged and reverted by subtracting install's own additions rather than snapshot-replaced.
+`~/.claude/CLAUDE.md` is the user's own file: install adds one `@claude-config-rules.md`
+import line to it, or creates it holding that line alone, and uninstall subtracts exactly
+what it added.
 
 `install.js` writes a manifest at `~/.claude/.claude-config-manifest.json` recording every
 created file, every backup, and exactly which hooks and permissions it merged into
@@ -203,8 +207,9 @@ of install. Between them they exercise the payloads a guard decides on and the d
 returns, the skill and agent frontmatter the routing reads, the `settings.json` merge, an
 install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than the real
 one, the rule that every file under `test/` is a test file, since the runner loads each of
-them as one, and the rule that no path `config/retired.json` retires is one install still
-ships.
+them as one, the rule that no path `config/retired.json` retires is one install still
+ships, and the force marker under every `##` heading of the skill
+template and of each skill declaring `rubric: applied`.
 
 ## Manual setup
 
@@ -226,7 +231,8 @@ Get-ChildItem skills -Directory | ForEach-Object {
     New-Item -ItemType Directory -Force "$dest\skills\$($_.Name)" | Out-Null
     Copy-Item "$($_.FullName)\SKILL.md" "$dest\skills\$($_.Name)\SKILL.md"
 }
-Copy-Item config\CLAUDE.md "$dest\CLAUDE.md"
+Copy-Item config\claude-config-rules.md "$dest\claude-config-rules.md"
+Add-Content "$dest\CLAUDE.md" "@claude-config-rules.md"
 ```
 
 ```sh
@@ -244,7 +250,8 @@ for d in skills/*/; do
     mkdir -p "$dest/skills/$(basename "$d")"
     cp "$d/SKILL.md" "$dest/skills/$(basename "$d")/SKILL.md"
 done
-cp config/CLAUDE.md "$dest/CLAUDE.md"
+cp config/claude-config-rules.md "$dest/claude-config-rules.md"
+printf '@claude-config-rules.md\n' >> "$dest/CLAUDE.md"
 ```
 
 `hooks/git/` is left out on purpose: nothing under `~/.claude/` reads it. Each skill

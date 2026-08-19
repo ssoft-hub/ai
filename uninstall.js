@@ -4,6 +4,10 @@ const os = require('os');
 const path = require('path');
 const { subtractAdditions, isEffectivelyEmpty } = require('./lib/settings');
 
+// Must match install.js: the target install imports, and the line it appends.
+const RULES_FILE = 'claude-config-rules.md';
+const IMPORT_LINE = `@${RULES_FILE}`;
+
 const DRY_RUN = process.argv.includes('--dry-run');
 const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 const manifestPath = path.join(claudeDir, '.claude-config-manifest.json');
@@ -57,6 +61,44 @@ function revertSettings(record) {
 if (manifest.settings) {
   log('\nreverting settings.json additions:');
   revertSettings(manifest.settings);
+}
+
+// CLAUDE.md is the user's own file: install appended one import line to it, so uninstall
+// subtracts exactly that text and leaves everything else, the way it reverts settings.json
+// rather than restoring a snapshot over it.
+function revertClaudeMd(record) {
+  const { dest, preexisted, appended } = record;
+  const say = msg => log(`  ${DRY_RUN ? '[dry]' : '    '} ${msg}`);
+  if (!fs.existsSync(dest)) { say(`${dest} already absent`); return; }
+
+  const text = fs.readFileSync(dest, 'utf8');
+  let out;
+  if (appended && text.endsWith(appended)) {
+    out = text.slice(0, text.length - appended.length);
+  } else {
+    // The user moved or reworded the line. Drop a line that is nothing but the import and
+    // keep any line they wrote around it, rather than deleting prose that is theirs.
+    const kept = text.split('\n').filter(line => line.trim() !== IMPORT_LINE);
+    if (kept.length === text.split('\n').length) {
+      warn(`${dest} no longer carries ${IMPORT_LINE} — leaving it as it is`);
+      return;
+    }
+    out = kept.join('\n').replace(/\n+$/, '\n');
+  }
+
+  // Only a file install itself created is removed, and only when the import was all it held.
+  if (!preexisted && out.trim() === '') {
+    if (!DRY_RUN) fs.unlinkSync(dest);
+    say(`removed ${dest}`);
+    return;
+  }
+  if (!DRY_RUN) fs.writeFileSync(dest, out);
+  say(`removed the import line from ${dest}`);
+}
+
+if (manifest.claudeMd) {
+  log('\nreverting the CLAUDE.md import line:');
+  revertClaudeMd(manifest.claudeMd);
 }
 
 log('\nrestoring backups:');

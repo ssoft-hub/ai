@@ -260,6 +260,93 @@ conventions) and `github-cli` / `gitlab-cli` (a repository has one host). Their 
 principles are stated in each one's own runner and command vocabulary; routing a JS test
 task through a `cpp-` prefixed skill for one line would cost more than the duplication.
 
+## Binding Force
+
+Two agents applying one skill reach one verdict only where the skill says which of its
+statements bind. Every `##` section of a skill answers that with a marker on the line under
+its heading, and every statement under it is written with the modal that matches.
+
+What the four markers are, the order of force between them, what each entitles a reader to
+do, and the ceiling on the modal a section may speak with are the reader's half, and they
+are stated in `config/claude-config-rules.md` → Binding force of a skill section. That file is what
+`install.js` copies to the config directory, so it reaches every project the installed
+skills are read in; this repository's `AGENTS.md` does not. Nothing about what a marker
+means is repeated here. What follows is the author's half: how to choose a marker, where to
+put it, and what holds it.
+
+The rubric scopes to the sections of a skill: `skills/*/SKILL.md` and the template they are
+copied from. This file is not a skill and carries no markers — it states the rubric rather
+than being checked by it.
+
+`**Must**` is placed only where compliance can be checked. Every statement under a
+`**Must**` section meets all three of these conditions:
+
+1. It names a quantity, a closed list, a checkable pattern or a required artifact — 72
+   characters, the commit type table, the shape of a branch name, a regression test.
+2. It names what to look at to establish compliance — a test name, a file, a build task,
+   a checklist item, a command. The artifact carries the verdict; reading it does not
+   require the author's account of what was intended. The artifact under inspection
+   counts as that named artifact when, and only when, the statement names the property
+   to count in it: "a comment must be at most one line" names the comment and the property
+   (its line count), so it passes, while "the comment must be clear" names a property
+   nobody can count, so it fails. A statement naming no countable property of the thing
+   under inspection needs an external artifact — a test, a command, a build task, a
+   checklist item — before it can sit under `**Must**`.
+3. It contains no adjective without a scale and no appeal to the reader's state of mind.
+   "long", "deeply nested", "a reasonable default", "a careful reader would get it
+   wrong" — each of these leaves the verdict with whoever happens to read it.
+
+The other three markers carry no such requirement and are ordered by importance alone.
+That is what the four steps buy over two: a statement can be central and unmeasurable at
+the same time — "code documents itself" is what a whole skill derives from, and nothing
+counts it — and it takes `**Should**` on its importance without being called advice and
+without being given a force no check could back. A section no statement of which is
+checkable does not carry `**Must**` however important it is, and marking it `**Must**`
+does not make it checkable.
+
+The conditions apply to the whole section rather than to its strongest sentence: a `##`
+section takes `**Must**` when every statement under it meets all three, and one statement
+short of them puts the section at `**Should**` or below. That is what keeps the verdict
+reproducible — two people marking the same section reach the same word, because neither
+has to pick which sentence the section is really about.
+
+A checkable statement among unmeasurable neighbours is therefore raised by splitting it
+into a `##` section of its own, never by strengthening the marker in place: the marker
+covers every statement under its heading, so raising it where it stands would extend
+`**Must**` over the very neighbours the conditions reject. Rewriting reaches a statement
+that falls short of the conditions; splitting reaches one held down by the company it
+keeps. Those two are the whole partition. Deleting or moving the weak neighbours would
+raise the section just as well, and is not a third route: a neighbour that no longer earns
+its place is dropped on its own merits, never as a way to promote the statement beside it.
+
+The marker sits alone on the first line under the heading it applies to:
+
+```markdown
+## Keep It Short
+
+**Must**
+
+A comment must be at most one line.
+```
+
+The heading text itself carries no marker, because the heading is what every
+cross-reference resolves against — `skills/pr-rules/SKILL.md` points back at its own
+`Project Overrides`, and the `<skill>` → `Section` form runs through this file. A marker
+inside the heading would have to be reproduced in every such reference to keep it
+quotable verbatim.
+
+`test/rubric.test.js` holds all of it: exactly one marker per `##` section, drawn from the
+four, on the first line under the heading and never inside it; no section speaking above
+its own marker; and `config/claude-config-rules.md` naming the four, so a skill never
+ships a marker
+whose meaning ships nowhere. It reads every `skills/*/SKILL.md` and checks the ones
+declaring `rubric: applied` indented under `metadata:`, where `tools/skill-catalog.js`
+reads every other key it needs, so a skill comes under the check in the pass that marks it
+and not before. `templates/SKILL.md` is marked throughout and checked whatever it declares,
+so a skill copied from it is born marked, and it defaults every section to
+`**Recommended**` — the weakest marker that still states a norm, so force is something an
+author raises deliberately rather than something a copied file confers.
+
 ## Adding a skill
 
 0. Pre-flight check, before creating any file:
@@ -288,7 +375,10 @@ task through a `cpp-` prefixed skill for one line would cost more than the dupli
      half-applied
    - `description` must name the language when the name does, so the one line the
      every-prompt reminder shows is unambiguous without opening the skill
-4. Write rules sections following the template structure
+4. Write rules sections following the template structure, keeping the marker line the
+   template puts under each `##` heading — see "Binding Force" for which of the
+   four each section takes, and add `rubric: applied` to the frontmatter once every
+   section carries one
 5. Add an entry to the skill table in `README.md`
 6. Add the skill's line to the skill ownership map above — the concern it owns and what it
    hands off, plus a hand-off line in every skill it takes a concern from
@@ -435,7 +525,7 @@ node install.js --no-git-hook # skip .git/hooks/pre-commit copy
 node uninstall.js            # full restore to pre-install state
 ```
 
-`settings.json` is JSON-merged into `~/.claude/settings.json`; existing machine-specific settings are preserved (`defaultMode`, user `allow`/`ask`/`deny` entries). Every file install overwrites is copied into `.claude-config-backups` and recorded before it is written — `settings.json` alone is exempt, because it is merged and reverted by subtracting install's own additions rather than snapshot-replaced. A manifest at `~/.claude/.claude-config-manifest.json` records every created file and every backup so `uninstall.js` can restore the exact prior state byte-for-byte.
+`settings.json` is JSON-merged into `~/.claude/settings.json`; existing machine-specific settings are preserved (`defaultMode`, user `allow`/`ask`/`deny` entries). Every file install overwrites is copied into `.claude-config-backups` and recorded before it is written — `settings.json` and `CLAUDE.md` are the two exemptions, because each is merged and reverted by subtracting install's own additions rather than snapshot-replaced. This repository's own rules install as `~/.claude/claude-config-rules.md`, and `~/.claude/CLAUDE.md` gets one `@claude-config-rules.md` import line and keeps everything else — it is the user's file, and replacing it would suspend their global instructions for as long as this configuration stayed installed. Re-installing adds no second line, since the check is for the import target rather than for the line install last wrote. A manifest at `~/.claude/.claude-config-manifest.json` records every created file and every backup so `uninstall.js` can restore the exact prior state byte-for-byte.
 
 What the git-hook step installs, and the single repository it applies to, is stated in `README.md` → Installation.
 
