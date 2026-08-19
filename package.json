@@ -5,6 +5,7 @@
   "type": "commonjs",
   "license": "Unlicense",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "check:install": "node check-install.js"
   }
 }

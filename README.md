@@ -182,7 +182,16 @@ node install.js --dry-run      # preview without writing
 node install.js --no-git-hook  # skip .git/hooks/pre-commit copy
 node uninstall.js              # full restore using manifest
 node uninstall.js --dry-run    # preview what would be restored
+npm run check:install          # report every skill whose installed copy is stale
 ```
+
+`npm run check:install` compares each `skills/<name>/SKILL.md` byte for byte against the
+copy install wrote, and names every file whose two copies differ - a skill the config dir
+carries no copy of among them. An agent reads the installed copy, so a skill edited
+without a later `node install.js` leaves it on the old text. A config dir holding no
+`skills/` has never been installed to and passes silently. `npm test` does not run the
+check: `node install.js` writes outside the working directory and stays the user's own
+step, so the suite answers the same on every machine.
 
 `hooks/git/pre-commit` is the one file install writes outside `~/.claude/`, and it goes
 into this checkout's own `.git/hooks/pre-commit`. No other repository on the machine
@@ -202,9 +211,10 @@ Uses node's built-in `node:test` runner, so there is nothing to install first. E
 of install. Between them they exercise the payloads a guard decides on and the decision it
 returns, the skill and agent frontmatter the routing reads, the `settings.json` merge, an
 install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than the real
-one, the rule that every file under `test/` is a test file, since the runner loads each of
-them as one, and the rule that no path `config/retired.json` retires is one install still
-ships.
+one, both verdicts `npm run check:install` gives over a temporary config dir carrying one
+matching and one differing skill copy, the rule that every file under `test/` is a test
+file, since the runner loads each of them as one, and the rule that no path
+`config/retired.json` retires is one install still ships.
 
 ## Manual setup
 

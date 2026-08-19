@@ -5,18 +5,20 @@ Configuration repository for Claude Code.
 ## Repository layout
 
 ```
-hooks/      Event dispatcher scripts (PreToolUse, PostToolUse, Stop, SessionStart,
-            UserPromptSubmit), and hooks/git/ which install writes to .git/ instead
-tools/      Atomic tool scripts invoked by hooks
-skills/     Skill definitions loaded by /skill-name slash commands
-agents/     Persona subagent definitions (one markdown file per agent)
-commands/   Slash command definitions (one markdown file per command)
-config/     What install deploys as configuration: settings.json, the CLAUDE.md it
-            writes to ~/.claude/, and retired.json — paths this repo no longer ships
-lib/        Pure helpers shared by install.js and uninstall.js
-templates/  Starting points for a new skill, agent or command
-test/       One test file per unit, run by npm test
-install.js  Bootstrap script — copies files to ~/.claude/
+hooks/            Event dispatcher scripts (PreToolUse, PostToolUse, Stop, SessionStart,
+                  UserPromptSubmit), and hooks/git/ which install writes to .git/ instead
+tools/            Atomic tool scripts invoked by hooks
+skills/           Skill definitions loaded by /skill-name slash commands
+agents/           Persona subagent definitions (one markdown file per agent)
+commands/         Slash command definitions (one markdown file per command)
+config/           What install deploys as configuration: settings.json, the CLAUDE.md it
+                  writes to ~/.claude/, and retired.json — paths this repo no longer ships
+lib/              Pure helpers shared by install.js and uninstall.js
+templates/        Starting points for a new skill, agent or command
+test/             One test file per unit, run by npm test
+install.js        Bootstrap script — copies files to ~/.claude/
+uninstall.js      Reverses install from its manifest, back to the pre-install state
+check-install.js  Reports every skill whose installed copy has fallen behind the repo
 ```
 
 ## Hook architecture
@@ -433,6 +435,7 @@ node install.js              # install to ~/.claude/
 node install.js --dry-run    # preview without writing
 node install.js --no-git-hook # skip .git/hooks/pre-commit copy
 node uninstall.js            # full restore to pre-install state
+npm run check:install        # name every skill whose installed copy is stale
 ```
 
 `settings.json` is JSON-merged into `~/.claude/settings.json`; existing machine-specific settings are preserved (`defaultMode`, user `allow`/`ask`/`deny` entries). Every file install overwrites is copied into `.claude-config-backups` and recorded before it is written — `settings.json` alone is exempt, because it is merged and reverted by subtracting install's own additions rather than snapshot-replaced. A manifest at `~/.claude/.claude-config-manifest.json` records every created file and every backup so `uninstall.js` can restore the exact prior state byte-for-byte.
@@ -446,6 +449,8 @@ npm test
 ```
 
 Tests live in `test/<name>.test.js` using node's built-in `node:test` runner. What the suite covers is stated in `README.md` → Tests.
+
+`npm test` runs no step that reads or writes the machine's own configuration directory, so it gives one verdict on every machine. `check:install` sits outside the suite for that reason and stays a command the user runs — what it compares is stated in `README.md` → Installation.
 
 ## Commit conventions
 
