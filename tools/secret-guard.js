@@ -1,6 +1,5 @@
 'use strict';
 const path = require('path');
-const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 
 const BINARY_EXTS = new Set([
   '.png', '.jpg', '.jpeg', '.gif', '.ico', '.bmp', '.webp',
@@ -38,7 +37,9 @@ function check(content, filePath) {
 }
 
 function verdict(data) {
-  const filePath = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path ?? '';
+  // An unusable path costs the binary-extension skip, never the scan of what is written.
+  const named = data.tool_input?.file_path ?? data.tool_input?.notebook_path ?? data.tool_input?.path;
+  const filePath = typeof named === 'string' ? named : '';
   const command = typeof data.tool_input?.command === 'string' ? data.tool_input.command : '';
 
   // The written path decides how the written content is read and says nothing about a
@@ -67,6 +68,6 @@ function verdict(data) {
   return undefined;
 }
 
-if (require.main === module) runAsScript(verdict);
+if (require.main === module) require(path.join(__dirname, 'guard.js')).runAsScript(verdict);
 
 module.exports = { BINARY_EXTS, BLOCK, WARN, check, extractContent, verdict };

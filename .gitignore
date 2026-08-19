@@ -7,6 +7,9 @@
 # Node.js
 node_modules/
 
+# Written by the tools when CLAUDE_CONFIG_DIR resolves to this checkout
+session-env/
+
 # Temporary and backup files
 *.bak
 *.tmp

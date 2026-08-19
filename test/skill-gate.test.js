@@ -78,6 +78,18 @@ function runGate(configDir, input) {
     env: { ...process.env, CLAUDE_CONFIG_DIR: configDir },
   });
 }
+// A copy of tools/ short one module, to see which payloads still reach a verdict without it.
+function mkToolsCopy(configDir, omit) {
+  const src = path.join(__dirname, '..', 'tools');
+  const dst = path.join(configDir, 'tools');
+  fs.mkdirSync(dst, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    if (entry.isFile() && entry.name !== omit) {
+      fs.copyFileSync(path.join(src, entry.name), path.join(dst, entry.name));
+    }
+  }
+  return path.join(dst, 'skill-gate.js');
+}
 
 test('skillsIn finds each Skill invocation in a transcript chunk', () => {
   const text = transcriptLine('debugging') + '\n' + transcriptLine('editing') + '\n';
@@ -473,6 +485,107 @@ test('stateOf keeps a session id carrying a traversal inside session-env', () =>
 
 test('stateOf keeps an agent id carrying a traversal inside session-env', () => {
   assert.ok(insideSessionEnv(stateOf('s1', '../../../evil')));
+});
+
+test('gate claims a write while the shell lexer is missing', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const gate = mkToolsCopy(dir, 'shell-lex.js');
+    const r = spawnSync('node', [gate], {
+      input: JSON.stringify({
+        tool_name: 'Edit', tool_input: { file_path: 'D:/repo/a.cpp' }, session_id: 's1',
+      }),
+      encoding: 'utf8',
+      stdio: 'pipe',
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
+    });
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.match(r.stdout, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate decides a command that writes nothing while the catalogue is missing', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const gate = mkToolsCopy(dir, 'skill-catalog.js');
+    const r = spawnSync('node', [gate], {
+      input: JSON.stringify({
+        tool_name: 'Bash', tool_input: { command: 'git status' }, session_id: 's1',
+      }),
+      encoding: 'utf8',
+      stdio: 'pipe',
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
+    });
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(r.stderr, '');
+  } finally { rmTmp(dir); }
+});
+
+test('gate claims a write through the dispatcher while the script runner is missing', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    mkToolsCopy(dir, 'guard.js');
+    const r = spawnSync('node', [path.join(__dirname, '..', 'hooks', 'PreToolUse.js')], {
+      input: JSON.stringify({
+        tool_name: 'Edit',
+        tool_input: { file_path: 'D:/repo/a.cpp', content: 'int i;' },
+        session_id: 's1',
+      }),
+      encoding: 'utf8',
+      stdio: 'pipe',
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
+    });
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(r.stderr, '');
+    assert.match(r.stdout, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate keeps a declared target when the command half needs the missing lexer', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const gate = mkToolsCopy(dir, 'shell-lex.js');
+    const r = spawnSync('node', [gate], {
+      input: JSON.stringify({
+        tool_name: 'Bash',
+        tool_input: { command: 'echo x > other.txt', file_path: 'D:/repo/a.cpp', content: 'int i;' },
+        session_id: 's1',
+      }),
+      encoding: 'utf8',
+      stdio: 'pipe',
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
+    });
+    assert.strictEqual(r.status, 0);
+    assert.match(r.stdout, /cpp-coding/);
+  } finally { rmTmp(dir); }
+});
+
+test('gate is skipped with a line on stderr when a command needs the missing lexer', () => {
+  const dir = mkConfigDir({ 'cpp-coding': 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n' });
+  try {
+    const gate = mkToolsCopy(dir, 'shell-lex.js');
+    const r = spawnSync('node', [gate], {
+      input: JSON.stringify({
+        tool_name: 'Bash', tool_input: { command: 'echo x > D:/repo/a.cpp' }, session_id: 's1',
+      }),
+      encoding: 'utf8',
+      stdio: 'pipe',
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
+    });
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(r.stdout, '');
+    assert.match(r.stderr, /skill-gate\.js did not run/);
+  } finally { rmTmp(dir); }
+});
+
+// A gated call is a fresh process, and this name is how the next one finds the deny spent.
+test('stateOf names an agent id it had to rewrite by a fixed digest', () => {
+  assert.strictEqual(path.basename(stateOf('s1', '../../../evil')),
+    's1.3647b318ebaf49fb.skill-gate.json');
+});
+
+test('stateOf keeps two agent ids it had to rewrite on names of their own', () => {
+  assert.notStrictEqual(stateOf('s1', '../../../evil'), stateOf('s1', '../../../other'));
 });
 
 test('gate keeps its state inside session-env for an agent id carrying a traversal', () => {

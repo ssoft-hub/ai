@@ -1,7 +1,6 @@
 'use strict';
 const path = require('path');
 const { gitCalls } = require(path.join(__dirname, 'git-command.js'));
-const { runAsScript } = require(path.join(__dirname, 'guard.js'));
 const { commands, commandName } = require(path.join(__dirname, 'shell-lex.js'));
 
 // A trailing glob names the same target: `rm -rf /*` empties the filesystem `rm -rf /`
@@ -98,6 +97,6 @@ function verdict(data) {
   return undefined;
 }
 
-if (require.main === module) runAsScript(verdict);
+if (require.main === module) require(path.join(__dirname, 'guard.js')).runAsScript(verdict);
 
 module.exports = { BLOCK, GIT_ASK, GIT_WARN, SHELL_WARN, WARN, check, verdict };

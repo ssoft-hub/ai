@@ -50,6 +50,20 @@ test('globToRegExp escapes regex metacharacters in literal text', () => {
   assert.ok(!re.test('D:/repo/CHANGELOGxmd'));
 });
 
+test('globToRegExp keeps a deeply nested pattern with one wildcard a segment', () => {
+  const re = globToRegExp('**/a/*/b/*/c/*.h');
+  assert.ok(re.test('D:/repo/a/x/b/y/c/z.h'));
+  assert.ok(!re.test('D:/repo/a/x/b/y/c/z.cpp'));
+});
+
+// Past the cap a pattern matches nothing rather than spending the hook's budget deciding.
+test('globToRegExp answers at once for a pattern crowding one segment with wildcards', () => {
+  const re = globToRegExp(`**/${'*a'.repeat(8)}`);
+  const started = Date.now();
+  assert.ok(!re.test(`D:/repo/src/${'a'.repeat(48)}b.txt`));
+  assert.ok(Date.now() - started < 1000);
+});
+
 test('parseFrontmatter reads a block sequence', () => {
   const fm = parseFrontmatter('---\nname: x\nmetadata:\n  paths:\n    - "**/*.cpp"\n    - "**/*.h"\n---\nbody\n');
   assert.deepStrictEqual(fm.paths, ['**/*.cpp', '**/*.h']);
@@ -78,6 +92,14 @@ test('parseFrontmatter reads a CRLF file', () => {
 
 test('parseFrontmatter returns an empty object without frontmatter', () => {
   assert.deepStrictEqual(parseFrontmatter('no frontmatter here\n'), {});
+});
+
+test('parseFrontmatter returns an empty object when the delimiter never closes', () => {
+  assert.deepStrictEqual(parseFrontmatter('---\ndescription: d\ntier: process\n'), {});
+});
+
+test('parseFrontmatter reads a block whose closing delimiter is the last byte', () => {
+  assert.strictEqual(parseFrontmatter('---\ntier: process\n---').tier, 'process');
 });
 
 test('loadCatalog defaults tier to domain and leaves paths empty', () => {
@@ -215,4 +237,51 @@ test('the comments skill claims a build file named without an extension', () => 
   for (const file of ['Makefile', 'makefile', 'CMakeLists.txt', 'Dockerfile', '.gitignore']) {
     assert.ok(matchSkills(catalog, `D:/repo/${file}`).includes('comments'), file);
   }
+});
+
+test('loadCatalog skips a plain file sitting among the skill directories', () => {
+  const tmp = mkTmp();
+  try {
+    fs.writeFileSync(path.join(tmp, 'notes.md'), 'not a skill\n');
+    writeSkill(tmp, 'real', 'description: Apply when real\n');
+    assert.deepStrictEqual(loadCatalog(tmp).map(s => s.name), ['real']);
+  } finally { rmTmp(tmp); }
+});
+
+test('loadCatalog returns nothing for a skills directory that does not exist', () => {
+  const tmp = mkTmp();
+  try {
+    assert.deepStrictEqual(loadCatalog(path.join(tmp, 'absent')), []);
+  } finally { rmTmp(tmp); }
+});
+
+test('loadCatalog reads a SKILL.md edited since the previous call', () => {
+  const tmp = mkTmp();
+  try {
+    writeSkill(tmp, 'alpha', 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n');
+    assert.deepStrictEqual(loadCatalog(tmp)[0].paths, ['**/*.cpp']);
+    writeSkill(tmp, 'alpha', 'description: d\nmetadata:\n  paths: ["**/*.rs"]\n');
+    assert.deepStrictEqual(loadCatalog(tmp)[0].paths, ['**/*.rs']);
+  } finally { rmTmp(tmp); }
+});
+
+test('loadCatalog lists a SKILL.md added since the previous call', () => {
+  const tmp = mkTmp();
+  try {
+    writeSkill(tmp, 'alpha', 'description: d\n');
+    assert.deepStrictEqual(loadCatalog(tmp).map(s => s.name), ['alpha']);
+    writeSkill(tmp, 'beta', 'description: d\n');
+    assert.deepStrictEqual(loadCatalog(tmp).map(s => s.name), ['alpha', 'beta']);
+  } finally { rmTmp(tmp); }
+});
+
+test('loadCatalog drops a SKILL.md removed since the previous call', () => {
+  const tmp = mkTmp();
+  try {
+    writeSkill(tmp, 'alpha', 'description: d\n');
+    writeSkill(tmp, 'beta', 'description: d\n');
+    assert.deepStrictEqual(loadCatalog(tmp).map(s => s.name), ['alpha', 'beta']);
+    fs.rmSync(path.join(tmp, 'beta'), { recursive: true, force: true });
+    assert.deepStrictEqual(loadCatalog(tmp).map(s => s.name), ['alpha']);
+  } finally { rmTmp(tmp); }
 });
