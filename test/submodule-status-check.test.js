@@ -4,13 +4,25 @@ const assert = require('node:assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { parseStatus, check } = require('../tools/submodule-status-check');
+const { PREFIX_NAMES, STATUS_ARGS, parseStatus, check } = require('../tools/submodule-status-check');
 
-test('parseStatus finds ahead-of-root-ref submodules (+ prefix)', () => {
+test('the status read covers a module inside a module', () => {
+  assert.deepStrictEqual(STATUS_ARGS, ['submodule', 'status', '--recursive'],
+    'without --recursive a nested module carrying + prints nothing, so the check passes it');
+});
+
+test('parseStatus names the + prefix by the difference, not by a direction', () => {
   const issues = parseStatus('+abc1234 libs/foo (heads/main)\n');
   assert.strictEqual(issues.length, 1);
   assert.strictEqual(issues[0].prefix, '+');
-  assert.strictEqual(issues[0].name, 'ahead of root ref');
+  assert.strictEqual(issues[0].name, 'differs from recorded ref');
+});
+
+test('no prefix name claims a direction the status output does not carry', () => {
+  for (const [prefix, name] of Object.entries(PREFIX_NAMES)) {
+    assert.ok(!/\bahead\b|\bbehind\b/i.test(name),
+      `PREFIX_NAMES['${prefix}'] is "${name}" — the prefix says nothing about direction`);
+  }
 });
 
 test('parseStatus finds uninitialized submodules (- prefix)', () => {
@@ -36,7 +48,7 @@ test('parseStatus ignores blank lines', () => {
 });
 
 test('parseStatus handles mixed output', () => {
-  const issues = parseStatus(' abc1234 ok\n+def5678 ahead\n-ghi9012 uninit\n');
+  const issues = parseStatus(' abc1234 ok\n+def5678 differs\n-ghi9012 uninit\n');
   assert.strictEqual(issues.length, 2);
 });
 

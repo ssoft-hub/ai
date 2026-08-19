@@ -6,7 +6,8 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const skillsDir = path.join(__dirname, '..', 'skills');
+const repoDir = path.join(__dirname, '..');
+const skillsDir = path.join(repoDir, 'skills');
 const fixturesDir = path.join(__dirname, 'fixtures');
 
 function mkTmp() {
@@ -86,6 +87,14 @@ function skillText(skill) {
   return text;
 }
 
+// A file whose subject is not a skill, under the same guard.
+function fileText(...parts) {
+  const file = path.join(repoDir, ...parts);
+  const text = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+  if (text.trim() === '') throw new Error(`${file} is empty`);
+  return text;
+}
+
 // A fence can hold a line starting with "## ", so a section ends at the next such line
 // outside one: the search runs over a copy with every fence blanked at its own offsets.
 function withoutFences(text) {
@@ -123,6 +132,51 @@ function indexIn(source, line) {
 function replaced(text, from, to) {
   if (!text.includes(from)) throw new Error(`the reference no longer contains ${from}`);
   return text.split(from).join(to);
+}
+
+// Scoped to one fence of one language under one heading: an unscoped search takes the first
+// fence in the file carrying the string, so a fence added later under another heading
+// retargets the assertion and a recipe moved out of its section keeps it green.
+function fenceIn(skill, heading, lang, call) {
+  const found = [...sectionNamed(skill, heading).matchAll(/^```([a-z]*)\n([\s\S]*?)^```/gm)]
+    .filter(match => match[1] === lang && match[2].includes(call))
+    .map(match => match[2]);
+  if (found.length !== 1)
+    throw new Error(`${found.length} ${lang} fences under "## ${heading}" of ${skill}/SKILL.md call ${call}`);
+  return found[0];
+}
+
+// A table row addressed by its leading cell, returned cell by cell, so an assertion binds
+// to the row carrying the claim rather than to a word appearing anywhere in the file.
+function tableRow(text, leadCell) {
+  // Matched on cells, so dropping the padding spaces does not report the row as missing.
+  const row = text.split('\n')
+    .filter(line => line.trimStart().startsWith('|'))
+    .map(line => line.trim().split('|').slice(1, -1).map(cell => cell.trim()))
+    .find(cells => cells[0] === leadCell);
+  if (!row) throw new Error(`no table row leading with ${leadCell}`);
+  return row;
+}
+
+// The blank-line-delimited block carrying a claim: a sentence and the command it names have
+// to sit together for the reader to pair them at all.
+function blockWith(text, needle) {
+  // Unnormalised CRLF leaves no `\n\n` to split on, widening every block to the whole file.
+  if (text.includes('\r')) throw new Error('blockWith needs text with its CRLF normalised');
+  const block = text.split('\n\n').find(part => part.includes(needle));
+  if (!block) throw new Error(`nothing in the file carries ${needle}`);
+  return block;
+}
+
+// The same block read inside the section that owns it, as `fenceIn` reads a fence: searched
+// over the whole file, a claim moved under another heading is still found and the assertion
+// holds nothing about where the reader meets it.
+function blockIn(skill, heading, needle) {
+  const section = sectionNamed(skill, heading);
+  // `blockWith` would answer "nothing in the file", naming a search this one did not run.
+  if (!section.includes(needle))
+    throw new Error(`nothing under "## ${heading}" of ${skill}/SKILL.md carries ${needle}`);
+  return blockWith(section, needle);
 }
 
 // -O2 rather than the default: a guard against undefined behaviour is pinned only where
@@ -840,4 +894,148 @@ test('the rules name no toolchain particular', () => {
   for (const particular of particulars)
     assert.ok(!text.includes(particular),
       `${particular} belongs to one library, platform or compiler, and the rule holds for readers on none of them`);
+});
+
+// --- submodule-sync ----------------------------------------------------------
+
+test('the + row of the prefix table states a difference, not a direction', () => {
+  const cells = tableRow(skillText('submodule-sync'), '`+`');
+  assert.match(cells[1], /differs/,
+    'the prefix says the checked-out commit is not the recorded one, and nothing beyond that');
+  assert.doesNotMatch(cells[1], /\bahead\b|\bbehind\b/i,
+    `the cell is "${cells[1]}" — the prefix says nothing about direction`);
+});
+
+test('the + row names no command, leaving the way out to the cell beside it', () => {
+  const cells = tableRow(skillText('submodule-sync'), '`+`');
+  assert.doesNotMatch(cells[1], /git add/,
+    `the cell is "${cells[1]}" — git add is wrong on two of the three forms, and the` +
+    ' next cell already carries the pointer');
+});
+
+test('the + row sends the reader to the section that reads the direction, and nowhere else', () => {
+  const cells = tableRow(skillText('submodule-sync'), '`+`');
+  assert.strictEqual(cells[2], 'Resolving `+` below',
+    'the cell reads exactly "Resolving `+` below": anything further resolves a + whose' +
+    ' direction has not been read yet');
+});
+
+test('resolving + names the three-dot form git prints for a divergence', () => {
+  assert.match(blockIn('submodule-sync', 'Resolving `+`', '(rewind)'), /<old>\.\.\.<new>/,
+    'git prints three dots, and both > and < lines, when neither commit contains the other');
+});
+
+test('resolving + names the line printed for a difference inside a module, and its prefix', () => {
+  assert.match(blockIn('submodule-sync', 'Resolving `+`', 'contains modified content'),
+    /space prefix/,
+    'a parent whose own module moved carries the space prefix, so a reader holding the' +
+    ' three dot-forms as the whole vocabulary meets a line under no row of the table');
+});
+
+test('resolving + sends a content-only difference to the module that carries it', () => {
+  assert.match(blockIn('submodule-sync', 'Resolving `+`', 'contains modified content'),
+    /commit it inside `module\/foo` first/,
+    'the superproject records the commit it already records, so the way out is the module' +
+    ' holding the difference rather than either command under this heading');
+});
+
+test('resolving + gates git add on containment, not on the rewind marker', () => {
+  assert.match(blockIn('submodule-sync', 'Resolving `+`', '`git add module/foo` — only where'),
+    /merge-base --is-ancestor/,
+    'an absent (rewind) marker admits the divergence, where git add drops commits');
+});
+
+test('resolving + states git add correct only where the containment holds', () => {
+  assert.match(blockIn('submodule-sync', 'Resolving `+`', '`git add module/foo` — only where'),
+    /only where/,
+    'a bullet naming the condition beside git add without binding the two leaves it as' +
+    ' background the reader may add against');
+});
+
+test('resolving + keeps git status out of the direction decision', () => {
+  assert.ok(states('submodule-sync', 'Resolving `+`',
+    'Do not read the direction off `git status`'),
+    'a reader who reads the direction off git status gets the same line either way');
+});
+
+test('the + gate reads the baseline git submodule status compares against', () => {
+  const fence = fenceIn('submodule-sync', 'Resolving `+`', 'bash',
+    'merge-base --is-ancestor <recorded SHA> HEAD');
+  assert.match(fence, /git rev-parse :module\/foo/,
+    'status and diff compare the index entry, so the gate has to read that one');
+  assert.doesNotMatch(fence, /HEAD:module\/foo/,
+    'the HEAD baseline exits 0 on a staged rewind, inverting the verdict the marker got right');
+});
+
+test('resolving + reads a nested gitlink at its immediate parent', () => {
+  assert.match(blockIn('submodule-sync', 'Nested Gitlinks', 'git -C module/foo rev-parse :bar'),
+    /git -C module\/foo diff --submodule=log bar/,
+    'a gitlink is in the index of its immediate parent, so the superproject-level reads' +
+    ' answer for module/foo and for nothing under it');
+});
+
+test('the U recipe concludes the module merge before recording the ref', () => {
+  const fence = fenceIn('submodule-sync', 'Resolving `U`', 'bash', ':3:module/foo');
+  assert.ok(indexIn(fence, 'git -C module/foo commit') < indexIn(fence, 'git add module/foo'),
+    'a conflicted module merge exits non-zero, and git add then records the pre-merge HEAD');
+});
+
+test('resolving U reads a nested gitlink at its immediate parent', () => {
+  assert.match(
+    blockIn('submodule-sync', 'Nested Gitlinks', 'git -C module/foo rev-parse :2:bar :3:bar'),
+    /git -C module\/foo add bar/,
+    'both stages and the record are the parent index\'s, so the recipe run in the' +
+    ' superproject exits 128 on the read and has nothing to record afterwards');
+});
+
+test('the Pre-PR / Pre-Release Check the pre-open checklist gates on is still a section', () => {
+  assert.doesNotThrow(() => sectionNamed('submodule-sync', 'Pre-PR / Pre-Release Check'),
+    'pr-rules → Pre-Open Checklist requires every line of it to pass');
+});
+
+test('the Merge Order Across Repositories the pre-merge checklist gates on is still a section', () => {
+  assert.doesNotThrow(() => sectionNamed('submodule-sync', 'Merge Order Across Repositories'),
+    'pr-rules → Pre-Merge Checklist requires every module reference the branch records to satisfy it');
+});
+
+test('the detached-HEAD string is attributed to the command that prints it', () => {
+  assert.match(blockIn('submodule-sync', 'Detached HEAD', '## HEAD (no branch)'), /--short --branch/,
+    'plain git status prints "HEAD detached at <sha>" instead');
+});
+
+test('the README describes the rule the prefix-table assertions hold', () => {
+  assert.match(blockWith(fileText('README.md'), 'skills/submodule-sync/SKILL.md'), /prefix table/,
+    'the suite holds the + row of that table, not the vocabulary of the prose around it');
+});
+
+test('the merge order requires every module reference to resolve to something permanent', () => {
+  assert.match(blockIn('submodule-sync', 'Merge Order Across Repositories',
+    'resolve to something permanent'), /on no target branch/,
+    'the recorded commit is held by the condition already stated, and a second check beside' +
+    ' it would be a copy the reader has to reconcile against the first');
+});
+
+test('the merge order holds the branch key to a name that outlives the merge', () => {
+  assert.match(blockIn('submodule-sync', 'Merge Order Across Repositories',
+    '`submodule.<name>.branch`'), /`commit-rules` → Branch Naming/,
+    'nothing above reaches the key --remote follows, and the shape a working branch takes' +
+    ' is what separates a value that survives the merge from one deletion breaks');
+});
+
+test('the branch-key rule names the command reading the key and the one confirming the branch', () => {
+  const fence = fenceIn('submodule-sync', 'Merge Order Across Repositories', 'bash',
+    'ls-remote --exit-code --heads origin');
+  assert.match(fence, /git config -f \.gitmodules --get-regexp/,
+    'a value nobody is told how to read is a rule nobody can run: the key comes out of' +
+    ' .gitmodules, not out of the module clone\'s own config');
+});
+
+test('the pre-release checklist reads the module ref as the state the release ships', () => {
+  const heading = 'Step 4 — Pre-Release Checklist';
+  assert.ok(states('release', heading, 'is the module state it ships'),
+    'submodule-sync → Merge Order Across Repositories makes the bump follow what the' +
+    ' superproject needs, so an item requiring the act contradicts the skill it defers to');
+  assert.ok(!states('release', heading, '(if applicable)'),
+    'the escape leaves the reader deciding whether an unbumped ref applies to them, which' +
+    ' is the very question the condition answers');
 });
