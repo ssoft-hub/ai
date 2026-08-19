@@ -17,8 +17,9 @@ Apply when designing system or module architecture, evaluating tradeoffs between
 competing designs, or writing an Architecture Decision Record (ADR).
 
 - This skill covers how modules/services/processes fit together. A single public
-  interface's own hygiene (namespacing, no `void*`, breaking-change policy) →
-  `cpp-api-design` skill.
+  interface's own hygiene (namespacing, no `void*`, breaking-change policy; not what a
+  reuse may expose across a public boundary — that stays here, under Common Tradeoff
+  Axes) → `cpp-api-design` skill.
 - Modelling one bounded context's domain objects and invariants → `ddd` skill.
   Architecture decides where the boundaries between contexts are; `ddd` decides what
   goes on inside one of them.
@@ -176,9 +177,14 @@ quality on each side of it; Quality Priorities above settles which side may be s
   reliability, security and portability at risk together — a defect you cannot fix on
   your own schedule, in a dependency that may not exist on the further target — against
   the volume of code you own, which is not one of the seven, so this axis reaches step 5
-  rather than the order. Check `cpp-api-design`'s "no runtime dependencies in
-  public API" rule before reuse decisions that would leak a third-party type across a
-  public boundary.
+  rather than the order. Whichever side wins, no third-party type crosses the public
+  surface of the boundary under discussion — what consumers outside it compile, link or
+  import against, which is nothing at all where every consumer sits inside the same
+  build. A consumer of that surface inherits the dependency, so dropping the reuse
+  later is a breaking change for them rather than an edit inside your implementation.
+  Where the type is the contract — a library built on a framework whose types it
+  promises — exposing it is portability and modularity spent, and step 4 weighs that
+  cost like any other.
 - **Synchronous vs asynchronous boundary** — sync is easier to reason about and debug;
   async decouples failure/load between components at the cost of that ease. Async buys
   reliability under partial failure and performance under load, and spends

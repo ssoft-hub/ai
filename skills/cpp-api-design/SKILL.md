@@ -27,7 +27,7 @@ Apply when designing a new C++ API, adding public C++ headers, or reviewing publ
 
 ## Dependencies
 
-- **No runtime dependencies in public API.** A public header that pulls in a third-party type leaks that dependency to every consumer — they now need it on their include path too, and an upgrade on either side can break the other.
+- **No runtime dependencies in public API.** Whether a reuse may expose a third-party type across a public boundary at all → `architecture` skill, Common Tradeoff Axes → Build vs buy/reuse. What C++ adds is two costs no dependency manifest absorbs for the consumer: there is nothing for your header to declare the requirement in, so the consumer puts the third-party headers on its own include path by hand and the failure arrives as a compile error inside a header it did not write; and an upgrade on either side can break the other through link-time ABI and ODR breakage, which has no analogue where a stable module ABI carries the type across versions.
 - **No external headers in public API headers.** Forward-declare or wrap; push the actual `#include` into the `.cpp` file. Keeps the dependency private to the implementation.
 - **No compiler-specific extensions directly** — abstract via macro or type_traits helpers, so the header still compiles for consumers on a different compiler.
 - Use C++ feature test macros for version/compiler guards:
