@@ -44,6 +44,22 @@ Apply when <trigger condition — one line, specific, actionable>.
 
 ## <Primary Section>
 
+**Recommended**
+
+<!-- The marker above is one of exactly four, alone on the first line under every `## `
+     heading, ordered by force and meaning the same in every skill:
+       `**Must**`        ground for refusing work, and appears in checklists
+       `**Should**`      may stop a review with a stated reason; no mechanical check
+       `**Recommended**` raised as a remark, blocks nothing
+       `**May**`         grants permission, forbids nothing
+     `**Must**` is placed only where compliance can be checked: every statement under it
+     meets the three conditions in AGENTS.md → Binding Force. The other three
+     carry no such requirement and are ordered by importance alone. The default above is
+     `**Recommended**`, the weakest marker that still states a norm — raise a section
+     deliberately, and split a checkable statement out into its own section rather than
+     strengthening the marker over neighbours the conditions reject. Keep the line: a
+     skill whose sections all carry one declares `rubric: applied` in its frontmatter. -->
+
 <!-- Lead with the most important rules. Use bullet lists for rules,
      tables for mappings, fenced code blocks for examples. -->
 
@@ -56,6 +72,8 @@ Apply when <trigger condition — one line, specific, actionable>.
 ---
 
 ## <Secondary Section>
+
+**Recommended**
 
 <!-- Add sections as needed. Common section names:
      Rules, Format, Structure, What to Test, Architecture,
@@ -71,7 +89,9 @@ Apply when <trigger condition — one line, specific, actionable>.
 
 ## Cross-References
 
-<!-- List skills that should be consulted alongside this one.
+**Recommended**
+
+<!-- Name the skills that cover an adjacent concern to this one.
      Omit section if there are no meaningful cross-references. -->
 
 - `<skill-name>` — <what it covers that this skill does not>

@@ -6,6 +6,7 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  rubric: applied
   paths:
     - "**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx,inl,ipp,m,mm,java,cs,go,rs,swift,kt,kts,scala,php,qml,dart,groovy,gradle,glsl,vert,frag,proto}"
     - "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,css,scss,less}"
@@ -31,26 +32,32 @@ Doxygen blocks on public C++ headers → `cpp-doxygen` skill. This skill covers 
 
 ## Philosophy
 
-Code documents itself. **The default is no comment.** Add one only when, without it, a careful reader would get a critical, non-obvious fact wrong — never to restate what the code already shows.
+**Should**
 
-- **Default to none** — first make the code self-explanatory (better names, extracted function, clearer types). "Might help the reader" is not enough; the bar is that they get it *wrong* without the line.
-- **Keep it short** — one line. No multi-line prose blocks outside a documentation block.
-- **General character, not case history** — state a timeless fact about the code (an invariant, a constraint, a non-obvious reason), not the story of how it got that way.
+Code documents itself, so a comment should not exist unless it earns its place: it should be there only where, without it, a reader would get a critical, non-obvious fact wrong, and it should never restate what the code already shows.
+
+- **Default to none** — the code should be made self-explanatory first (better names, extracted function, clearer types). "Might help the reader" is not enough; the bar is that they get it *wrong* without the line.
+- **Keep it short** — a comment should be one line, with no multi-line prose block outside a documentation block.
+- **General character, not case history** — a comment should state a timeless fact about the code (an invariant, a constraint, a non-obvious reason), not the story of how it got that way.
 
 ## When a Comment Is Justified
 
-Only for something the code cannot say itself:
-- A hidden constraint or external requirement (e.g., a protocol quirk, a platform limitation)
-- A subtle invariant the reader could otherwise break by "simplifying"
-- A workaround, stated in general terms (what breaks and why), not as a changelog entry
-- Behavior that would genuinely surprise a careful reader
+**May**
+
+A comment may say what the code cannot:
+- It may name a hidden constraint or external requirement (a protocol quirk, a platform limitation)
+- It may name a subtle invariant a reader could otherwise break by "simplifying"
+- It may state a workaround in general terms (what breaks and why), not as a changelog entry
+- It may flag behaviour that would genuinely surprise a careful reader
 
 ## What Never Belongs in a Comment
 
-- **References to the current task, ticket, bug ID, or "just fixed"** — that belongs in the commit message, not the code. A comment describing the fix for an error introduced moments ago is a diary entry, not documentation, and it rots the moment the surrounding code changes again.
-- **What the code already says** — if removing the comment loses no information, delete it.
-- **Narration of a specific decision's private context** ("we chose X because the other team asked", "temporary until Y ships") — write the general constraint instead, or put case-specific context in the commit message / PR description.
-- **Multi-paragraph explanations** — a sign the design needs fixing: extract the invariant into a named function or type instead of writing a wall of prose around it.
+**Should**
+
+- **References to the current task, ticket, bug ID, or "just fixed"** — a comment should not carry them; they belong in the commit message. A comment describing the fix for an error introduced moments ago is a diary entry, not documentation, and it rots the moment the surrounding code changes again.
+- **What the code already says** — a comment that loses no information when it is removed should be deleted.
+- **Narration of a specific decision's private context** ("we chose X because the other team asked", "temporary until Y ships") — a comment should state the general constraint instead, leaving case-specific context to the commit message or PR description.
+- **Multi-paragraph explanations** — a comment should not run to paragraphs; the invariant should be extracted into a named function or type instead.
 
 ```cpp
 // Wrong — narrates a private fix history, will rot, belongs in commit message
@@ -64,10 +71,15 @@ if (connection == nullptr) return;
 
 ## Red Flags — delete the comment
 
+**Should**
+
+A comment should be deleted wherever the reason for keeping it is one of these:
 - "This might help the next reader" — not enough; the bar is they get it *wrong* without it.
-- "This expression is non-obvious, I'll explain it" — if it needs prose, name it (extract a constant or function) instead.
+- "This expression is non-obvious, I'll explain it" — it should be named instead (extract a constant or function), not explained in prose.
 - "I'll note why I chose this approach" — that is commit-message material, not a code comment.
 
 ## Cross-References
+
+**Recommended**
 
 - `commit-rules` — where task/fix/ticket context actually belongs
