@@ -26,17 +26,19 @@ function skillFiles() {
     .map(name => `skills/${name}/SKILL.md`);
 }
 
-// The two files install.js writes at the root of the config dir, out of `config/`.
+// The names install.js writes at the root of the config dir. Keyed on the destination
+// rather than on what `config/` happens to hold: a source file renamed out from under
+// this list would otherwise drop its destination out of `shipped()`, and a retired entry
+// naming that destination would pass the very check meant to catch it.
 function configFiles() {
-  return ['settings.json', 'CLAUDE.md']
-    .filter(name => fs.existsSync(path.join(repoDir, 'config', name)));
+  return ['settings.json', 'CLAUDE.md', 'claude-config-rules.md'];
 }
 
 // A retired entry names a path relative to the Claude config dir, so the set it is
 // checked against is what install.js writes there rather than what the repo holds:
 // `hooks/` without `git/`, whose pre-commit hook goes into `.git/` instead; `tools/`,
-// `agents/` and `commands/` whole; one `SKILL.md` per skill; and `config/`'s two files
-// under the name they take at the root.
+// `agents/` and `commands/` whole; one `SKILL.md` per skill; and the three names
+// it writes at the root of the config dir.
 function shipped() {
   const paths = new Set();
   const addAll = dests => { for (const dest of dests) paths.add(dest); };

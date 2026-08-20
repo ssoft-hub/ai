@@ -11,8 +11,9 @@ tools/      Atomic tool scripts invoked by hooks
 skills/     Skill definitions loaded by /skill-name slash commands
 agents/     Persona subagent definitions (one markdown file per agent)
 commands/   Slash command definitions (one markdown file per command)
-config/     What install deploys as configuration: settings.json, the CLAUDE.md it
-            writes to ~/.claude/, and retired.json — paths this repo no longer ships
+config/     What install deploys as configuration: settings.json, the
+            claude-config-rules.md it writes to ~/.claude/ and imports from the
+            CLAUDE.md there, and retired.json — paths this repo no longer ships
 lib/        Pure helpers shared by install.js and uninstall.js
 templates/  Starting points for a new skill, agent or command
 test/       One test file per unit, run by npm test
@@ -435,7 +436,7 @@ node install.js --no-git-hook # skip .git/hooks/pre-commit copy
 node uninstall.js            # full restore to pre-install state
 ```
 
-`settings.json` is JSON-merged into `~/.claude/settings.json`; existing machine-specific settings are preserved (`defaultMode`, user `allow`/`ask`/`deny` entries). Every file install overwrites is copied into `.claude-config-backups` and recorded before it is written — `settings.json` alone is exempt, because it is merged and reverted by subtracting install's own additions rather than snapshot-replaced. A manifest at `~/.claude/.claude-config-manifest.json` records every created file and every backup so `uninstall.js` can restore the exact prior state byte-for-byte.
+`settings.json` is JSON-merged into `~/.claude/settings.json`; existing machine-specific settings are preserved (`defaultMode`, user `allow`/`ask`/`deny` entries). Every file install overwrites is copied into `.claude-config-backups` and recorded before it is written — `settings.json` and `CLAUDE.md` are the two exemptions, because each is merged and reverted by subtracting install's own additions rather than snapshot-replaced. This repository's own rules install as `~/.claude/claude-config-rules.md`, and `~/.claude/CLAUDE.md` gets one `@claude-config-rules.md` import line and keeps everything else — it is the user's file, and replacing it would suspend their global instructions for as long as this configuration stayed installed. Re-installing adds no second line, since the check is for the import target rather than for the line install last wrote. A manifest at `~/.claude/.claude-config-manifest.json` records every created file and every backup so `uninstall.js` can restore the exact prior state byte-for-byte.
 
 What the git-hook step installs, and the single repository it applies to, is stated in `README.md` → Installation.
 
