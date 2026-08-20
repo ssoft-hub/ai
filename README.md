@@ -14,7 +14,7 @@ pipeline of persona agents and commands built on top of them.
 | `skills/` | Skill definitions (SKILL.md files loaded by `/skill-name`) |
 | `agents/` | Persona subagent definitions (one markdown file per agent) |
 | `commands/` | Slash command definitions (one markdown file per command) |
-| `config/` | What install deploys as configuration: `settings.json` (hooks, permissions, statusline), the `CLAUDE.md` it writes to `~/.claude/`, and `retired.json` - paths this repo no longer ships, which install warns about but never deletes |
+| `config/` | What install deploys as configuration: `settings.json` (hooks, permissions, statusline), the `claude-config-rules.md` it writes to `~/.claude/` and imports from the `CLAUDE.md` there, and `retired.json` - paths this repo no longer ships, which install warns about but never deletes |
 
 ## Hooks
 
@@ -154,12 +154,16 @@ node install.js
 
 Copies `hooks/` (without `hooks/git/`, which is not part of `~/.claude/`), `tools/`,
 `agents/` and `commands/` into `~/.claude/`, one `SKILL.md` per skill into
-`~/.claude/skills/<name>/`, and `config/CLAUDE.md` to `~/.claude/CLAUDE.md`;
+`~/.claude/skills/<name>/`, and `config/claude-config-rules.md` to
+`~/.claude/claude-config-rules.md`;
 `config/settings.json` is merged into `~/.claude/settings.json` (existing machine-specific
 settings are preserved). `agents/` and `commands/` are optional — installing without
 either is not an error. Every file install overwrites is backed up and recorded before it
-is written — `settings.json` alone is exempt, because it is merged and reverted by
-subtracting install's own additions rather than snapshot-replaced.
+is written — `settings.json` and `CLAUDE.md` are the two exemptions, because each is
+merged and reverted by subtracting install's own additions rather than snapshot-replaced.
+`~/.claude/CLAUDE.md` is the user's own file: install adds one `@claude-config-rules.md`
+import line to it, or creates it holding that line alone, and uninstall subtracts exactly
+what it added.
 
 `install.js` writes a manifest at `~/.claude/.claude-config-manifest.json` recording every
 created file, every backup, and exactly which hooks and permissions it merged into
@@ -226,7 +230,13 @@ Get-ChildItem skills -Directory | ForEach-Object {
     New-Item -ItemType Directory -Force "$dest\skills\$($_.Name)" | Out-Null
     Copy-Item "$($_.FullName)\SKILL.md" "$dest\skills\$($_.Name)\SKILL.md"
 }
-Copy-Item config\CLAUDE.md "$dest\CLAUDE.md"
+Copy-Item config\claude-config-rules.md "$dest\claude-config-rules.md"
+# Import it from CLAUDE.md, once, keeping whatever that file already holds
+$claudeMd = "$dest\CLAUDE.md"
+if (-not (Test-Path $claudeMd)) { Set-Content $claudeMd "@claude-config-rules.md" }
+elseif (-not (Select-String -Path $claudeMd -SimpleMatch "@claude-config-rules.md" -Quiet)) {
+    Add-Content $claudeMd "`n@claude-config-rules.md"
+}
 ```
 
 ```sh
@@ -244,7 +254,12 @@ for d in skills/*/; do
     mkdir -p "$dest/skills/$(basename "$d")"
     cp "$d/SKILL.md" "$dest/skills/$(basename "$d")/SKILL.md"
 done
-cp config/CLAUDE.md "$dest/CLAUDE.md"
+cp config/claude-config-rules.md "$dest/claude-config-rules.md"
+# Import it from CLAUDE.md, once, keeping whatever that file already holds
+if ! grep -qF '@claude-config-rules.md' "$dest/CLAUDE.md" 2>/dev/null; then
+    [ -s "$dest/CLAUDE.md" ] && printf '\n' >> "$dest/CLAUDE.md"
+    printf '@claude-config-rules.md\n' >> "$dest/CLAUDE.md"
+fi
 ```
 
 `hooks/git/` is left out on purpose: nothing under `~/.claude/` reads it. Each skill
@@ -263,6 +278,9 @@ Two steps remain:
 
 Manual setup writes no manifest, so it cannot be undone by `node uninstall.js` - that
 command reverses what `install.js` recorded, and knows nothing about files copied by
-hand. Nothing is backed up either: an existing `~/.claude/CLAUDE.md` or `settings.json` is
-overwritten and gone. Re-running the copies upgrades the files this checkout ships, but
+hand. Nothing is backed up either: an existing `~/.claude/settings.json` is overwritten
+and gone. `~/.claude/CLAUDE.md` is the exception — the two commands above add one import
+line to it and keep the rest, and skip even that where the line is already there, so
+they can be re-run without stacking a second one. Re-running the copies upgrades the
+files this checkout ships, but
 leaves behind any file an earlier version installed and this one no longer has.

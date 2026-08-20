@@ -10,6 +10,9 @@ const repoDir = path.resolve(__dirname, '..');
 const installJs = path.join(repoDir, 'install.js');
 const uninstallJs = path.join(repoDir, 'uninstall.js');
 
+const RULES_FILE = 'claude-config-rules.md';
+const IMPORT_LINE = '@' + RULES_FILE;
+
 function mkTmp() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
 }
@@ -267,18 +270,140 @@ test('install re-claims live hook commands its manifest records as unowned', () 
   } finally { rmTmp(dir); }
 });
 
-test('install+uninstall restores preexisting CLAUDE.md', () => {
+// `<config dir>/CLAUDE.md` is the user's own file, so install adds one import line and
+// leaves the rest, the way it merges settings.json rather than replacing it.
+test('install adds one import line to a preexisting CLAUDE.md and keeps the rest', () => {
   const dir = mkTmp();
   try {
     const claudeMdPath = path.join(dir, 'CLAUDE.md');
     const original = '# User CLAUDE.md\n\nCustom rules.\n';
     fs.writeFileSync(claudeMdPath, original);
 
-    runInstall(dir);
-    assert.notStrictEqual(fs.readFileSync(claudeMdPath, 'utf8'), original, 'install overwrites with backup');
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
 
-    runUninstall(dir);
-    assert.strictEqual(fs.readFileSync(claudeMdPath, 'utf8'), original, 'CLAUDE.md restored');
+    const after = fs.readFileSync(claudeMdPath, 'utf8');
+    assert.ok(after.startsWith(original),
+      `the user's own rules must survive install verbatim, got: ${JSON.stringify(after)}`);
+    assert.ok(after.includes(IMPORT_LINE), 'install adds the import line');
+    assert.ok(fs.existsSync(path.join(dir, RULES_FILE)), 'install owns the rules file');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    assert.strictEqual(fs.readFileSync(claudeMdPath, 'utf8'), original,
+      'uninstall gives the file back byte for byte');
+  } finally { rmTmp(dir); }
+});
+
+// The install that replaced CLAUDE.md recorded the user's file as a backup. Upgrading has
+// to hand it back before adding the import line, or the later restore pass would put the
+// snapshot over the edit and the user would keep our copy for one more install.
+test('install hands back a CLAUDE.md an older install had replaced', () => {
+  const dir = mkTmp();
+  try {
+    const claudeMdPath = path.join(dir, 'CLAUDE.md');
+    const original = '# User rules\n\nMine.\n';
+    const backupsDir = path.join(dir, '.claude-config-backups');
+    const backup = path.join(backupsDir, 'CLAUDE.md.old.bak');
+    fs.mkdirSync(backupsDir, { recursive: true });
+    fs.writeFileSync(backup, original);
+    fs.writeFileSync(claudeMdPath, '# the copy an older install shipped\n');
+    fs.writeFileSync(path.join(dir, '.claude-config-manifest.json'), JSON.stringify({
+      version: 1, installedAt: 'old', createdFiles: [],
+      backups: [{ dest: claudeMdPath, backup }],
+    }, null, 2) + '\n');
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+
+    const after = fs.readFileSync(claudeMdPath, 'utf8');
+    assert.ok(after.startsWith(original), `user content handed back, got: ${JSON.stringify(after)}`);
+    assert.ok(after.includes(IMPORT_LINE), 'and the import line added');
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    assert.strictEqual(fs.readFileSync(claudeMdPath, 'utf8'), original,
+      'uninstall leaves the user with exactly what they started with');
+  } finally { rmTmp(dir); }
+});
+
+// The other upgrade shape: an older install found no CLAUDE.md and created one, so the
+// file on disk is install's own copy rather than the user's and nothing is handed back.
+test('install replaces a CLAUDE.md an older install had created with the import line', () => {
+  const dir = mkTmp();
+  try {
+    const claudeMdPath = path.join(dir, 'CLAUDE.md');
+    fs.writeFileSync(claudeMdPath, '# the copy an older install shipped\n\nRules we used to inline.\n');
+    fs.writeFileSync(path.join(dir, '.claude-config-manifest.json'), JSON.stringify({
+      version: 1, installedAt: 'old', createdFiles: [claudeMdPath], backups: [],
+    }, null, 2) + '\n');
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+    assert.strictEqual(fs.readFileSync(claudeMdPath, 'utf8').trim(), IMPORT_LINE,
+      "install's own former copy is not kept as if it were the user's writing");
+
+    const ru = runUninstall(dir);
+    assert.strictEqual(ru.status, 0, ru.stderr);
+    assert.ok(!fs.existsSync(claudeMdPath), 'and the file goes again, since install owns it');
+  } finally { rmTmp(dir); }
+});
+
+test('install warns and keeps CLAUDE.md when the recorded backup has gone', () => {
+  const dir = mkTmp();
+  try {
+    const claudeMdPath = path.join(dir, 'CLAUDE.md');
+    const onDisk = '# whatever is there now\n';
+    fs.writeFileSync(claudeMdPath, onDisk);
+    fs.writeFileSync(path.join(dir, '.claude-config-manifest.json'), JSON.stringify({
+      version: 1, installedAt: 'old', createdFiles: [],
+      backups: [{ dest: claudeMdPath, backup: path.join(dir, '.claude-config-backups', 'gone.bak') }],
+    }, null, 2) + '\n');
+
+    const ri = runInstall(dir);
+    assert.strictEqual(ri.status, 0, ri.stderr);
+    assert.match(ri.stderr, /backup missing/, 'the lost backup is reported, not passed over');
+    const after = fs.readFileSync(claudeMdPath, 'utf8');
+    assert.ok(after.startsWith(onDisk), 'nothing is invented in place of the lost backup');
+    assert.ok(after.includes(IMPORT_LINE), 'and the import line still lands');
+  } finally { rmTmp(dir); }
+});
+
+test('installing twice leaves one import line in CLAUDE.md', () => {
+  const dir = mkTmp();
+  try {
+    const claudeMdPath = path.join(dir, 'CLAUDE.md');
+    fs.writeFileSync(claudeMdPath, '# Mine\n');
+    assert.strictEqual(runInstall(dir).status, 0);
+    assert.strictEqual(runInstall(dir).status, 0);
+    const lines = fs.readFileSync(claudeMdPath, 'utf8')
+      .split('\n').filter(l => l.includes(IMPORT_LINE));
+    assert.strictEqual(lines.length, 1, 'the second install must not add a duplicate');
+  } finally { rmTmp(dir); }
+});
+
+test('uninstall deletes the rules file and keeps a CLAUDE.md install did not create', () => {
+  const dir = mkTmp();
+  try {
+    const claudeMdPath = path.join(dir, 'CLAUDE.md');
+    fs.writeFileSync(claudeMdPath, '# Mine\n');
+    assert.strictEqual(runInstall(dir).status, 0);
+    assert.strictEqual(runUninstall(dir).status, 0);
+    assert.ok(!fs.existsSync(path.join(dir, RULES_FILE)), 'the rules file goes');
+    assert.strictEqual(fs.readFileSync(claudeMdPath, 'utf8'), '# Mine\n',
+      "the user's CLAUDE.md stays, holding exactly what it held before");
+  } finally { rmTmp(dir); }
+});
+
+test('install creates CLAUDE.md holding the import line alone, and uninstall removes it', () => {
+  const dir = mkTmp();
+  try {
+    const claudeMdPath = path.join(dir, 'CLAUDE.md');
+    assert.strictEqual(runInstall(dir).status, 0);
+    assert.strictEqual(fs.readFileSync(claudeMdPath, 'utf8').trim(), IMPORT_LINE,
+      'a CLAUDE.md install created carries nothing else');
+    assert.strictEqual(runUninstall(dir).status, 0);
+    assert.ok(!fs.existsSync(claudeMdPath), 'a file install created is removed again');
   } finally { rmTmp(dir); }
 });
 

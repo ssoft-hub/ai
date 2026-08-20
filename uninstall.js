@@ -3,6 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { subtractAdditions, isEffectivelyEmpty } = require('./lib/settings');
+const { IMPORT_LINE, removeImport } = require('./lib/claude-md');
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -57,6 +58,36 @@ function revertSettings(record) {
 if (manifest.settings) {
   log('\nreverting settings.json additions:');
   revertSettings(manifest.settings);
+}
+
+// CLAUDE.md is the user's own file: install inserted one import line into it, so uninstall
+// takes that line back out and leaves everything else, the way it reverts settings.json
+// rather than restoring a snapshot over it. `lib/claude-md.js` decides which line that is,
+// so install and uninstall cannot disagree about it.
+function revertClaudeMd(record) {
+  const { dest, preexisted, added } = record;
+  const say = msg => log(`  ${DRY_RUN ? '[dry]' : '    '} ${msg}`);
+  if (!fs.existsSync(dest)) { say(`${dest} already absent`); return; }
+
+  const out = removeImport(fs.readFileSync(dest, 'utf8'), added);
+  if (out === null) {
+    warn(`${dest} carries no line that is only ${IMPORT_LINE} — leaving it as it is`);
+    return;
+  }
+
+  // Only a file install itself created is removed, and only when the import was all it held.
+  if (!preexisted && out.trim() === '') {
+    if (!DRY_RUN) fs.unlinkSync(dest);
+    say(`removed ${dest}`);
+    return;
+  }
+  if (!DRY_RUN) fs.writeFileSync(dest, out);
+  say(`removed the import line from ${dest}`);
+}
+
+if (manifest.claudeMd) {
+  log('\nreverting the CLAUDE.md import line:');
+  revertClaudeMd(manifest.claudeMd);
 }
 
 log('\nrestoring backups:');
