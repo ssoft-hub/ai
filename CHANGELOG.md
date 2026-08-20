@@ -13,7 +13,7 @@
 - Portable `config/settings.json` using `CLAUDE_CONFIG_DIR` / `os.homedir()` — no hardcoded user paths
 - `install.js` bootstrap with JSON-merge for `~/.claude/settings.json` — existing machine-specific settings preserved
 - `templates/SKILL.md` template for consistent skill authoring
-- Skills: `architecture` (ADRs, design tradeoffs), `node-testing` (`test/*.test.js` conventions), `project-planning` (scoping, estimation, milestones), `requirements` (user stories, acceptance criteria)
+- Skills: `architecture` (ADRs, design tradeoffs, the seven qualities in priority order, what a decision record's location must satisfy and a question where the project has not said), `node-testing` (`test/*.test.js` conventions), `project-planning` (scoping, estimation, milestones), `requirements` (user stories, acceptance criteria)
 - `commit-trailer-guard` tool: blocks `git commit` commands containing banned AI-attribution trailers (`Co-Authored-By`, `Generated-by`)
 - `SessionStart` hook: `submodule-status-check` flags ahead/uninitialized/conflicted submodules, and `session-env-prune` removes the skill-gate state of every session that has gone a week without a gated call, keeping the state of the session being started whatever its age
 - `background-call-counter` tool: tracks pending background agents; `Stop` notification deferred until all `run_in_background` agents complete, preventing premature "Task complete" toasts
