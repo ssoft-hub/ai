@@ -25,7 +25,7 @@ Project-local rules win. If the repository's `AGENTS.md` or a project skill defi
 
 End-to-end order of actions from a new task to a merged, closed issue. Steps run in order — do not open a PR before step 1 is satisfied, do not merge before step 5 is satisfied.
 
-Every step that touches the tracker or the PR is carried out with the hosting platform's CLI — `github-cli` for `gh`, `gitlab-cli` for `glab`. This skill states what must be true at each step; the platform skill states the command that gets there.
+Every step that touches the tracker or the PR is carried out with the hosting platform's CLI — `github-cli` for `gh`, `gitlab-cli` for `glab`. This skill states what must be true at each step; the platform skill states the command that gets there, except the commands that publish review feedback on the spot, which this skill names under Pending by Default.
 
 Where the repository provides one, its `AGENTS.md` → Lifecycle map lines these steps up against the pipeline stage, command and persona behind each, the `issue-rules` state the issue sits in meanwhile, and what runs before step 1 and after step 7. The steps themselves stay here.
 
@@ -223,6 +223,21 @@ What that means depends on what the platform offers:
 Check for a draft or pending state in that platform's API before assuming which case
 applies. "No draft support" is something to state in the report, not licence to publish.
 
+The draft path is the only one an agent takes, so none of these is run for review feedback
+on any repository:
+
+- **Publishes on the spot** — `gh pr review` with `--comment`, `--approve` or
+  `--request-changes`, `gh pr comment`, `glab mr note`, `glab mr note create`,
+  `glab mr approve`.
+- **Sends an existing draft** — `submitPullRequestReview`,
+  `PUT .../draft_notes/:id/publish`, `POST .../draft_notes/bulk_publish`. Sending what is
+  already drafted is the human's step by the same rule.
+- **Reaches a reader with no draft at all** — `POST .../pulls/{n}/reviews` with an `event`
+  field, or `addPullRequestReview` carrying one; `POST .../pulls/{n}/comments` with
+  `in_reply_to`; `POST .../merge_requests/:iid/notes` and
+  `POST .../merge_requests/:iid/discussions`; and a reply belonging to no draft,
+  `addPullRequestReviewThreadReply` without a `pullRequestReviewId`.
+
 The single exception is an explicit instruction naming the act on that artifact — "approve
 it", "post that reply now". The instruction is the submission. Nothing else authorises
 publishing, and an instruction given on one PR does not carry to the next one.
@@ -235,8 +250,9 @@ as usual: recording which PR resolves which checklist item is not a review findi
 the draft was opened by this pass or reused. A draft nobody is told about is the same as
 no review.
 
-Which command publishes on the spot, which one keeps the feedback unsent, and the traps
-neither CLI help states: `github-cli` → Review Threads, `gitlab-cli` → Draft Notes.
+The mechanics of the draft path itself — the mutations and endpoints that hold feedback
+unsent, what each publish call sends, and the traps neither CLI help states:
+`github-cli` → Review Threads, `gitlab-cli` → Draft Notes.
 
 ### Register
 
@@ -324,5 +340,5 @@ If a PR touches too many things, split it. A PR that cannot be summarised in one
 
 - `issue-rules` — the issue this PR resolves: title, description templates, labels, lifecycle.
 - `commit-rules` — commit message format and branch naming on the PR's branch.
-- `github-cli` — the `gh` commands behind every step above.
-- `gitlab-cli` — the `glab` commands behind every step above.
+- `github-cli` — the `gh` commands behind the Workflow steps above.
+- `gitlab-cli` — the `glab` commands behind the Workflow steps above.
