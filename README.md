@@ -37,7 +37,7 @@ pipeline of persona agents and commands built on top of them.
 
 **`SessionStart`** — fires once when a session begins:
 - `session-env-prune.js` — removes the `skill-gate.js` state of every session that has gone a week without a gated call, keeping the state of the session being started whatever its age; it runs here rather than in the gate so that no gated call ever pays for a directory listing, and it takes only the files the gate wrote, never the per-session directory Claude Code keeps beside them
-- `submodule-status-check.js` — warns if any git submodule is ahead/uninitialized/conflicted
+- `submodule-status-check.js` — warns when a git submodule has a checked-out commit differing from the one the superproject records, is uninitialized, or is conflicted
 
 **`UserPromptSubmit`** — runs on every user message:
 - `skills-reminder.js` — injects a reminder of the available skills, generated live from `skills/*/SKILL.md` frontmatter; a skill declaring `reminder: false` is left to `skill-gate.js` alone
@@ -213,6 +213,22 @@ control, the `settings.json` merge, an install/uninstall round trip against a te
 test file, since the runner loads each of them as one, the rule that no path
 `config/retired.json` retires is one install still ships, and the force marker under every
 `##` heading of the skill template and of each skill declaring `rubric: applied`.
+
+`test/skill-content.test.js` holds both of those — the reference runs and what the skill has
+to state — and binds each assertion to the structure carrying the claim rather than to the
+words around it: a table row addressed by its leading cell, one fence of one language under
+one heading, the blank-line block a sentence and its command share. In
+`skills/submodule-sync/SKILL.md` its subject is the `+` prefix — among others, that the row
+naming it states a difference and neither a direction nor `git add`, since `git add` is wrong
+on two of the three forms `git diff --submodule=log` prints, and that its way out is a
+pointer to the section reading the direction and nothing else. One assertion reads this file,
+and what it requires is the words `prefix table`: deleting this paragraph or emptying it of
+its subject reddens the suite, while rewording the rest of it does not. Two more read the
+headings `pr-rules` cites by name, so a checklist item cannot come to gate on a section that
+is gone. Every helper throws where its row, fence or file is gone, where the heading it was
+given holds no single fence in the language asked for, and where a caller hands it text whose
+CRLF has not been normalised, so nothing passes on a subject that has been deleted or on a
+block that has silently widened to the whole file.
 
 ## Manual setup
 

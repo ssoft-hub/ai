@@ -3,7 +3,8 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const PREFIX_NAMES = { '+': 'ahead of root ref', '-': 'not initialized', 'U': 'merge conflict' };
+// A rollback carries `+` too.
+const PREFIX_NAMES = { '+': 'differs from recorded ref', '-': 'not initialized', 'U': 'merge conflict' };
 
 function parseStatus(output) {
   const issues = [];

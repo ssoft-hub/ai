@@ -30,7 +30,7 @@ Every step that touches the tracker or the PR is carried out with the hosting pl
 Where the repository provides one, its `AGENTS.md` → Lifecycle map lines these steps up against the pipeline stage, command and persona behind each, the `issue-rules` state the issue sits in meanwhile, and what runs before step 1 and after step 7. The steps themselves stay here.
 
 **1. Scope and issue** — before any code change:
-- Identify the repository the change belongs to (root repo or a submodule); the issue is created and tracked there, not in the root repo.
+- Identify the repository the change belongs to (the superproject or a submodule); the issue is created and tracked there, not in the superproject.
 - Search the tracker for an existing issue covering the task. If found, check it has a test plan and, for features, acceptance criteria (`issue-rules` → Description Template); if incomplete for this task, update the issue before writing code.
 - Apply the type label matching the title Type, if one exists, plus topic labels for the issue's subject matter (`issue-rules` → Labels).
 - If no issue exists, create one in that repository (`issue-rules`):
@@ -273,7 +273,7 @@ Project Overrides above).
 - [ ] Every checked box in the PR's test plan corresponds to a run that actually passed
 - [ ] PR carries the issue's labels — type label if any, plus topic labels — see `issue-rules` → Labels
 - [ ] `CHANGELOG.md` updated — every user-visible change documented
-- [ ] `git submodule status` — no `+` prefix on any module (`submodule-sync`)
+- [ ] Every line of `submodule-sync` → Pre-PR / Pre-Release Check passes
 - [ ] Every commit in the branch builds independently (no broken intermediate state)
 - [ ] Commit trailers conform to `commit-rules` skill
 - [ ] Branch is rebased onto the current target branch (no stale merge base)
@@ -287,6 +287,7 @@ Gates the merge itself — distinct from the Pre-Open Checklist above, which gat
 - [ ] Every checklist checkbox in the issue reflects actual current state, not the state at issue-creation time
 - [ ] Each checkbox now checked is verifiable from what shipped in this PR or an earlier merged PR
 - [ ] Every unchecked item either is out of scope for this PR or has a linked follow-up PR/MR
+- [ ] Every module ref the branch records satisfies `submodule-sync` → Merge Order Across Repositories
 - [ ] Every test-plan box in the PR description is checked, or the item is named out of scope with a reason — an unchecked box means the work is merging unverified
 - [ ] A comment is added to the issue recording which PR/MR resolves which item (`issue-rules` → Progress Comments)
 

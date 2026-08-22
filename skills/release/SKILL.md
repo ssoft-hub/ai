@@ -65,7 +65,7 @@ to users is a separate gate → `shipping-and-launch` skill.
 - [ ] `CHANGELOG.md` covers all changes since last release, reconciled against the
       previous release, `[Unreleased]` renamed (`changelog` → On Release)
 - [ ] Version string consistent across **all** version files (grep confirms)
-- [ ] Submodule ref updated in root repo (if applicable)
+- [ ] Submodule ref updated in the superproject (if applicable)
 - [ ] Commit trailers conform to `commit-rules` skill
 
 ## Step 5 — Commit and Tag
@@ -80,6 +80,6 @@ git push --tags    # separate push — triggers CI release workflow
 
 ## Step 6 — Submodule Root Update (if applicable)
 
-If this library is a submodule in a root repo:
-1. After pushing the tag, update the submodule ref in root
+If this library is a submodule in a superproject:
+1. After pushing the tag, update the submodule ref in the superproject
 2. See `submodule-sync` skill for the exact workflow
