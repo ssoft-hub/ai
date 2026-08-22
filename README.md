@@ -202,14 +202,17 @@ npm test
 ```
 
 Uses node's built-in `node:test` runner, so there is nothing to install first. Each
-`test/<name>.test.js` takes one unit: a tool, the dispatcher that routes to it, or a step
-of install. Between them they exercise the payloads a guard decides on and the decision it
-returns, the skill and agent frontmatter the routing reads, the `settings.json` merge, an
-install/uninstall round trip against a temporary `CLAUDE_CONFIG_DIR` rather than the real
-one, the rule that every file under `test/` is a test file, since the runner loads each of
-them as one, the rule that no path `config/retired.json` retires is one install still
-ships, and the force marker under every `##` heading of the skill
-template and of each skill declaring `rubric: applied`.
+`test/<name>.test.js` takes one unit: a tool, the dispatcher that routes to it, a step of
+install, or the body of a skill. Between them they exercise the payloads a guard decides
+on and the decision it returns, the skill and agent frontmatter the routing reads, the
+reference implementation of each control a skill states — kept under `test/fixtures/`, run
+against the input classes that skill's own criterion names, and compiled first where the
+file is C++ and a compiler is on PATH — what the skill itself has to state about that
+control, the `settings.json` merge, an install/uninstall round trip against a temporary
+`CLAUDE_CONFIG_DIR` rather than the real one, the rule that every script under `test/` is a
+test file, since the runner loads each of them as one, the rule that no path
+`config/retired.json` retires is one install still ships, and the force marker under every
+`##` heading of the skill template and of each skill declaring `rubric: applied`.
 
 ## Manual setup
 

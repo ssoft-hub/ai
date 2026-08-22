@@ -1,0 +1,56 @@
+'use strict';
+// Not named `.js`: `node --test` runs every script under `test/` as a test file.
+const fs = require('node:fs');
+const path = require('node:path');
+
+// A backslash separates components on win32 and is a legal name character on POSIX.
+const componentSeparator = process.platform === 'win32' ? /[\\/]/ : /\//;
+// Win32 drops a trailing dot or space, so the name checked is not the name opened.
+const rewritesComponent = process.platform === 'win32'
+  ? component => /[. ]$/.test(component) : () => false;
+// The ceiling belongs to the format the name arrives in, so this number is the caller's.
+const componentCeiling = 64;
+
+function isUnder(base, candidate) {
+  const relative = path.relative(base, candidate);
+  return !path.isAbsolute(relative) && relative.split(path.sep)[0] !== '..';
+}
+
+// Resolved downward from the base, so a name that does not exist yet can only be a suffix
+// under a directory that resolved, and every other failure is a refusal.
+function resolveDownward(base, components) {
+  let resolved = base;
+  for (let at = 0; at < components.length; at += 1) {
+    try {
+      resolved = fs.realpathSync(path.join(resolved, components[at]));
+    } catch (error) {
+      const parent = fs.statSync(resolved, { throwIfNoEntry: false });
+      if (error.code !== 'ENOENT' || !parent?.isDirectory())
+        throw new Error(`path does not resolve under the base directory: ${error.code}`);
+      return path.join(resolved, ...components.slice(at));
+    }
+    if (!isUnder(base, resolved))
+      throw new Error('path escapes base directory');
+  }
+  return resolved;
+}
+
+function resolveUnder(baseDir, userSuppliedName) {
+  const components = userSuppliedName.split(componentSeparator);
+  if (components.length > componentCeiling)
+    throw new Error('path has more components than the ceiling allows');
+  for (const component of components) {
+    if (component === '..')
+      throw new Error('path contains a ".." component');
+    if (component !== '.' && rewritesComponent(component))
+      throw new Error('path holds a component the platform rewrites');
+  }
+  const base = fs.realpathSync(path.resolve(baseDir));
+  const target = path.resolve(base, userSuppliedName);
+  if (!isUnder(base, target))
+    throw new Error('path escapes base directory');
+  const relative = path.relative(base, target);
+  return resolveDownward(base, relative === '' ? [] : relative.split(path.sep));
+}
+
+module.exports = { resolveUnder };

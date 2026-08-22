@@ -65,29 +65,117 @@ controls added at that point are bolted on, not designed in.
 - Validate shape (type, length, format) and range (bounds, allowed values) separately —
   a string that's syntactically a number can still be out of the range the code assumes.
 - Treat size/length fields from untrusted input as untrusted too — do not `resize()` or
-  `reserve()` a container to an attacker-controlled value without an upper bound.
+  `reserve()` a container to an attacker-controlled value without a domain ceiling, which
+  is the bound Integer and Bounds Safety below distinguishes from the type's own limit.
 - Never build a shell command, SQL query, file path, or format string by concatenating
   untrusted input — use parameterized APIs (prepared statements, `std::filesystem` path
   composition, argv arrays instead of a shell string).
 
-```cpp
-// Wrong: path traversal via unvalidated input
-auto path = base_dir + "/" + user_supplied_name;
+Composing a path from an untrusted name is where those rules are most often got wrong, and
+the control has an order: refuse, then resolve, then compare.
 
-// Correct: reject any component that escapes base_dir
-auto candidate = std::filesystem::weakly_canonical(base_dir / user_supplied_name);
-if (!candidate.string().starts_with(base_dir.string()))
-    throw std::invalid_argument("path escapes base directory");
-```
+- **Refuse**, on the untrusted name and before any resolution: a `..` component, whatever
+  its position; a component the platform rewrites before it opens the name, so that the
+  name checked is not the name opened; and a component count above a ceiling the arriving
+  format states. A `..` collapses lexically, ahead of every link on the way to it, so a
+  resolve is not where it can be caught, and an unbounded resolve reports its refusal as a
+  failure of the runtime rather than as a refusal of the name.
+- **Resolve** from the base downward, one component at a time, following the links each
+  component goes through rather than collapsing the name ahead of them. A resolution
+  failure is a refusal unless it says the name does not exist yet: read as that, a
+  component that could not be resolved at all becomes a name derived lexically and
+  accepted. An upward walk from the target learns only that some prefix resolved, and
+  excuses every failure below it.
+- **Compare** the result against the base by components, never by strings: a string prefix
+  admits a sibling directory whose name extends the base name, and a leading-`..` test over
+  the relative string admits a component that merely begins with those dots. Resolve the
+  base as well, since an unresolved base is not a prefix of a resolved candidate.
+- **Take identity from the handle** the open returned, never from the input and never from
+  the string the check gave back. The control establishes containment and nothing about
+  identity: many names denote one file, and a link created after the check and before the
+  open leads that open out of the base. Where that matters, containment is established on
+  an open handle.
+
+The base directory is the trusted half of the call: derive it from the authenticated
+principal, never from a request parameter. Where the base is a tenant boundary, containment
+inside it is the authorisation control, and a call taking the base from the request beside
+the name satisfies every rule above while enforcing nothing.
+
+The `..` refusal holds on the fully decoded name only. Decode exactly once, before the
+check, so the bytes checked are the bytes the system call receives.
+
+Resolution reaches only the link kinds the standard library follows, and a library
+following none of the kinds its platform has reports every one of them as a plain
+directory. Establish which kinds the library in hand follows on the platform the name is
+opened on, and treat the resolution as unproven until you have; where it follows too few,
+resolve through the platform's own API.
+
+What establishes the control is the guard run over each input class below, presented with
+the refusal or the contained name it produced. A guard read rather than run is not
+evidence: every clause above is one some library makes unnecessary and some other one
+defeats.
+
+- a name climbing out of the base
+- a name leaving the base through a link
+- a name whose `..` cancels a link component rather than the directory that link resolves to
+- a name under another root, on a platform that has more than one
+- a name holding a component the platform rewrites before the open
+- a name whose resolution fails for a reason other than the name not existing yet
+- a name that is legitimate and has to come back: one merely beginning with the dots a
+  `..` component is made of, and a base given relative to the working directory
+
+What refutes it: a string comparison in place of the component one; a lexical collapse in
+place of the resolve; an unresolved base on either side of the comparison; a resolution
+failure read as a name that does not exist yet; a check on a name decoded after it; and a
+guard refusing the last class along with the rest, which answers every class above it while
+forbidding every name a caller may legitimately write.
 
 ## Integer and Bounds Safety
 
-- Check for overflow before an arithmetic operation on attacker-influenced sizes, not
-  after — `a + b < a` (unsigned wraparound) is a hardening check, not defensive noise.
+- Check for overflow before an arithmetic operation on attacker-influenced sizes, by
+  testing an operand against the limit of the type the result is stored in. The bound is a
+  hardening check, not defensive noise.
 - Prefer a bounds-checked accessor (`.at()`) over `operator[]` at a trust boundary; the
   cost of a checked access is negligible next to the cost of an out-of-bounds read.
 - Reject negative values for anything that becomes a size, count, or index before it
   reaches the container API, rather than relying on the container to reject it.
+
+The rule governs fixed-width integer arithmetic; a language whose integers grow rather than
+wrap is outside it. The control is three clauses, and their order is part of them:
+
+- **Check shape before range.** An operand of the wrong shape passes every comparison in
+  the bound and then behaves as something else in the operation, so a bound reached with an
+  unchecked shape decides nothing.
+- **Bound an operand, not the result**, against the limit of the type the result is stored
+  in, before the operation runs. Read that limit off the storage rather than writing it
+  out: a limit written out belongs to the width it was written for, and a limit taken from
+  the type the arithmetic runs in belongs to what the operands promote to rather than to
+  what holds the result. Where an operand may be negative, reject that first — it is the
+  negative-size rule above, and it also keeps the limit test's own subtraction inside its
+  type.
+- **Keep the type limit apart from the domain ceiling.** Neither stands in for the other:
+
+| Bound | Applied | Derived from | What it leaves open |
+|---|---|---|---|
+| the type limit | in front of the arithmetic | the type the result is stored in | the value: a checked sum handed straight to a container allocates whatever two length fields add up to |
+| a domain ceiling | where the field is parsed | the protocol or the deployment | the arithmetic: a total within the ceiling still has to fit the type it is computed in |
+
+An operation reporting the overflow an addition would cause, rather than performing it,
+replaces the limit test and needs no precondition on the operand signs. The
+language in hand may offer none, and one a compiler offers of its own is absent on the next
+compiler; where there is none, the operand test is the whole guard. It answers the width
+question alone either way, so an operand that becomes a size is still rejected when
+negative.
+
+What establishes the guard is the same guard retyped for a narrower type, still rejecting a
+pair of operands the wider type held. What refutes it is a check that reads the sum, which
+fails in two of the three cases and is worthless in the third: where the language leaves
+the overflow undefined, the compiler may delete the check along with the addition; on an
+unsigned type narrower than the one the operands promote to, the addition never wraps and
+the check is never true; and where the wrap is defined and the check does fire, the stored
+value is already the wrong number. A limit written out as a constant, a bound placed after
+the operation, a shape checked after the range, and a guard rejecting every pair of
+operands refute it the same way.
 
 ## Secrets and Credentials
 
