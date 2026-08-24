@@ -60,9 +60,12 @@ and any nit/question resolved along the way) and what is still open (only possib
 pass found what, so the report reads as a history. Do not report the loop as clean when
 a blocking finding is still open.
 
-Local edits and fixes proceed automatically. `git push`, `gh issue edit`, `gh pr edit`,
-and merge stay gated on user confirmation (`pr-rules` → Pending by Default) — this
-command fixes code, it does not publish or merge on its own.
+Local edits and fixes proceed automatically. What waits, and under which rule: `git push`,
+which belongs to the Push step and so falls outside a round of this loop (`pr-rules` →
+Workflow, and When a Check Runs for what that moment holds); `gh issue edit` and
+`gh pr edit`, for the review wording they can put in front of a reader (`pr-rules` →
+Pending by Default); and the merge, which is the human's (`pr-rules` → Merge Strategy 2).
+This command fixes code; it does not publish or merge on its own.
 
 This does not replace `/ship`: `/ship` stays a single-pass go/no-go with a fixed
 reviewer pair. Use this command instead when the change needs iteration, a different

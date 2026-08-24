@@ -249,13 +249,13 @@ agent reading both has nothing telling it which one wins.
 - `node-testing` — conventions for `test/*.test.js`: `node:test` only, flat tests, direct calls over subprocesses, temp-dir fixtures, what to cover. Hands off the red-green-refactor order to `test-driven-development`, the code under test to `hook-scripts`.
 - `observability-and-instrumentation` — telemetry for production visibility: signal choice, log levels, structure, metric shape and cardinality, alerting, traces. Hands off bug-chasing instrumentation to `debugging`, secret redaction to `security-and-hardening`, a regression a metric reveals to `performance-optimization`.
 - `performance-optimization` — the process around one performance problem: measure first, state the budget, complexity before constants, measure the fix. Hands off the default idioms to the language's coding-conventions skill (today `cpp-coding`), review depth to `code-review-and-quality`, production signals to `observability-and-instrumentation`.
-- `pr-rules` — the PR: workflow order, title, description structure and its per-section length budget, review comment and reply wording, pending-by-default, both checklists, merge strategy, and the commands that put review feedback in front of a reader, on the spot or by sending an existing draft. Hands off commit and branch format to `commit-rules`, the module refs a checklist gates on to the version control system's module-sync skill (today `submodule-sync`), issue content to `issue-rules`, every other command to `github-cli`/`gitlab-cli`, prose register and the result-not-process rule to `writing-style`, what a review should look for to `code-review-and-quality`.
+- `pr-rules` — the PR: workflow order, when each check over the change runs, title, description structure and its per-section length budget, review comment and reply wording, pending-by-default, both checklists, merge strategy, and the commands that put review feedback in front of a reader, on the spot or by sending an existing draft. Hands off commit and branch format to `commit-rules`, the module refs a checklist gates on to the version control system's module-sync skill (today `submodule-sync`), issue content to `issue-rules`, every other command to `github-cli`/`gitlab-cli`, prose register and the result-not-process rule to `writing-style`, what a review should look for to `code-review-and-quality`.
 - `project-planning` — stakeholder-facing planning: increments, estimation under uncertainty, dependencies and risk, milestones, status updates. Hands off settled requirements to `requirements`, per-PR size to `pr-rules`, the release tail to `release`.
 - `release` — the version number and the mechanical steps to ship it, plus the pre-release checklist. Hands off the changelog edit to `changelog`, whether users may see the result to `shipping-and-launch`, the definition of a breaking change to the language's API-design skill (today `cpp-api-design`), the submodule ref to the version control system's module-sync skill (today `submodule-sync`), commit format to `commit-rules`.
 - `requirements` — turning an ask into a requirement: actor/goal/context, user stories, acceptance criteria, functional vs non-functional, definition of done, traceability. Hands off design to `architecture`, breakdown into work to `project-planning`, the vocabulary's afterlife to `ddd`.
 - `security-and-hardening` — design-time security: trust boundaries, threat modelling, input validation, bounds and integer safety, secrets, least privilege, dependency posture. Hands off memory-safety idioms to the language's coding-conventions skill (today `cpp-coding`), the review pass to `code-review-and-quality`, retiring an unsafe path to `deprecation-and-migration`, the investigation itself to `debugging`.
 - `shipping-and-launch` — whether a built release may reach users, and how widely: readiness, staged rollout, advance/hold/roll-back thresholds, rollback plan, feature flags, post-launch verification. Hands off the version-bump mechanics to `release`, the monitoring it depends on to `observability-and-instrumentation`, telegraphing a break to `deprecation-and-migration`.
-- `submodule-sync` — submodule ref discipline: what each `git submodule status` prefix means and which command resolves it, the order of the two commits, the pre-PR check and its reach, the condition a superproject branch merges under, and acquiring, populating and removing a module. `pr-rules` gates on its check and on its merge condition rather than restating either; `release` gates its Step 4 item on the merge condition and references it for the ref-update workflow. Hands off the module branch's name to `commit-rules`.
+- `submodule-sync` — submodule ref discipline: what each `git submodule status` prefix means and which command resolves it, the order of the two commits, the pre-PR check and its reach, the condition a superproject branch merges under, and acquiring, populating and removing a module. `pr-rules` gates on its check and on its merge condition rather than restating either; `release` gates its Pre-Release Checklist item on the merge condition and references it for the ref-update workflow. Hands off the module branch's name to `commit-rules`.
 - `test-driven-development` — the order of work: red, green, refactor, one behaviour per cycle, real collaborator over a mock. Hands off test structure, naming and coverage to the testing skill of the language being written, reproducing a bug to `debugging`.
 - `writing-style` — prose register and vocabulary in any human language, keyboard-reachable characters, result-not-process (no work log, no deliberation), and figures that go stale (run counts, coverage, timings, a hash from a branch under review). Hands off the structure of every artifact to that artifact's own skill, and each artifact's own length budget to that skill: the commit body's paragraph to `commit-rules`, the PR description's per-section budget to `pr-rules`.
 
@@ -495,7 +495,7 @@ stated in that persona's own Composition section in `agents/<name>.md`.
 ### Lifecycle map
 
 That pipeline is one axis of a lifecycle two other files state along their own:
-`pr-rules` → Workflow as seven steps from a new task to a closed issue, and
+`pr-rules` → Workflow as eight steps from a new task to a closed issue, and
 `issue-rules` → Lifecycle as the four states the issue passes through. This table is the
 only place the three are lined up against each other; every rule stays in the skill that
 owns it, and a stage with no command, no persona or no step of its own says so rather
@@ -503,51 +503,53 @@ than naming the nearest one.
 
 | Stage | Command / persona | `pr-rules` step | Issue state | Skills |
 |-------|-------------------|-----------------|-------------|--------|
-| Intake | — | before 1 | not created yet | `requirements`, `project-planning` |
-| Spec | `/spec` → `spec-architect` | feeds 1 | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
-| Issue | — | 1 | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
-| Branch | — | 2 | → `In Progress` | `commit-rules` → Branch Naming |
-| Build | `/build` → `implementer` | 3 | `In Progress` | `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
-| PR | — | 4 | → `In Review` | `pr-rules`, `changelog`, `submodule-sync`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
-| Review | `/ship`, or `/review-loop` to iterate → `code-reviewer` | none; step 6 waits on it | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
-| Security audit | `/ship`, or `/review-loop` to iterate → `security-auditor` | none; step 6 waits on it | `In Review` | `security-and-hardening`, `pr-rules` |
-| Pre-merge check | — | 5 | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
-| Merge | — | 6 | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
-| Close | — | 7 | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
-| Release | `/ship` on a go verdict → `release-manager` | after 7 | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
+| Intake | — | before Scope and issue | not created yet | `requirements`, `project-planning` |
+| Spec | `/spec` → `spec-architect` | feeds Scope and issue | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
+| Issue | — | Scope and issue | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
+| Branch | — | Branch | → `In Progress` | `commit-rules` → Branch Naming |
+| Build | `/build` → `implementer` | Commits | `In Progress` | `pr-rules` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
+| Push | — | Push | `In Progress` | `pr-rules` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
+| PR | — | PR | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
+| Review | `/ship`, or `/review-loop` to iterate → `code-reviewer` | none; Merge commit waits on it | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
+| Security audit | `/ship`, or `/review-loop` to iterate → `security-auditor` | none; Merge commit waits on it | `In Review` | `security-and-hardening`, `pr-rules` |
+| Pre-merge check | — | Pre-merge issue check | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
+| Merge | — | Merge commit | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
+| Close | — | Close issue | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
+| Release | `/ship` on a go verdict → `release-manager` | after Close issue | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
 
 No file assigns issue-state transitions to a role: `issue-rules` → Lifecycle defines each
 state by a condition — branch exists, PR open, merged and deployed — rather than by an
 act with an actor. The acts reserved to the human are the merge (`pr-rules` → Merge
 Strategy 2) and submitting review feedback (Pending by Default), which Merge Strategy 2
-names as the lighter act it follows. The issue comments steps 1, 5 and 7 require
-are the one kind of issue comment `pr-rules` → Pending by Default leaves an agent free to
-publish.
+names as the lighter act it follows. The issue comments the Scope and issue, Pre-merge
+issue check and Close issue steps require are the one kind of issue comment `pr-rules` →
+Pending by Default leaves an agent free to publish.
 
 Where the two axes do not line up one-to-one:
 
-- **`/spec` against step 1.** `commands/spec.md` takes an idea or a task description and
-  names no tracker, so the spec may be written before the issue exists or against one
-  that already does. What both sides fix is the issue's content rather than the order: an
-  issue without a test plan (and, for features, acceptance criteria) is not ready to
-  implement against — the criteria from `requirements`, the test plan from `issue-rules`
+- **`/spec` against the Scope and issue step.** `commands/spec.md` takes an idea or a task
+  description and names no tracker, so the spec may be written before the issue exists or
+  against one that already does. What both sides fix is the issue's content rather than the
+  order: an issue without a test plan (and, for features, acceptance criteria) is not ready
+  to implement against — the criteria from `requirements`, the test plan from `issue-rules`
   → Description Template.
-- **`/build` against step 3.** It implements one task from the spec, so a branch whose
-  issue holds several tasks runs it several times. It neither names the branch (step 2)
-  nor opens the PR (step 4).
-- **`/ship` against steps 5 and 6.** It neither replaces them nor wraps them: its review
-  pass is what step 6 waits on, its `release-manager` hand-off is the Release row, and
-  steps 5, 6 and 7 sit between the two under no command at all.
-- **Uncovered stages.** Intake, and steps 1, 2, 4, 5, 6 and 7 — issue, branch, PR,
-  pre-merge check, merge, close — have no command and no persona; they are carried out
-  directly under the skill the row names. Only step 6 states why: Merge Strategy 2 gives
-  the merge to the human.
+- **`/build` against the Commits step.** It implements one task from the spec, so a branch
+  whose issue holds several tasks runs it several times. It neither names the branch (the
+  Branch step), nor sends it (the Push step), nor opens the PR (the PR step).
+- **`/ship` against the Pre-merge issue check and Merge commit steps.** It neither replaces
+  them nor wraps them: its review pass is what the Merge commit step waits on, its
+  `release-manager` hand-off is the Release row, and the Pre-merge issue check, Merge
+  commit and Close issue steps sit between the two under no command at all.
+- **Uncovered stages.** Intake, and the Scope and issue, Branch, Push, PR, Pre-merge issue
+  check, Merge commit and Close issue steps have no command and no persona; they are
+  carried out directly under the skill the row names. Only the Merge commit step states
+  why: Merge Strategy 2 gives the merge to the human.
 - **The Release row does not run once per pass.** `changelog` → On Release renames one
   `[Unreleased]` section covering everything merged since the previous version, so one
   release gathers the closed issues of many passes.
 - **The changelog entry sits on both axes.** `pr-rules` → Pre-Open Checklist requires
-  `CHANGELOG.md` updated before step 4; `commands/ship.md` has `release-manager` prepare
-  the entry after review. Unresolved — see GH-105.
+  `CHANGELOG.md` updated at the push; `commands/ship.md` has `release-manager` prepare the
+  entry after review. Unresolved — see GH-105.
 
 ## Installation
 
@@ -569,6 +571,12 @@ npm test
 ```
 
 Tests live in `test/<name>.test.js` using node's built-in `node:test` runner. What the suite covers is stated in `README.md` → Tests.
+
+A test over a skill holds a relation between two artifacts with different authors — a
+frontmatter key against the context vocabulary, a section's marker against the modals
+under it, a citation against the heading it resolves to. An assertion that reddens when a
+sentence is rephrased while its rule stands checks text with text: it is a change
+detector, not a check, and is not written.
 
 ## Commit conventions
 
