@@ -3,7 +3,12 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const PREFIX_NAMES = { '+': 'ahead of root ref', '-': 'not initialized', 'U': 'merge conflict' };
+// A rollback carries `+` too.
+const PREFIX_NAMES = { '+': 'differs from recorded ref', '-': 'not initialized', 'U': 'merge conflict' };
+
+// `--recursive`: git walks no module's own modules without it, so a nested module carrying
+// `+` prints nothing and the check reports a clean superproject over it.
+const STATUS_ARGS = ['submodule', 'status', '--recursive'];
 
 function parseStatus(output) {
   const issues = [];
@@ -19,7 +24,7 @@ function parseStatus(output) {
 
 function check(cwd) {
   if (!fs.existsSync(path.join(cwd, '.gitmodules'))) return { issues: [] };
-  const r = spawnSync('git', ['submodule', 'status'], { cwd, encoding: 'utf8', timeout: 10000 });
+  const r = spawnSync('git', STATUS_ARGS, { cwd, encoding: 'utf8', timeout: 10000 });
   if (r.error || r.status !== 0) return { issues: [] };
   return { issues: parseStatus(r.stdout || '') };
 }
@@ -36,4 +41,4 @@ if (require.main === module) {
   process.exit(0);
 }
 
-module.exports = { PREFIX_NAMES, parseStatus, check };
+module.exports = { PREFIX_NAMES, STATUS_ARGS, parseStatus, check };
