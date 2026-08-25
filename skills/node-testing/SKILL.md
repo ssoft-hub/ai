@@ -116,7 +116,7 @@ function rmTmp(dir) {
 test('install creates files and manifest on empty dir', () => {
   const dir = mkTmp();
   try {
-    const r = spawnSync('node', [installJs, '--no-git-hook'], {
+    const r = spawnSync('node', [installJs], {
       cwd: repoDir,
       env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
       encoding: 'utf8',

@@ -19,3 +19,9 @@ Invoke the `<agent-name>` subagent to <do the thing> with:
 $ARGUMENTS
 
 <Boundary: what this command does not do, and which other command picks it up next.>
+
+<!-- Adding a command:
+     1. Copy this file to commands/<name>.md and fill in the frontmatter and the prompt
+        above.
+     2. Add a row to the commands table in README.md.
+     3. Run `node install.js`, which copies it to ~/.claude/commands/<name>.md. -->

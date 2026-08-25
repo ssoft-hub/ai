@@ -193,6 +193,11 @@ prompt, while a guard that does not run where it must is an unchecked `git push`
 carrying both a command and a write target reaches both sets of guards, since either half
 alone would leave the other unchecked.
 
+An id the payload carries that a tool then puts in a path — `session_id`, `agent_id` —
+must be a plain identifier, and one that is not is carried as a digest of itself, so it
+cannot walk out of the directory it belongs to. Hashing rather than dropping it keeps each
+caller distinct.
+
 A dispatcher does not `require` a file from `tools/` in order to start: a missing or
 half-installed tool would throw before any payload is read and take every tool call in the
 session with it. It may require one where it calls it, inside the try that calls it, since
@@ -200,6 +205,26 @@ that failure costs the one tool and a line on stderr. So the routing rule, which
 which tools are called at all, is stated on both sides of the boundary — add a test that
 runs the two copies over the same inputs. A duplication a test holds together beats a
 dependency that can bring the session down.
+
+## Reading a Command
+
+A guard keyed on a command reads it as argv, never as text. `tools/shell-lex.js` lexes a
+command string into the argv of every command it runs: a transparent prefix (`sudo`, `env`,
+`xargs`, `VAR=x`) is dropped so the command word is the one that decides what runs, a quoted
+argument stays one opaque token so prose naming a command gates nothing, and an interpreter's
+own argument is read as a command string in its own right — `bash -c`, `cmd /c`,
+`powershell -Command` and its base64 `-EncodedCommand`, and the string a `node -e` or
+`python -c` script hands to its exec function, three quoting levels deep.
+`tools/git-command.js` reads that argv as a git call: the global options git accepts before
+the subcommand (`-C <dir>`, `-c <name>=<value>`, `--git-dir=<path>`, …) are skipped and an
+alias is resolved to the subcommand it stands for, whether it was defined with
+`-c alias.x=…` or in a git config file, so a rule states the subcommand alone.
+
+A regex over the raw command string is not the lighter version of this: it misses each form
+that spells the same call differently, and it fires on the call named inside a commit
+message. Only a rule whose subject is not a command stays on the raw text — the SQL warnings
+in `bash-safety.js`, since `psql -c "DROP TABLE users"` carries its subject inside the quotes
+that argv makes opaque.
 
 ## PATH Resolution
 
@@ -234,6 +259,22 @@ For `PostToolUse` use `timeout: 30` / `timeout:30000`, `Stop` use `timeout: 10` 
 For project-level: `"command": "node .claude/hooks/PreToolUse.js"` (relative path, no launcher needed).
 
 Scripts are portable global↔project without changes — only the command path differs.
+
+## Adding or Retiring a Tool
+
+1. Write `tools/<name>.js` to the Tool Skeleton above — a guard states a verdict, and a tool
+   running after the fact takes stdin or a path on argv and writes its own output.
+2. Route to it from the dispatcher of the event it belongs to. Which channel carries its
+   text to the model is the event's, not the tool's — see Reaching the Model — so on
+   `SessionStart` and `UserPromptSubmit` a tool writes the text as the model must read it,
+   and on `PreToolUse` and `PostToolUse` the dispatcher wraps what the tool states.
+3. Export the pure logic, cover it in `test/<name>.test.js`, and run `npm test`.
+4. List it under its event in the repository's own tool list (in this repository,
+   `README.md` → Hooks).
+
+Retiring one is that list read backwards: drop the route, delete the tool and its test,
+update every reference to it, and add its installed path (`tools/<name>.js`) to
+`config/retired.json`, for the reason `AGENTS.md` → Renaming or retiring a skill states.
 
 ## Useful Patterns
 

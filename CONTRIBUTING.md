@@ -3,9 +3,10 @@
 ## Workflow
 
 The order of work - issue, branch, commits, PR, pre-merge check, merge, close - is stated
-in full in `skills/pr-rules/SKILL.md` -> Workflow, and lined up against the pipeline
-stage, the state the issue is in and the skills that apply in `AGENTS.md` -> Lifecycle
-map. Follow those two; this file does not carry a third version of them.
+in full in `skills/pr-rules/SKILL.md` -> Workflow. The pipeline stage each falls in, the
+command or persona carrying it, the state the issue is in and the skills that apply are
+in `AGENTS.md` -> Lifecycle map. Follow those two; this file does not carry a third
+version of them.
 
 ## Commits and branches
 
@@ -13,10 +14,8 @@ Conventional Commits. The message format, the type vocabulary, the body and the 
 name pattern are owned by `skills/commit-rules/SKILL.md` - read it before the first
 commit rather than copying the shape of a nearby one.
 
-Two of its rules are enforced rather than left to the reader: this checkout's pre-commit
-hook rejects a commit made directly on a protected branch (`main`, `master`, `dev`,
-`develop`), and the `commit-trailer-guard` tool blocks
-a `git commit` an agent runs with an AI-attribution trailer in the message.
+One of its rules is enforced rather than left to the reader: the `commit-trailer-guard`
+tool blocks a `git commit` an agent runs with an AI-attribution trailer in the message.
 
 ## Hook and tool scripts
 
@@ -28,7 +27,8 @@ to block on stderr, never `1`. That is the short form of
 `hooks/` or `tools/` is read against.
 
 A new tool also has to be routed to and covered by a test, or nothing ever runs it - see
-`AGENTS.md` -> Adding a new tool check for the steps.
+`skills/hook-scripts/SKILL.md` -> Adding or Retiring a Tool for the steps, and
+`README.md` -> Hooks for what each dispatcher here routes where.
 
 ## Skills
 

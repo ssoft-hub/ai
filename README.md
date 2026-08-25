@@ -120,10 +120,10 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 
 Persona subagents forming an idea-to-release pipeline. Each is scoped to one stage and
 carries the `Skill` tool to load the skills it applies, rather than restating their rules
-— see `AGENTS.md` → "Adding an agent". Where each stage sits against the `pr-rules`
-Workflow steps and the issue lifecycle, and which stages no agent or command covers, is
-mapped in `AGENTS.md` → Lifecycle map. When to invoke a persona directly rather than
-through its command is stated in that persona's own Composition section.
+— see `templates/AGENT.md`. Where each stage sits against the issue lifecycle, and which
+stages no agent or command covers, is mapped in `AGENTS.md` → Lifecycle map. When to
+invoke a persona directly rather than through its command is stated in that persona's
+own Composition section.
 
 | Agent | Stage |
 |-------|-------|
@@ -152,7 +152,7 @@ Requires Node.js (no npm packages needed).
 node install.js
 ```
 
-Copies `hooks/` (without `hooks/git/`, which is not part of `~/.claude/`), `tools/`,
+Copies `hooks/` (without `hooks/README.md`, which is not part of `~/.claude/`), `tools/`,
 `agents/` and `commands/` into `~/.claude/`, one `SKILL.md` per skill into
 `~/.claude/skills/<name>/`, and `config/claude-config-rules.md` to
 `~/.claude/claude-config-rules.md`;
@@ -183,17 +183,9 @@ rather than duplicated. The manifest tracks `installedAt` and `updatedAt`.
 
 ```
 node install.js --dry-run      # preview without writing
-node install.js --no-git-hook  # skip .git/hooks/pre-commit copy
 node uninstall.js              # full restore using manifest
 node uninstall.js --dry-run    # preview what would be restored
 ```
-
-`hooks/git/pre-commit` is the one file install writes outside `~/.claude/`, and it goes
-into this checkout's own `.git/hooks/pre-commit`. No other repository on the machine
-receives it, so the checks it carries apply to work on this repository alone - among them
-a refusal to commit at all until `user.name` and `user.email` are set locally, the block
-on committing to a protected branch, and a `clang-format` pass over staged C/C++ files.
-`--no-git-hook` skips that one copy and leaves the rest of the install unchanged.
 
 ## Tests
 
@@ -225,7 +217,7 @@ $dest = "$env:USERPROFILE\.claude"
 foreach ($d in 'hooks', 'tools', 'agents', 'commands', 'skills') {
     New-Item -ItemType Directory -Force "$dest\$d" | Out-Null
 }
-Get-ChildItem hooks -Exclude git | Copy-Item -Destination "$dest\hooks" -Recurse -Force
+Get-ChildItem hooks -Exclude README.md | Copy-Item -Destination "$dest\hooks" -Recurse -Force
 Copy-Item -Recurse -Force tools\*    "$dest\tools"
 Copy-Item -Recurse -Force agents\*   "$dest\agents"
 Copy-Item -Recurse -Force commands\* "$dest\commands"
@@ -247,7 +239,8 @@ elseif (-not (Select-String -Path $claudeMd -SimpleMatch "@claude-config-rules.m
 dest=~/.claude
 mkdir -p "$dest"/hooks "$dest"/tools "$dest"/agents "$dest"/commands "$dest"/skills
 for f in hooks/*; do
-    [ "$(basename "$f")" = git ] || cp -R "$f" "$dest/hooks/"
+    case "$(basename "$f")" in README.md) continue;; esac
+    cp -R "$f" "$dest/hooks/"
 done
 cp -R tools/* "$dest/tools/"
 cp -R agents/* "$dest/agents/"
@@ -265,19 +258,17 @@ if ! grep -qF '@claude-config-rules.md' "$dest/CLAUDE.md" 2>/dev/null; then
 fi
 ```
 
-`hooks/git/` is left out on purpose: nothing under `~/.claude/` reads it. Each skill
-contributes its `SKILL.md` and nothing else from its directory, which is why the skills
-are copied one at a time rather than as a tree.
+`hooks/README.md` is left out on purpose: nothing under `~/.claude/` reads it, since it
+documents the dispatchers for a reader of this repository. Each skill contributes its
+`SKILL.md` and nothing else from its directory, which is why the skills are copied one at
+a time rather than as a tree.
 
-Two steps remain:
+One step remains:
 
 - **`config/settings.json`.** Copy it to `~/.claude/settings.json` if that file does not
   exist yet. If it does, merge by hand: add this repository's `hooks` entries and
   `permissions` to what is already there, and take over the single `statusLine` slot. A
   plain copy would drop every machine-local setting the file already holds.
-- **The git pre-commit hook**, if you want it in this checkout: copy `hooks/git/pre-commit`
-  to `.git/hooks/pre-commit` and make it executable. It applies to this repository only,
-  as under `node install.js` above.
 
 Manual setup writes no manifest, so it cannot be undone by `node uninstall.js` - that
 command reverses what `install.js` recorded, and knows nothing about files copied by

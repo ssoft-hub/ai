@@ -21,6 +21,7 @@ Apply when investigating a bug, test failure, or unexpected behavior, before pro
   of the language being written.
 - The fix needs a test that fails before it and passes after → `test-driven-development` skill.
 - Writing up what was found for reviewers → `pr-rules` skill (Description Structure).
+- Instrumentation that stays in the code once the bug is closed → `observability-and-instrumentation` skill.
 
 ## Project Overrides
 

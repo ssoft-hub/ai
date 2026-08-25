@@ -45,3 +45,14 @@ this file:
 - **Invoke via:** `/<command-name>`
 - **Do not invoke another persona.** <what to do instead when a handoff is warranted —
   surface it as a recommendation; orchestration belongs to commands, not personas.>
+
+<!-- Adding a persona:
+     1. Copy this file to agents/<name>.md and fill in the frontmatter and the body above.
+     2. Run `npm test` — test/agents.test.js checks every persona's frontmatter and that
+        each skill a body names still exists under skills/.
+     3. Add a row to the agents table in README.md.
+     4. Run `node install.js`, which copies it to ~/.claude/agents/<name>.md.
+
+     A skill this body leaves out is one the persona may never load: the every-prompt
+     reminder never reaches a persona, and the edit-time gate fires only for one that
+     writes a file — AGENTS.md → How a skill reaches the agent. -->

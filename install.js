@@ -6,7 +6,6 @@ const { mergeSettings, additionsFromRepo, subtractAdditions } = require('./lib/s
 const { RULES_FILE, importsRules, addImport } = require('./lib/claude-md');
 
 const DRY_RUN = process.argv.includes('--dry-run');
-const SKIP_GIT = process.argv.includes('--no-git-hook');
 const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 const repoDir = __dirname;
 const manifestPath = path.join(claudeDir, '.claude-config-manifest.json');
@@ -196,27 +195,12 @@ function installClaudeRules() {
   log(`  ${logPrefix} ${dest} ${preexisted ? 'imports' : 'created importing'} ${RULES_FILE}`);
 }
 
-function installGitHook() {
-  const preCommitSrc = path.join(repoDir, 'hooks', 'git', 'pre-commit');
-  const gitDir = path.join(repoDir, '.git');
-  if (!fs.existsSync(preCommitSrc) || !fs.existsSync(gitDir)) {
-    warn('hooks/git/pre-commit not found or .git missing, skipping');
-    return;
-  }
-  const dest = path.join(gitDir, 'hooks', 'pre-commit');
-  backupBeforeWrite(dest);
-  if (!DRY_RUN) {
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.copyFileSync(preCommitSrc, dest);
-    fs.chmodSync(dest, 0o755);
-  }
-  log(`  ${logPrefix} hooks/git/pre-commit → ${dest}`);
-}
-
 log(`Installing to: ${claudeDir}${DRY_RUN ? ' (dry run)' : ''}\n`);
 
 log('hooks/');
-copyDir(path.join(repoDir, 'hooks'), path.join(claudeDir, 'hooks'), new Set(['git']));
+// The config dir carries what Claude Code runs, so this one file, which documents these
+// dispatchers for a reader of this repository, stays out of it.
+copyDir(path.join(repoDir, 'hooks'), path.join(claudeDir, 'hooks'), new Set(['README.md']));
 
 log('\ntools/');
 copyDir(path.join(repoDir, 'tools'), path.join(claudeDir, 'tools'));
@@ -251,11 +235,6 @@ installSettings();
 log('\nCLAUDE.md');
 installClaudeRules();
 
-if (!SKIP_GIT) {
-  log('\ngit hooks');
-  installGitHook();
-}
-
 // A rename only reaches a machine whose manifest still names the old path. Warn about
 // the ones it doesn't own so a lost manifest doesn't leave a skill live under both
 // names — an untracked file may be the user's own, so it is never deleted here.
@@ -279,7 +258,7 @@ function warnRetiredPaths() {
 
 // Upgrade hygiene: remove files a previous install created under claudeDir that
 // the current repo no longer ships (renamed/deleted hooks, tools, skills).
-// Scoped to claudeDir so the git pre-commit hook (outside it) is never touched.
+// Scoped to claudeDir, so a path an older manifest names outside it is left in place.
 log('\nretired paths install does not own:');
 warnRetiredPaths();
 
