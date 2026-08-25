@@ -152,7 +152,7 @@ Pass no path. `node --test` walks the tree itself: anywhere under a directory na
 `test` it loads every `.js`, `.cjs` and `.mjs` file whatever its name, and elsewhere the
 files matching `*.test.js`, `*-test.js`, `*_test.js`, `test-*.js` or `test.js`. Every
 script under `test/` therefore has to stand alone as a test file — a shared helper put
-there is loaded and run as one, giving a passing test nobody wrote, or a red suite when
+there is loaded and run as one, giving a passing test nobody wrote, or a failing suite when
 its top-level code throws. That is why the fixture helpers above are repeated in each
 file, and `test/test-layout.test.js` holds the directory to it. A fixture that is data
 rather than a test carries an extension the runner does not load, so it is read by the

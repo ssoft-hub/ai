@@ -229,6 +229,11 @@ const commandsDir = path.join(repoDir, 'commands');
 if (fs.existsSync(commandsDir)) copyDir(commandsDir, path.join(claudeDir, 'commands'));
 else log(`  ${logPrefix} (none)`);
 
+log('\nwriting-language/');
+const langDir = path.join(repoDir, 'config', 'writing-language');
+if (fs.existsSync(langDir)) copyDir(langDir, path.join(claudeDir, 'writing-language'));
+else log(`  ${logPrefix} (none)`);
+
 log('\nsettings.json');
 installSettings();
 

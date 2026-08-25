@@ -71,7 +71,7 @@ if (connection == nullptr) return;
 if (connection == nullptr) return;
 ```
 
-## Red Flags — delete the comment
+## Warning Signs — delete the comment
 
 **Should**
 

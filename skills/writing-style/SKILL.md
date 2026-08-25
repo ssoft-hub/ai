@@ -62,6 +62,14 @@ on any platform. A thread comment is the most common place the rule is broken, b
 the work is fresh and the process feels like news; state what is true of the artifact
 now, and say what changed only when the reader has to act on the change.
 
+## Name the Force, Not Just the Action
+
+Where text addressed to a person prescribes an action - a review comment or reply, a
+comment in an issue or a thread, a message - the sentence carries the word naming its
+binding force - must, should, recommended or may, one to one with the four markers. The
+bare infinitive and the bare noun phrase name no force: not "Extract the loop" but "the
+loop should be extracted". The words each force is stated with:
+`<config dir>/writing-language/<language>.json`.
 ## No Figures That Go Stale
 
 Leave out numbers that measure a run rather than describe the subject: test totals and
@@ -80,30 +88,22 @@ names a released version or a tag, or the merge commit on the protected branch, 
 hash from the branch under review: rebase replaces those commits and the hash then
 points at nothing.
 
+## Name the State, Not the Colour
+
+Name a state by its condition, never by the colour of an indicator reporting it:
+`CI green` is not a condition, "every check the project declares has passed" is.
+
 ## No Slang, No Unnecessary Borrowing
 
-Prefer the term already established in the target language's own professional/technical
-literature over an informal phonetic transliteration borrowed from another language. A
-borrowed word is fine when it's the field's actual standard term (an assimilated loanword
-every glossary in that language uses); it's a defect when it's an ad hoc transliteration
-of spoken slang that a written technical document in that language would not use.
+Prefer the term the target language's own technical literature established over a phonetic
+transliteration borrowed from another language. A borrowed word stays where it is the
+field's standard term in that language; it is a defect where a written technical document
+in that language would not use it. The term to use for an operation:
+`<config dir>/writing-language/<language>.json`.
 
-Russian is the clearest example of this distinction, since Russian-language developer
-slang borrows verb forms wholesale from English rather than translating them:
-
-| Slang (avoid in written technical text) | Prefer |
-|---|---|
-| пушить / запушить | отправить (изменения/ветку) в удалённый репозиторий |
-| коммитить / закоммитить | зафиксировать изменения |
-| гейт / гейтить | контрольная точка, условие пропуска, проверка |
-| трейс | трассировка |
-| задеплоить | развернуть, выполнить развёртывание |
-| дефолтный | принятый по умолчанию |
-
-The same rule holds in the other direction — English technical prose picking up
-unnecessary loanwords from another language, or internet-chat abbreviations, is the
-same defect, just facing the other way.
-
+A command, a flag, an identifier and an error string keep their own spelling in every
+language, in backticks: `git push`, not a word transliterating it. What the dictionary
+replaces is the action named by a word of the language, never the name of the thing run.
 ## Applies to Every Language, Not Just One
 
 The rule is symmetric: whichever language is being written, use that language's own
@@ -150,11 +150,7 @@ characters copied from elsewhere.
 
 ## Self-Check Before Sending
 
-Re-read non-English prose before sending it and flag any word that is a direct phonetic
-transliteration of an English verb or slang term used only in spoken/informal
-developer jargon. Replace it with the native phrase, or with the properly assimilated
-term if one already exists — see the table above for the pattern to apply.
-
-In human-facing text, re-read every language's prose, including English, for a
-dash/arrow/quote character a plain keyboard cannot produce directly, and replace it
-per the table above.
+Re-read prose before sending it: replace a transliterated term with the one
+`<config dir>/writing-language/<language>.json` names for that operation, and replace a
+dash, arrow, ellipsis or quote a plain keyboard cannot produce with the form Prefer
+Keyboard-Reachable Characters gives.

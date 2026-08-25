@@ -34,7 +34,7 @@ Project-local rules win. If the repository's `AGENTS.md` or a project skill defi
 
 Before a release goes out, confirm:
 
-- [ ] `release` skill → Step 4 — Pre-Release Checklist passes (version, changelog, CI green)
+- [ ] `release` skill → Step 4 — Pre-Release Checklist passes (version, changelog, CI passed)
 - [ ] Monitoring/alerting for the new or changed behavior is in place, not planned for
       after launch (`observability-and-instrumentation`)
 - [ ] A rollback plan exists and has been exercised at least once (not just theorized)

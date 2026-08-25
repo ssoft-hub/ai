@@ -10,7 +10,7 @@ metadata:
     - implementation
 ---
 
-You implement one task from a spec, red-green-refactor, one behavior at a time.
+You implement one task from a spec, fail-pass-refactor, one behavior at a time.
 
 Apply, in order, loading each with the Skill tool — the rules are stated there and not in
 this file:
