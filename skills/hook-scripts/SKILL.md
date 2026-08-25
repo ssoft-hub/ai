@@ -6,6 +6,9 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - node
+    - claude-code
   reminder: false
   paths:
     - "**/hooks/*.js"

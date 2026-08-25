@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: process
+  bound-to:
+    - universal
   tags:
     - review
     - quality
@@ -17,8 +19,10 @@ Apply when reviewing code changes for correctness, readability, architecture, se
 and performance. This skill covers the substance of a review — what to look for. Process
 around opening/merging the PR the review attaches to → `pr-rules` skill.
 
-- Public API shape and breaking-change review → `cpp-api-design` skill.
-- Access-specifier and encapsulation review → `cpp-encapsulation` skill.
+- Public API shape and breaking-change review → the API-design skill of the language
+  being written.
+- Access-specifier and encapsulation review → the encapsulation skill of the language
+  being written.
 - Security-specific review depth (auth, input validation, secrets) → `security-and-hardening` skill.
 - Performance-specific review depth (complexity, allocations) → `performance-optimization` skill.
 
@@ -46,8 +50,9 @@ wrong):
 
 - Trace at least one success path and one failure path by hand — don't just read that a
   `try`/`catch` exists, check what happens inside it.
-- Check every changed boundary condition against `cpp-testing`'s Boundary Cases table —
-  a review that doesn't check for off-by-one/empty/null is incomplete.
+- Check every changed boundary condition against the boundary cases the testing skill of
+  the language being written makes mandatory — a review that doesn't check for
+  off-by-one/empty/null is incomplete.
 - A bug fix without a regression test (`debugging` → Regression Test First) is not done,
   regardless of how correct the fix looks by inspection.
 

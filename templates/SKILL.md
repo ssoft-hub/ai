@@ -9,6 +9,10 @@ metadata:
   # Several skills firing on one task are loaded in that order; the narrower one wins
   # on its own topic and must not restate the wider one.
   tier: <process | domain | narrow>
+  # Required. The contexts this skill's rules are bound to, from
+  # config/skill-contexts.json. AGENTS.md -> Adding a skill states the rules.
+  bound-to:
+    - <context>
   # Optional. Globs of the files this skill owns, matched against the full path with
   # forward slashes — write '**/' in front of anything that isn't repo-root-anchored.
   # A skill with paths is announced by tools/skill-gate.js when such a file is edited.

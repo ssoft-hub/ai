@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  bound-to:
+    - universal
   tags:
     - writing
     - style
@@ -19,7 +21,8 @@ of a specific artifact is covered elsewhere — this skill governs the language 
 written in, not its shape:
 
 - Code comment structure and when to write one → `comments` skill.
-- Public API documentation structure → `cpp-doxygen` skill.
+- Public API documentation structure → the API-documentation skill of the language being
+  written.
 - Issue title/description structure → `issue-rules` skill.
 - PR title/description structure, review comment/reply structure → `pr-rules` skill.
 - Commit message structure → `commit-rules` skill.

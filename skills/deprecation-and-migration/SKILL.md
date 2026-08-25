@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - universal
   tags:
     - api
     - migration
@@ -16,9 +18,10 @@ metadata:
 Apply when retiring a public API, planning a breaking change, or writing a migration
 guide for consumers moving off one.
 
-- What counts as a breaking change and the version bump it requires → `cpp-api-design`
-  skill (Breaking Changes section) — this skill covers the deprecation-to-removal
-  process around that change, not the definition of "breaking" itself.
+- What counts as a breaking change and the version bump it requires → the API-design
+  skill of the language being written, in its breaking-changes section — this skill
+  covers the deprecation-to-removal process around that change, not the definition of
+  "breaking" itself.
 - The version bump and changelog mechanics of shipping the removal →
   `release`/`changelog` skills.
 - A security vulnerability that forces retiring an unsafe API path →
@@ -95,10 +98,10 @@ working.
 
 ## Internal vs Public Deprecation
 
-Deprecating an internal-only symbol (not part of the public API per `cpp-api-design`) does
-not need a grace period or migration guide — update every internal call site in the
-same change. This skill's ceremony is proportional to how many consumers outside this
-repo are affected.
+Deprecating an internal-only symbol — one the API-design skill of the language being
+written leaves outside the public surface — needs no grace period and no migration
+guide: update every internal call site in the same change. This skill's ceremony is
+proportional to how many consumers outside this repo are affected.
 
 ## Migrating a Persisted Format (Expand/Contract)
 

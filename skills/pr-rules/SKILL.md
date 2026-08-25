@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  bound-to:
+    - forge
   tags:
     - git
     - pr
@@ -25,7 +27,7 @@ Project-local rules win. If the repository's `AGENTS.md` or a project skill defi
 
 End-to-end order of actions from a new task to a merged, closed issue. Steps run in order — do not open a PR before step 1 is satisfied, do not merge before step 5 is satisfied.
 
-Every step that touches the tracker or the PR is carried out with the hosting platform's CLI — `github-cli` for `gh`, `gitlab-cli` for `glab`. This skill states what must be true at each step; the platform skill states the command that gets there, except the commands that publish review feedback on the spot, which this skill names under Pending by Default.
+Every step that touches the tracker or the PR is carried out with the hosting platform's own CLI. This skill states what must be true at each step; the CLI skill of that platform states the command that gets there, except the commands that publish review feedback on the spot, which this skill names under Pending by Default.
 
 Where the repository provides one, its `AGENTS.md` → Lifecycle map lines these steps up against the pipeline stage, command and persona behind each, the `issue-rules` state the issue sits in meanwhile, and what runs before step 1 and after step 7. The steps themselves stay here.
 
@@ -251,8 +253,8 @@ the draft was opened by this pass or reused. A draft nobody is told about is the
 no review.
 
 The mechanics of the draft path itself — the mutations and endpoints that hold feedback
-unsent, what each publish call sends, and the traps neither CLI help states:
-`github-cli` → Review Threads, `gitlab-cli` → Draft Notes.
+unsent, what each publish call sends, and the traps the CLI help does not state, belong
+to the CLI skill of the hosting platform, under its review-thread or draft-note section.
 
 ### Register
 
@@ -273,7 +275,7 @@ Project Overrides above).
 - [ ] Every checked box in the PR's test plan corresponds to a run that actually passed
 - [ ] PR carries the issue's labels — type label if any, plus topic labels — see `issue-rules` → Labels
 - [ ] `CHANGELOG.md` updated — every user-visible change documented
-- [ ] Every line of `submodule-sync` → Pre-PR / Pre-Release Check passes
+- [ ] Every line of the pre-PR check in the module-sync skill of the version control system passes
 - [ ] Every commit in the branch builds independently (no broken intermediate state)
 - [ ] Commit trailers conform to `commit-rules` skill
 - [ ] Branch is rebased onto the current target branch (no stale merge base)
@@ -287,7 +289,7 @@ Gates the merge itself — distinct from the Pre-Open Checklist above, which gat
 - [ ] Every checklist checkbox in the issue reflects actual current state, not the state at issue-creation time
 - [ ] Each checkbox now checked is verifiable from what shipped in this PR or an earlier merged PR
 - [ ] Every unchecked item either is out of scope for this PR or has a linked follow-up PR/MR
-- [ ] Every module reference the branch records satisfies `submodule-sync` → Merge Order Across Repositories
+- [ ] Every module reference the branch records satisfies the merge order the module-sync skill of the version control system fixes
 - [ ] Every test-plan box in the PR description is checked, or the item is named out of scope with a reason — an unchecked box means the work is merging unverified
 - [ ] A comment is added to the issue recording which PR/MR resolves which item (`issue-rules` → Progress Comments)
 
@@ -320,8 +322,8 @@ Gates the merge itself — distinct from the Pre-Open Checklist above, which gat
 
 ### Platform mechanics
 
-The command that performs this merge, and the repository settings it depends on:
-`github-cli` → Pull Requests, `gitlab-cli` → Merge Requests.
+The command that performs this merge, and the repository settings it depends on, belong
+to the CLI skill of the hosting platform, in its pull-request or merge-request section.
 
 ---
 
@@ -341,5 +343,4 @@ If a PR touches too many things, split it. A PR that cannot be summarised in one
 
 - `issue-rules` — the issue this PR resolves: title, description templates, labels, lifecycle.
 - `commit-rules` — commit message format and branch naming on the PR's branch.
-- `github-cli` — the `gh` commands behind the Workflow steps above.
-- `gitlab-cli` — the `glab` commands behind the Workflow steps above.
+- The CLI skill of the hosting platform — the commands behind the Workflow steps above.

@@ -1,11 +1,13 @@
 ---
 name: comments
 version: "1.0.0"
-description: Apply when writing or reviewing a code comment in any language (inline notes, implementation comments), Doxygen blocks aside
+description: Apply when writing or reviewing a code comment in any language (inline notes, implementation comments), documentation blocks aside
 license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  bound-to:
+    - universal
   rubric: applied
   paths:
     - "**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx,inl,ipp,m,mm,java,cs,go,rs,swift,kt,kts,scala,php,qml,dart,groovy,gradle,glsl,vert,frag,proto}"
@@ -26,7 +28,7 @@ metadata:
 
 Apply when writing or reviewing a code comment in any language (inline notes, implementation comments), whatever marker opens it — `//`, `/* */`, `#`, `--`, `;`, `%`, `<!-- -->`.
 
-Doxygen blocks on public C++ headers → `cpp-doxygen` skill. This skill covers every other comment, in every language: inside function bodies, in implementation files, in a hook script, a build file or a configuration file. C++ implementation conventions (types, RAII, naming) → `cpp-coding` skill.
+Documentation blocks on a public header → the API-documentation skill of the language being written. This skill covers every other comment, in every language: inside function bodies, in implementation files, in a hook script, a build file or a configuration file. Implementation conventions (types, resource handling, naming) → the coding-conventions skill of the language being written.
 
 ---
 

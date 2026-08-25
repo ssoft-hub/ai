@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - universal
   tags:
     - ci
     - automation
@@ -17,7 +19,8 @@ Apply when designing or reviewing a CI/CD pipeline, build automation, or a quali
 that decides whether a change can merge or ship.
 
 - The specific checks a gate should run (lint, format, static analysis) are project- and
-  language-specific → `cpp-coding`/`hook-scripts` and the project's `AGENTS.md`.
+  language-specific → the coding-conventions skill of the language being written, the
+  hook-script skill of the agent tool, and the project's `AGENTS.md`.
 - Merge itself is still gated on the Pre-Open/Pre-Merge Checklists → `pr-rules` skill;
   this skill is about the pipeline that produces the "CI green" signal those checklists
   require.
@@ -107,6 +110,6 @@ accumulate further broken changes on top of it.
 ## Automation Beyond CI
 
 The same "reproducible, fast-feedback, explicit gate" principles apply to any automated
-check that gates a workflow — this repo's own `PreToolUse`/`PostToolUse` hooks (see
-`hook-scripts` skill) are automation in this same sense, just running locally instead of
-in a remote pipeline.
+check that gates a workflow — an agent's own hooks, which the hook-script skill of the
+agent tool covers, are automation in this same sense, just running locally instead of in
+a remote pipeline.

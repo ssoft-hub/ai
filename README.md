@@ -14,7 +14,7 @@ pipeline of persona agents and commands built on top of them.
 | `skills/` | Skill definitions (SKILL.md files loaded by `/skill-name`) |
 | `agents/` | Persona subagent definitions (one markdown file per agent) |
 | `commands/` | Slash command definitions (one markdown file per command) |
-| `config/` | What install deploys as configuration: `settings.json` (hooks, permissions, statusline), the `claude-config-rules.md` it writes to `~/.claude/` and imports from the `CLAUDE.md` there, and `retired.json` - paths this repo no longer ships, which install warns about but never deletes |
+| `config/` | What install deploys as configuration: `settings.json` (hooks, permissions, statusline), the `claude-config-rules.md` it writes to `~/.claude/` and imports from the `CLAUDE.md` there, and `retired.json` - paths this repo no longer ships, which install warns about but never deletes; plus `skill-contexts.json`, the contexts a skill's `bound-to` draws from, which install never deploys |
 
 ## Hooks
 
@@ -211,8 +211,10 @@ file is C++ and a compiler is on PATH — what the skill itself has to state abo
 control, the `settings.json` merge, an install/uninstall round trip against a temporary
 `CLAUDE_CONFIG_DIR` rather than the real one, the rule that every script under `test/` is a
 test file, since the runner loads each of them as one, the rule that no path
-`config/retired.json` retires is one install still ships, and the force marker under every
-`##` heading of the skill template and of each skill declaring `rubric: applied`.
+`config/retired.json` retires is one install still ships, the context each skill declares
+in `bound-to` and what a routing may name or has to state by role under it, and the force
+marker under every `##` heading of the skill template and of each skill declaring
+`rubric: applied`.
 
 `test/skill-content.test.js` holds both of those — the reference runs and what the skill has
 to state — and binds each assertion to the structure carrying the claim rather than to the

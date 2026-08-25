@@ -13,7 +13,8 @@ agents/     Persona subagent definitions (one markdown file per agent)
 commands/   Slash command definitions (one markdown file per command)
 config/     What install deploys as configuration: settings.json, the
             claude-config-rules.md it writes to ~/.claude/ and imports from the
-            CLAUDE.md there, and retired.json — paths this repo no longer ships
+            CLAUDE.md there, and retired.json — paths this repo no longer ships;
+            plus skill-contexts.json, the contexts a skill's bound-to draws from
 lib/        Pure helpers shared by install.js and uninstall.js
 templates/  Starting points for a new skill, agent or command
 test/       One test file per unit, run by npm test
@@ -202,7 +203,8 @@ every prompt:
 
 Both read `tools/skill-catalog.js`, which parses `tier`/`paths`/`with` out of each
 `SKILL.md` frontmatter — the frontmatter is the only place a skill's triggers are
-declared, so there is no second list to keep in sync.
+declared, so there is no second list to keep in sync. It reads `bound-to` there too; the
+check under "Adding a skill" step 1 is its only reader.
 
 When several skills fire on one task they are ordered `process` → `domain` → `narrow`.
 The narrower skill rules its own topic and must not restate the wider one.
@@ -218,38 +220,40 @@ for an agent that genuinely cannot load a skill, not for a persona.
 
 ## Skill ownership map
 
-One line per skill: the single concern it owns, then what it hands off. A rule belongs to
+One line per skill: the single concern it owns, then what it hands off. This map is this
+repository's own index of the skills that exist here, which is why a line may name the
+instance in parentheses where the skill itself routes by role. A rule belongs to
 exactly one line. When a rule fits another line's concern, that skill states it and this
 one references it — a second statement is not emphasis, it is a copy that drifts, and the
 agent reading both has nothing telling it which one wins.
 
-- `architecture` — how modules, services and processes fit together; ADR format; tradeoff axes; which quality a design may give up for another, under Quality Priorities. Hands off a single interface's own hygiene to `cpp-api-design`, modelling inside one context to `ddd`, the requirement behind the decision to `requirements`, and measuring a ranked quality rather than ranking it to `security-and-hardening`, `performance-optimization` and `observability-and-instrumentation`.
-- `changelog` — the `CHANGELOG.md` file: subsections, bullet wording, what goes in, the release-time reconciliation and rename. Hands off the version number to `release`, the definition of a breaking change to `cpp-api-design`.
-- `ci-cd-and-automation` — the pipeline producing the "CI green" signal: what it gates, stage order, flaky checks, who owns a red build. Hands off the per-language checks to `cpp-coding`/`hook-scripts`, merge gating to `pr-rules`, tag automation to `release`, pipeline credentials to `security-and-hardening`.
-- `code-review-and-quality` — what a review looks for: the five axes, change size, dependency bumps, orphaned code. Hands off how a finding is worded to `pr-rules`, security depth to `security-and-hardening`, performance depth to `performance-optimization`, public-surface and access review to `cpp-api-design`/`cpp-encapsulation`.
-- `comments` — a comment in any language, whatever marker opens it: whether one is justified at all, its length, its timeless character. Hands off Doxygen blocks to `cpp-doxygen`, case history to `commit-rules`.
+- `architecture` — how modules, services and processes fit together; ADR format; tradeoff axes, including whether a reuse may expose a third-party type across a public boundary; which quality a design may give up for another, under Quality Priorities. Hands off a single interface's own hygiene, that one exposure rule aside, to the language's API-design skill (today `cpp-api-design`), modelling inside one context to `ddd`, the requirement behind the decision to `requirements`, and measuring a ranked quality rather than ranking it to `security-and-hardening`, `performance-optimization` and `observability-and-instrumentation`.
+- `changelog` — the `CHANGELOG.md` file: subsections, bullet wording, what goes in, the release-time reconciliation and rename. Hands off the version number to `release`, the definition of a breaking change to the language's API-design skill (today `cpp-api-design`).
+- `ci-cd-and-automation` — the pipeline producing the "CI green" signal: what it gates, stage order, flaky checks, who owns a red build. Hands off the per-language checks to the language's coding-conventions skill (today `cpp-coding`) and the agent tool's hook-script skill (today `hook-scripts`), merge gating to `pr-rules`, tag automation to `release`, pipeline credentials to `security-and-hardening`.
+- `code-review-and-quality` — what a review looks for: the five axes, change size, dependency bumps, orphaned code. Hands off how a finding is worded to `pr-rules`, security depth to `security-and-hardening`, performance depth to `performance-optimization`, public-surface and access review to the language's API-design and encapsulation skills (today `cpp-api-design`/`cpp-encapsulation`), and the boundary cases a review checks to its testing skill (today `cpp-testing`).
+- `comments` — a comment in any language, whatever marker opens it: whether one is justified at all, its length, its timeless character. Hands off a documentation block on a public header to the language's API-documentation skill (today `cpp-doxygen`), its implementation conventions to that language's coding-conventions skill (today `cpp-coding`), case history to `commit-rules`.
 - `commit-rules` — commit message format, the type vocabulary every artifact reuses, the body and its one-paragraph budget, branch naming, fixups, banned trailers. Hands off the merge commit's subject and length to `pr-rules`, prose register and the result-not-process rule to `writing-style`.
-- `cpp-api-design` — the shape of a public C++ surface: namespacing, dependency leakage, `bool`/`void*` bans, and the definition of a breaking change. Hands off the header guard to `cpp-coding`, doc blocks to `cpp-doxygen`, access levels to `cpp-encapsulation`, retiring a symbol to `deprecation-and-migration`, the bump and the entry to `release`/`changelog`.
+- `cpp-api-design` — the shape of a public C++ surface: namespacing, keeping a leaked dependency out of a public header and what one costs a consumer's build, the `bool`/`void*` bans, and the definition of a breaking change. Hands off whether a reuse may expose a third-party type at all to `architecture`, the header guard to `cpp-coding`, doc blocks to `cpp-doxygen`, access levels to `cpp-encapsulation`, retiring a symbol to `deprecation-and-migration`, the bump and the entry to `release`/`changelog`.
 - `cpp-coding` — C++ implementation conventions: value semantics, include order, header guard, type safety, RAII, qualifiers, attributes, modern idioms, and the performance idioms always in effect. Hands off the public surface to `cpp-api-design`, comments to `comments`, a specific performance investigation to `performance-optimization`, naming and file layout to the project's `AGENTS.md`.
 - `cpp-doxygen` — Doxygen blocks on public C++ headers: one block per type, placement, required tags, groups. Hands off header structure and namespaces to `cpp-api-design`, the guard to `cpp-coding`, every other comment to `comments`.
 - `cpp-encapsulation` — the access level of each member of one type, and `friend`. Hands off the surface spanning headers and modules to `cpp-api-design`, aggregate-internal exposure to `ddd`.
 - `cpp-testing` — C++ test structure: AAA, names, mandatory boundary cases, isolation, unit scope. Hands off the red-green-refactor order to `test-driven-development`, when a regression test is written to `debugging`.
-- `ddd` — modelling inside one bounded context: ubiquitous language, value objects, entities, aggregates, domain services. Hands off where context boundaries fall to `architecture`, C++ mechanics to `cpp-coding`/`cpp-api-design`.
-- `debugging` — investigation before a fix: reproduce, root cause, one hypothesis at a time, bisect, error output as evidence, regression test first. Hands off writing the fix to `cpp-coding`, the failing test's shape to `test-driven-development`, instrumentation that stays to `observability-and-instrumentation`.
-- `deprecation-and-migration` — retiring a public path: deprecate before removing, compulsory vs advisory, grace period, migration guide, expand/contract for a persisted format. Hands off what counts as breaking to `cpp-api-design`, the bump and the entry to `release`/`changelog`.
+- `ddd` — modelling inside one bounded context: ubiquitous language, value objects, entities, aggregates, domain services. Hands off where context boundaries fall to `architecture`, the mechanics of writing the model down to the language's coding-conventions and API-design skills (today `cpp-coding`/`cpp-api-design`).
+- `debugging` — investigation before a fix: reproduce, root cause, one hypothesis at a time, bisect, error output as evidence, regression test first. Hands off writing the fix to the language's coding-conventions skill (today `cpp-coding`), the write-up for reviewers to `pr-rules`, the failing test's shape to `test-driven-development`, instrumentation that stays to `observability-and-instrumentation`.
+- `deprecation-and-migration` — retiring a public path: deprecate before removing, compulsory vs advisory, grace period, migration guide, expand/contract for a persisted format. Hands off what counts as breaking to the language's API-design skill (today `cpp-api-design`), the removal's own issue to `issue-rules`, the bump and the entry to `release`/`changelog`.
 - `editing` — the edit mechanic itself: a fresh read immediately before an edit, one read per turn, scope discipline. Owns nothing else and hands off nothing.
 - `github-cli` — `gh` mechanics: what each command does, what keeps review feedback unsent, where the CLI help is silent. Hands off every question of what may be written or published to `issue-rules`/`pr-rules`, and the list of commands that put review feedback in front of a reader, on the spot or by sending an existing draft, to `pr-rules`.
 - `gitlab-cli` — the same for `glab`.
 - `hook-scripts` — writing this repo's hooks and tools: built-ins only, dispatcher/tool split, exit codes, `settings.json` registration. Hands off their tests to `node-testing`, their comments to `comments`.
-- `issue-rules` — what an issue contains: title, description templates, labels, priority, milestone, lifecycle, progress comments. Hands off what each type means to `commit-rules`, the commands to the platform skill, the PR side of the workflow to `pr-rules`.
+- `issue-rules` — what an issue contains: title, description templates, labels, priority, milestone, lifecycle, progress comments. Hands off what each type means to `commit-rules`, the commands to the hosting platform's CLI skill (today `github-cli`/`gitlab-cli`), the PR side of the workflow to `pr-rules`.
 - `node-testing` — conventions for `test/*.test.js`: `node:test` only, flat tests, direct calls over subprocesses, temp-dir fixtures, what to cover. Hands off the red-green-refactor order to `test-driven-development`, the code under test to `hook-scripts`.
 - `observability-and-instrumentation` — telemetry for production visibility: signal choice, log levels, structure, metric shape and cardinality, alerting, traces. Hands off bug-chasing instrumentation to `debugging`, secret redaction to `security-and-hardening`, a regression a metric reveals to `performance-optimization`.
-- `performance-optimization` — the process around one performance problem: measure first, state the budget, complexity before constants, measure the fix. Hands off the default idioms to `cpp-coding`, review depth to `code-review-and-quality`, production signals to `observability-and-instrumentation`.
-- `pr-rules` — the PR: workflow order, title, description structure and its per-section length budget, review comment and reply wording, pending-by-default, both checklists, merge strategy, and the commands that put review feedback in front of a reader, on the spot or by sending an existing draft. Hands off commit and branch format to `commit-rules`, issue content to `issue-rules`, every other command to `github-cli`/`gitlab-cli`, prose register and the result-not-process rule to `writing-style`, what a review should look for to `code-review-and-quality`.
+- `performance-optimization` — the process around one performance problem: measure first, state the budget, complexity before constants, measure the fix. Hands off the default idioms to the language's coding-conventions skill (today `cpp-coding`), review depth to `code-review-and-quality`, production signals to `observability-and-instrumentation`.
+- `pr-rules` — the PR: workflow order, title, description structure and its per-section length budget, review comment and reply wording, pending-by-default, both checklists, merge strategy, and the commands that put review feedback in front of a reader, on the spot or by sending an existing draft. Hands off commit and branch format to `commit-rules`, the module refs a checklist gates on to the version control system's module-sync skill (today `submodule-sync`), issue content to `issue-rules`, every other command to `github-cli`/`gitlab-cli`, prose register and the result-not-process rule to `writing-style`, what a review should look for to `code-review-and-quality`.
 - `project-planning` — stakeholder-facing planning: increments, estimation under uncertainty, dependencies and risk, milestones, status updates. Hands off settled requirements to `requirements`, per-PR size to `pr-rules`, the release tail to `release`.
-- `release` — the version number and the mechanical steps to ship it, plus the pre-release checklist. Hands off the changelog edit to `changelog`, whether users may see the result to `shipping-and-launch`, the submodule ref to `submodule-sync`, commit format to `commit-rules`.
+- `release` — the version number and the mechanical steps to ship it, plus the pre-release checklist. Hands off the changelog edit to `changelog`, whether users may see the result to `shipping-and-launch`, the definition of a breaking change to the language's API-design skill (today `cpp-api-design`), the submodule ref to the version control system's module-sync skill (today `submodule-sync`), commit format to `commit-rules`.
 - `requirements` — turning an ask into a requirement: actor/goal/context, user stories, acceptance criteria, functional vs non-functional, definition of done, traceability. Hands off design to `architecture`, breakdown into work to `project-planning`, the vocabulary's afterlife to `ddd`.
-- `security-and-hardening` — design-time security: trust boundaries, threat modelling, input validation, bounds and integer safety, secrets, least privilege, dependency posture. Hands off memory-safety idioms to `cpp-coding`, the review pass to `code-review-and-quality`, retiring an unsafe path to `deprecation-and-migration`, the investigation itself to `debugging`.
+- `security-and-hardening` — design-time security: trust boundaries, threat modelling, input validation, bounds and integer safety, secrets, least privilege, dependency posture. Hands off memory-safety idioms to the language's coding-conventions skill (today `cpp-coding`), the review pass to `code-review-and-quality`, retiring an unsafe path to `deprecation-and-migration`, the investigation itself to `debugging`.
 - `shipping-and-launch` — whether a built release may reach users, and how widely: readiness, staged rollout, advance/hold/roll-back thresholds, rollback plan, feature flags, post-launch verification. Hands off the version-bump mechanics to `release`, the monitoring it depends on to `observability-and-instrumentation`, telegraphing a break to `deprecation-and-migration`.
 - `submodule-sync` — submodule ref discipline: what each `git submodule status` prefix means and which command resolves it, the order of the two commits, the pre-PR check and its reach, the condition a superproject branch merges under, and acquiring, populating and removing a module. `pr-rules` gates on its check and on its merge condition rather than restating either; `release` gates its Step 4 item on the merge condition and references it for the ref-update workflow. Hands off the module branch's name to `commit-rules`.
 - `test-driven-development` — the order of work: red, green, refactor, one behaviour per cycle, real collaborator over a mock. Hands off test structure, naming and coverage to the testing skill of the language being written, reproducing a bug to `debugging`.
@@ -372,8 +376,30 @@ no section speaks above its marker — never that every statement carries one.
    `friend`, a Doxygen tag — the name carries the language: `cpp-api-design`,
    `cpp-doxygen`, `cpp-encapsulation`, `node-testing`. A skill bound to a tool rather
    than a language is named after the tool (`hook-scripts`, `github-cli`).
+
+   The prefix is a convention and nothing reads it: what the same test decides is the
+   skill's `bound-to`, a non-empty list of contexts drawn from
+   `config/skill-contexts.json`.
+
+   | Subject | Rule |
+   |---|---|
+   | The list | A conjunction, so a skill needing two contexts names both (`hook-scripts` is `node` and `claude-code`); `universal` stands alone. |
+   | Category | A context that, for the concern in question, one skill covers whole, so no sibling of it can appear (`commit-rules` covers git, svn and mercurial alike). |
+   | Instance | A context whose siblings exist or are expected. |
+   | Choosing the kind | Would a sibling appearing force an edit to the files naming a skill bound to this context? It would, `instance`; it could not, `category`; unclear, `instance`, since a wrong `category` surfaces only once the sibling arrives and every file naming the skill has to be corrected then. |
+   | Kind and children | Decided by a node's siblings, never by whether it has children. |
+   | An edge | A child refines and includes its parent, so a reader in the child is in the parent too; siblings are alternatives. |
+   | A context that accumulates | A chain, not siblings: `cpp` → `cpp23` → `cpp26`. |
+   | A new context | Added only when a skill is bound to it. |
+
+   A skill names another skill in backticks where the named skill's context is a
+   category, or is one of its own contexts or an ancestor of one; every other routing
+   states a role — "the API-design skill of the language being written", the noun taken
+   from that context's `role` — and names no skill. `test/skill-contexts.test.js` checks
+   both halves.
 2. Copy `templates/SKILL.md` to `skills/<name>/SKILL.md`
 3. Fill in frontmatter (name, description, tags), then decide how it is triggered:
+   - `bound-to` — the contexts of step 1, before anything else; it is required
    - `tier` — `process`, `domain`, or `narrow` (see "How a skill reaches the agent")
    - `paths` — the files this skill owns, when a kind of file should trigger it
    - `reminder: false` — only when those files are the *whole* trigger; it drops the

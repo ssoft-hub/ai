@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - universal
   tags:
     - security
     - quality
@@ -19,8 +21,8 @@ decisions; mechanical, write-time enforcement of some of the same concerns is ha
 the `secret-guard` and `bash-safety` hooks (see `AGENTS.md` → Hook architecture) — this
 skill is what to design for before those hooks would ever fire.
 
-- Memory-safety idioms that also happen to prevent whole classes of vulnerability
-  (RAII, no naked `new`, no `void*`) → `cpp-coding` skill.
+- Memory-safety idioms that also happen to prevent whole classes of vulnerability →
+  the coding-conventions skill of the language being written.
 - Security depth during review → `code-review-and-quality` skill (Security axis).
 - A vulnerability found in already-shipped code → `deprecation-and-migration` skill for
   how to retire the unsafe path.

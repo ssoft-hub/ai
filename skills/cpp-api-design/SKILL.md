@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - cpp
   paths:
     - "**/*.h"
     - "**/*.hpp"
@@ -18,6 +20,8 @@ metadata:
 
 Apply when designing a new C++ API, adding public C++ headers, or reviewing public C++ interface changes.
 
+Access-level choice within a single type → `cpp-encapsulation` skill.
+
 ## Structural Rules
 
 - **Namespace hierarchy**: public symbols in consistent `lib::` or `lib::module::` namespace; check project `AGENTS.md` for exact namespace.
@@ -27,7 +31,7 @@ Apply when designing a new C++ API, adding public C++ headers, or reviewing publ
 
 ## Dependencies
 
-- **No runtime dependencies in public API.** A public header that pulls in a third-party type leaks that dependency to every consumer — they now need it on their include path too, and an upgrade on either side can break the other.
+- **No runtime dependencies in public API.** Whether a reuse may expose a third-party type across a public boundary at all → `architecture` skill, Common Tradeoff Axes → Build vs buy/reuse. What C++ adds is two costs: no manifest to declare the requirement in, so the consumer adds the include path by hand and the failure is a compile error in a header it did not write; and an upgrade on either side breaks through ABI and ODR.
 - **No external headers in public API headers.** Forward-declare or wrap; push the actual `#include` into the `.cpp` file. Keeps the dependency private to the implementation.
 - **No compiler-specific extensions directly** — abstract via macro or type_traits helpers, so the header still compiles for consumers on a different compiler.
 - Use C++ feature test macros for version/compiler guards:

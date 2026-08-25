@@ -6,6 +6,8 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: process
+  bound-to:
+    - universal
   tags:
     - testing
     - workflow
@@ -15,8 +17,7 @@ metadata:
 
 Apply when implementing a feature or bug fix, before writing implementation code. This
 skill governs the order of work — red, green, refactor. Test structure, naming, and
-coverage rules belong to the testing skill of the language being written: `cpp-testing`
-for C++, `node-testing` for `test/*.test.js`.
+coverage rules belong to the testing skill of the language being written.
 
 - Reproducing a bug as a failing test before fixing it → `debugging` skill (Regression Test First).
 - Once tests are green and the implementation stands, reviewing it → `code-review-and-quality` skill.
@@ -53,8 +54,8 @@ so it can catch the implementation being wrong, not just being different.
 ## One Behavior Per Red Step
 
 Each red-green cycle targets one new behavior or boundary case, matching the
-one-behaviour-per-test rule of the language's testing skill (`cpp-testing` → One Reason
-to Fail, `node-testing` → One Behavior Per Test). Do not write five tests up front and then implement until all
+one-behaviour-per-test rule of the testing skill of the language being written. Do not
+write five tests up front and then implement until all
 five pass — that reintroduces the "test after" problem for tests 2 through 5, which sit
 red for longer than necessary and stop guiding the implementation step by step.
 
@@ -85,13 +86,14 @@ only last a mock that asserts *which* calls were made. A test built around call-
 assertions breaks the moment the implementation is refactored, even when the observable
 behavior hasn't changed — assert on outcomes, not on how the outcome was reached. Reach
 for a mock only when the real collaborator is slow, non-deterministic, or has a side
-effect the test can't afford (see `cpp-testing` → Unit Test Scope for what that excludes
-at the unit-test boundary).
+effect the test can't afford — what that excludes at the unit-test boundary belongs to
+the testing skill of the language being written.
 
 ## When TDD Doesn't Fit
 
 Exploratory spikes, throwaway prototypes, and pure UI/layout work where behavior isn't
 yet known are not test-first — write the test once the intended behavior is decided,
 before that code is treated as production. Do not retrofit tests after the fact and
-call it TDD; that's `cpp-testing` coverage applied after the code was already written,
-which is a legitimate but different practice.
+call it TDD; that is the coverage the testing skill of the language being written asks
+for, applied after the code was already written, which is a legitimate but different
+practice.

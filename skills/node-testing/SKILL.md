@@ -6,6 +6,9 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  bound-to:
+    - node
+    - claude-code
   reminder: false
   paths:
     - "**/test/*.test.js"
@@ -23,8 +26,8 @@ tools, or install/uninstall logic (e.g. `~/.claude/hooks/`, `~/.claude/tools/` �
 see `hook-scripts` skill).
 
 - Writing the hook/tool itself → `hook-scripts` skill.
-- C++ unit tests → `cpp-testing` skill (different language, different runner — do not
-  mix the two conventions).
+- Tests in another language → the testing skill of that language (different runner,
+  different conventions — do not mix the two).
 
 ---
 

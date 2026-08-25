@@ -1,0 +1,74 @@
+{
+  "$comment": "The contexts a skill's `bound-to` draws from, one entry per context with its parent, its kind, what it means, and the noun a role phrase names it by; the rules for reading and extending this file are in AGENTS.md -> Adding a skill.",
+  "contexts": {
+    "universal": {
+      "parent": null,
+      "kind": "category",
+      "means": "Any reader, whatever their language, version control system, hosting platform or agent tool."
+    },
+    "language": {
+      "parent": "universal",
+      "kind": "category",
+      "role": "language being written",
+      "means": "A reader writing in some programming language."
+    },
+    "cpp": {
+      "parent": "language",
+      "kind": "instance",
+      "means": "A reader writing C++."
+    },
+    "node": {
+      "parent": "language",
+      "kind": "instance",
+      "means": "A reader writing JavaScript on Node.js."
+    },
+    "vcs": {
+      "parent": "universal",
+      "kind": "category",
+      "role": "version control system",
+      "means": "A reader with a version control system."
+    },
+    "git": {
+      "parent": "vcs",
+      "kind": "instance",
+      "means": "A reader whose version control system is git."
+    },
+    "platform": {
+      "parent": "universal",
+      "kind": "category",
+      "means": "A reader with a hosted service the work is carried out on."
+    },
+    "forge": {
+      "parent": "platform",
+      "kind": "category",
+      "role": "hosting platform",
+      "means": "A reader whose platform offers proposed changes for review, whatever it calls them."
+    },
+    "github": {
+      "parent": "forge",
+      "kind": "instance",
+      "means": "A reader whose forge is GitHub."
+    },
+    "gitlab": {
+      "parent": "forge",
+      "kind": "instance",
+      "means": "A reader whose forge is GitLab."
+    },
+    "tracker": {
+      "parent": "platform",
+      "kind": "category",
+      "means": "A reader with an issue tracker, whether or not the forge hosts it."
+    },
+    "agent-tool": {
+      "parent": "universal",
+      "kind": "category",
+      "role": "agent tool",
+      "means": "A reader working as an agent through tools of its own."
+    },
+    "claude-code": {
+      "parent": "agent-tool",
+      "kind": "instance",
+      "means": "A reader whose agent tool is Claude Code."
+    }
+  }
+}
