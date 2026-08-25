@@ -213,11 +213,6 @@ test file, since the runner loads each of them as one, the rule that no path
 marker under every `##` heading of the skill template and of each skill declaring
 `rubric: applied`.
 
-A test over a skill holds a relation rather than a phrase (`AGENTS.md` → Tests):
-`test/workflow-steps.test.js` reads the step markers under `pr-rules` → Workflow and holds
-every citation of a step by name, in the skill and in every file naming `pr-rules`, to one
-the workflow carries, the lifecycle map's own column included.
-
 ## Manual setup
 
 For a machine without Node, or to see exactly what lands where. The copies below place
