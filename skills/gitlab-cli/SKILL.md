@@ -202,7 +202,7 @@ glab api projects/:id/merge_requests/<iid>/draft_notes/<draft-id> -X DELETE
 
 Read the status of the first `draft_notes` call rather than assuming the endpoint is
 there: an instance older than the release that added `draft_notes` answers `404`, which
-is `pr-rules` → Pending by Default's "None exists" branch.
+is `pr-rules` → Pending by Default's "no draft mechanism" row.
 
 Confirm an inline draft landed inline before moving on: the response carries a non-null
 `line_code` and a filled `position`. A null `line_code` means the note was accepted as an

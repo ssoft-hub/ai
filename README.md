@@ -205,33 +205,18 @@ Uses node's built-in `node:test` runner, so there is nothing to install first. E
 `test/<name>.test.js` takes one unit: a tool, the dispatcher that routes to it, a step of
 install, or the body of a skill. Between them they exercise the payloads a guard decides
 on and the decision it returns, the skill and agent frontmatter the routing reads, the
-reference implementation of each control a skill states — kept under `test/fixtures/`, run
-against the input classes that skill's own criterion names, and compiled first where the
-file is C++ and a compiler is on PATH — what the skill itself has to state about that
-control, the `settings.json` merge, an install/uninstall round trip against a temporary
+`settings.json` merge, an install/uninstall round trip against a temporary
 `CLAUDE_CONFIG_DIR` rather than the real one, the rule that every script under `test/` is a
 test file, since the runner loads each of them as one, the rule that no path
-`config/retired.json` retires is one install still ships, the context each skill declares
-in `bound-to` and what a routing may name or has to state by role under it, and the force
+`config/retired.json` retires is one install still ships, the context each skill declares in
+`bound-to` and what a routing may name or has to state by role under it, and the force
 marker under every `##` heading of the skill template and of each skill declaring
 `rubric: applied`.
 
-`test/skill-content.test.js` holds both of those — the reference runs and what the skill has
-to state — and binds each assertion to the structure carrying the claim rather than to the
-words around it: a table row addressed by its leading cell, and under one heading either one
-fence of one language or the blank-line block a sentence and its command share. In
-`skills/submodule-sync/SKILL.md` its subject is the `+` prefix — among others, that the row
-naming it states a difference and neither a direction nor `git add`, since `git add` is wrong
-on two of the three forms `git diff --submodule=log` prints, and that its way out is a
-pointer to the section reading the direction and nothing else. One assertion reads this file,
-and what it requires is the words `prefix table`: deleting this paragraph or emptying it of
-its subject reddens the suite, while rewording the rest of it does not. Two more read the
-headings `pr-rules` cites by name, so a checklist item cannot come to gate on a section that
-is gone. Every helper throws where its row, fence or file is gone, where the heading it was
-given holds no single fence in the language asked for and no block carrying the phrase, and
-where a caller hands it text whose CRLF has not been normalised, so nothing passes on a
-subject that has been deleted, on one moved out of the section that owns it, or on a block
-that has silently widened to the whole file.
+A test over a skill holds a relation rather than a phrase (`AGENTS.md` → Tests):
+`test/workflow-steps.test.js` reads the step markers under `pr-rules` → Workflow and holds
+every citation of a step by name, in the skill and in every file naming `pr-rules`, to one
+the workflow carries, the lifecycle map's own column included.
 
 ## Manual setup
 

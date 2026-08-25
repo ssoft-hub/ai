@@ -8,6 +8,7 @@ metadata:
   tier: narrow
   bound-to:
     - forge
+  rubric: applied
   tags:
     - git
     - pr
@@ -19,328 +20,234 @@ Apply when opening, reviewing, or preparing a PR/MR.
 
 ## Project Overrides
 
-Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own PR conventions, follow those instead. This skill is the fallback for projects that do not specify their own.
+**Must**
 
----
+PR conventions defined in the repository's `AGENTS.md` or in a project skill must be
+followed instead of this one.
 
 ## Workflow
 
-End-to-end order of actions from a new task to a merged, closed issue. Steps run in order — do not open a PR before step 1 is satisfied, do not merge before step 5 is satisfied.
+**Should**
 
-Every step that touches the tracker or the PR is carried out with the hosting platform's own CLI. This skill states what must be true at each step; the CLI skill of that platform states the command that gets there, except the commands that publish review feedback on the spot, which this skill names under Pending by Default.
+Eight steps, in order. A step that touches the tracker or the PR runs through the CLI
+skill of the hosting platform. Outside this section a step is cited by name, never by
+number.
 
-Where the repository provides one, its `AGENTS.md` → Lifecycle map lines these steps up against the pipeline stage, command and persona behind each, the `issue-rules` state the issue sits in meanwhile, and what runs before step 1 and after step 7. The steps themselves stay here.
+**1. Scope and issue** — find or create the issue in the repository the change belongs
+to, a submodule's in that submodule rather than in the superproject, and complete it
+per `issue-rules`.
 
-**1. Scope and issue** — before any code change:
-- Identify the repository the change belongs to (the superproject or a submodule); the issue is created and tracked there, not in the superproject.
-- Search the tracker for an existing issue covering the task. If found, check it has a test plan and, for features, acceptance criteria (`issue-rules` → Description Template); if incomplete for this task, update the issue before writing code.
-- Apply the type label matching the title Type, if one exists, plus topic labels for the issue's subject matter (`issue-rules` → Labels).
-- If no issue exists, create one in that repository (`issue-rules`):
-```
-Feat(hash): Add SipHash-2-4 keyed 64-bit hash   ← title
-PROJ-42                                           ← assigned ID
-```
-An issue without a test plan (and, for features, acceptance criteria) is not ready to implement against.
+**2. Branch** — name it before the first commit: `commit-rules` → Branch Naming.
 
-**2. Branch** — name before first commit (`commit-rules` → Branch Naming):
-```
-<user>/feat/PROJ-42/add-siphash
-```
+**3. Commits** — commit on the branch per `commit-rules`.
 
-**3. Commits** — on the branch (`commit-rules`):
-```
-feat(hash): add SipHash-2-4 keyed 64-bit hash
+**4. Push** — send the branch to the remote once the local remarks are exhausted; a
+later round of review returns here on the same condition.
 
-SipHash provides hash-flooding resistance missing in fnv1a/djb2.
-Implements SipHash-2-4 with a 128-bit key passed as two uint64_t.
-```
+**5. PR** — open it once the Push step has run: PR Title, Description Structure.
 
-**4. PR** — open when branch is ready (this skill):
-```
-PROJ-42: Add SipHash-2-4 keyed 64-bit hash
-```
-Description: `## Problem` + `## Summary` + `## Implementation` + `## Test plan`, the
-last one with checkbox items — see Description Structure.
+**6. Pre-merge issue check** — reconcile the linked issue against what the PR
+delivers, and comment there which items it resolves: Pre-Merge Checklist.
 
-**5. Pre-merge issue check** — before merging (this skill → Pre-Merge Checklist): reconcile every checkbox in the linked issue against what the PR actually delivers, and comment on the issue which items it resolves.
+**7. Merge commit** — after review passes and the Pre-merge issue check clears: Merge
+Strategy.
 
-**6. Merge commit** — after review passes and step 5 clears (this skill → Merge Strategy):
-`Merge PR #<n>: <pr title>` with a body. See Merge Strategy for the full rule.
+**8. Close issue** — when every checkbox in the issue is checked; otherwise leave it
+open and name the follow-up PR/MR in a comment (`issue-rules` → Lifecycle).
 
-**7. Close issue** — only when every checklist checkbox in the issue is checked (`issue-rules` → Lifecycle). If items remain, leave the issue open and note the follow-up PR/MR in a comment instead of closing.
+## When a Check Runs
 
----
+**Should**
+
+Every check this skill names as run over the change belongs to exactly one of three
+moments. Which checks a project declares is the project's own; the pipeline that runs
+them on the server is `ci-cd-and-automation`.
+
+| Moment | Runs | Does not run |
+|---|---|---|
+| A round of edits — one pass over the branch, the first and every fix answering a review remark alike | the checks the change touches: the tests whose subject the change names, plus any check the change's own files are the input of, on the commit that closes the round | what reads the branch as a whole |
+| The push — the Push step, once per branch state offered for review | what reads the branch as a whole | a round of review and fix, which reads the branch as it stands locally; a check whose answer still stands |
+| Opening the pull request | nothing over the branch, which the push answered | every check of the branch; the pull request's own four properties are established here instead, and the Pre-Open Checklist lists them as what it leaves out |
+
+- A check that has passed stands while the branch head is the commit it ran against;
+  an amend, a rebase or a further commit moves that head and puts the check back.
+- The rebase therefore runs first at the push, ahead of every check measured against
+  the head it moves.
 
 ## PR Title
 
-Type and subject both start with uppercase, ≤ 120 characters. Format depends on whether the PR resolves a tracked issue:
+**Must**
 
-**With issue** — tracker ID replaces `Type(scope)`:
-```
-PROJ-42: Add SipHash-2-4 keyed 64-bit hash
-GH-7: Correct noexcept propagation through executor chain
-```
+Type and subject both start with uppercase; the whole title is at most 120 characters.
 
-**Without issue** — Conventional Commits format:
-```
-Feat(hash): Add SipHash-2-4 keyed 64-bit hash
-Fix(wrapper): Correct noexcept propagation through executor chain
-```
-
----
+| The PR resolves | Format | Example |
+|---|---|---|
+| a tracked issue | `TRACKER-N: Subject` — the tracker ID replaces `Type(scope)` | `PROJ-42: Add SipHash-2-4 keyed 64-bit hash` |
+| no tracked issue | `Type(scope): Subject` | `Fix(wrapper): Correct noexcept propagation through executor chain` |
 
 ## Description Structure
 
-```markdown
-## Problem
-What is wrong or missing today, and what prompted the work now — the symptom, the
-cost of leaving it, and the trigger (issue, incident, review finding, blocked task).
-No solution here.
+**Must**
 
-## Summary
-- What changed, from a user-visible perspective (not implementation details)
-- One bullet per logical change
+All four sections are required, in this order. A change too large for the budgets is a
+PR to split (PR Size), not a description to extend.
 
-## Implementation
-- What was changed and how (technical perspective)
-- Why this approach over alternatives
-
-## Test plan
-- [ ] What was tested and how (automated test name, or manual steps)
-- [ ] Edge cases covered
-- [ ] How a reviewer can verify the change locally
-```
-
-All four sections are required. A PR missing `## Problem` or the test plan is not ready
-to review.
-
-**Problem** carries the motivation; **Summary** carries the change. Do not put the
-motivation in Summary — the split is what keeps "why this work exists" from
-collapsing into a restatement of the diff. When a tracked issue exists, restate its
-Goal or Problem here in one or two sentences instead of linking to it alone: the PR
-must be readable on its own. A change with no problem to state — a rename, a
-formatting pass — says so in one line ("no user-visible problem; ..."), rather than
-dropping the section.
-
-**Test plan** items are checkboxes, matching the issue templates (`issue-rules` →
-Description Template) so plan items can be reconciled against the issue at merge
-time. Check a box only once that item has actually been run and passed; an unchecked
-box means not yet verified, and the Pre-Open Checklist gates on that.
-
-### Length
-
-A description is read before every review pass and again at merge, so its length is a
-cost paid repeatedly. Keep each section to what a reviewer needs in order to act:
-
-- **Problem** — up to five lines.
-- **Summary** — up to five bullets, one line each.
-- **Implementation** — one bullet per decision, up to six, each naming the file or
-  symbol it changed.
-- **Test plan** — one line per item, naming the command that was run or the test that
-  covers it.
-
-A change too large for those budgets is a PR to split (see PR Size below), not a
-description to extend.
-
-The description states the final state of the change and nothing else.
-`writing-style` → State the Result, Not the Process states what that excludes: the
-order the work happened in, abandoned attempts, corrections and the mistakes behind
-them, and the deliberation that produced the approach rather than the constraint that
-decided it. The same rule governs review comments and replies (see Review Comments →
-Register).
-
----
+| Section | Carries | Budget |
+|---|---|---|
+| `## Problem` | the symptom, its cost and the trigger; the linked issue's Goal restated in one or two sentences; no solution. A change with no problem to state says so in one line | up to five lines |
+| `## Summary` | what changed, user-visible, one bullet per logical change | up to five bullets, one line each |
+| `## Implementation` | one bullet per decision, each naming the file or symbol it changed and the constraint that decided it | up to six bullets |
+| `## Test plan` | `- [ ]` per item, naming the command that was run or the test that covers it; a box is checked only once that run has passed (`issue-rules` → Description Template) | one line per item |
 
 ## Review Comments
 
-Applies to review feedback wherever it lands — inline comments and their replies on a
-PR, and the same feedback carried in a tracker or a message when that is where the
-review happens. A different artifact from the Description above: shorter-lived, one
-point at a time.
+**Should**
 
-### Findings
+Review feedback wherever it lands: inline on a PR, or in a tracker or a message where
+the review happens.
 
-Order:
-1. **The fact** — what the code does, naming the exact symbol. Not an impression
-   ("this looks fragile") — the concrete behaviour.
-2. **The consequence** — the scenario where it breaks, or the invariant it violates.
-   Skip only when the fact alone is self-evidently wrong.
-3. **The fix** — a specific change, or a couple of named alternatives ("either X or
-   Y"). A finding with no proposed direction is not actionable.
+A finding, in order:
 
-Prefix with a bold, lowercase, colon-terminated severity label — `**blocking:**`,
-`**must-fix:**`, `**question:**`, `**note:**`, or whatever label set the project's
-existing review threads already use. Omit the label only when every finding in the
-review is the same severity and there's nothing to disambiguate.
+1. **The fact** — what the code does, naming the exact symbol.
+2. **The consequence** — the scenario where it breaks or the invariant it violates;
+   skipped only where the fact alone is self-evidently wrong.
+3. **The fix** — a specific change, or a couple of named alternatives.
 
-```markdown
-**must-fix:** `hashBytes()` reads `key[0..15]` unconditionally; a key shorter than
-16 bytes is undefined behaviour, and nothing on the call path checks the length
-before this point.
+Prefix every finding with a bold, lowercase, colon-terminated severity label:
+`**blocking:**`, `**must-fix:**`, `**question:**`, `**note:**`, or the set the
+project's threads already use.
 
-Any caller passing a key from configuration can trigger it silently on a truncated
-value. Validate the length where the key is constructed and return an error, rather
-than trusting every call site to check it first.
-```
+Address the code rather than the author, and recommend rather than command: the label
+carries the severity.
 
-Address the code, not the author — state what the code does and what follows from it
-("the division by 2 encodes a fixed switch topology" — not "you hardcoded the
-topology"). Recommend rather than command, even for a blocking finding — "worth
-validating", "better to return an error here" — severity is carried by the label, not
-by imperative phrasing.
+A reply opens with a verb naming the resolution — fixed / reworked / done / agreed /
+removed / replaced — then names the symbol that changed and, where one exists, the
+test now covering it.
 
-### Replies
+A disagreement gives reasoning specific enough for the reviewer to check it; a fix
+belonging to another task is named as such rather than left unanswered.
 
-Open with a verb naming the resolution: fixed / reworked / done / agreed / removed /
-replaced. State the result first, explanation after — then, in one to a few
-sentences, what changed (naming the actual symbol) and, when one exists, the test
-that now covers it.
+Register: `writing-style`.
 
-```markdown
-Fixed: `SipHashKey` now validates its length in the constructor and returns
-`InvalidKeyLength` for anything but 16 bytes; call sites no longer need to check it
-themselves. Covered by `key_shorter_than_16_bytes_is_rejected`.
-```
+## Pending by Default
 
-When disagreeing or clarifying instead of agreeing, give the actual reasoning
-specifically enough that the reviewer can check it — never dismiss a finding without
-an explanation. When the fix belongs to a separate task, say so and name it, or offer
-to file one; don't let a valid finding go unaddressed just because it's out of scope
-for this PR.
+**Must**
 
-### Pending by Default
+An agent must not publish its own review wording — any platform, findings and replies
+alike, including replies on its own PR. Check the platform's API for a draft or
+pending state before assuming which case applies, and report a platform offering none
+rather than publishing there.
 
-Review feedback is outward-facing: publishing notifies the author and every watcher, and
-editing afterwards does not unsend it. An agent therefore does not publish its own review
-wording — on any platform, findings and replies alike, including replies to feedback on
-the agent's own PR.
+| The platform offers | The agent does |
+|---|---|
+| a draft mechanism — GitHub pending reviews, GitLab draft notes, Gerrit draft comments | write the feedback into it and stop; the human submits |
+| none | post nothing; the wording goes into the reply to the human |
 
-What that means depends on what the platform offers:
-
-- **A draft mechanism exists** — GitHub pending reviews, GitLab draft notes, Gerrit draft
-  comments: write into it and stop there. The human submits.
-- **None exists** — Jira and most trackers, chat, email: post nothing at all. The wording
-  goes into the reply to the human, who posts it or asks for it to be posted.
-
-Check for a draft or pending state in that platform's API before assuming which case
-applies. "No draft support" is something to state in the report, not licence to publish.
-
-The draft path is the only one an agent takes, so none of these is run for review feedback
-on any repository:
+None of these runs for review feedback:
 
 - **Publishes on the spot** — `gh pr review` with `--comment`, `--approve` or
   `--request-changes`, `gh pr comment`, `glab mr note`, `glab mr note create`,
   `glab mr approve`.
 - **Sends an existing draft** — `submitPullRequestReview`,
-  `PUT .../draft_notes/:id/publish`, `POST .../draft_notes/bulk_publish`. Sending what is
-  already drafted is the human's step by the same rule.
-- **Reaches a reader with no draft at all** — `POST .../pulls/{n}/reviews` with an `event`
-  field, or `addPullRequestReview` carrying one; `POST .../pulls/{n}/comments` with
-  `in_reply_to`; `POST .../merge_requests/:iid/notes` and
-  `POST .../merge_requests/:iid/discussions`; and a reply belonging to no draft,
+  `PUT .../draft_notes/:id/publish`, `POST .../draft_notes/bulk_publish`.
+- **Reaches a reader with no draft at all** — `POST .../pulls/{n}/reviews` with an
+  `event` field, `addPullRequestReview` carrying one, `POST .../pulls/{n}/comments`
+  with `in_reply_to`, `POST .../merge_requests/:iid/notes`,
+  `POST .../merge_requests/:iid/discussions`, and
   `addPullRequestReviewThreadReply` without a `pullRequestReviewId`.
 
-The single exception is an explicit instruction naming the act on that artifact — "approve
-it", "post that reply now". The instruction is the submission. Nothing else authorises
-publishing, and an instruction given on one PR does not carry to the next one.
+The one exception is an explicit instruction naming the act on that artifact
+("approve it", "post that reply now"), and it does not carry to the next PR. The issue
+comments the Scope and issue, Pre-merge issue check and Close issue steps require are
+published as usual (`issue-rules` → Progress Comments).
 
-The ban covers review feedback, not every comment. The issue comments and progress notes
-the Workflow requires (steps 1, 5 and 7; `issue-rules` → Progress Comments) are published
-as usual: recording which PR resolves which checklist item is not a review finding.
-
-**Report** at the end: that feedback is waiting, where it is, what it covers, and whether
-the draft was opened by this pass or reused. A draft nobody is told about is the same as
-no review.
-
-The mechanics of the draft path itself — the mutations and endpoints that hold feedback
-unsent, what each publish call sends, and the traps the CLI help does not state, belong
-to the CLI skill of the hosting platform, under its review-thread or draft-note section.
-
-### Register
-
-Full sentences, exact identifiers in backticks, no filler or hedging, no slang or
-unnecessary borrowed words — `writing-style` covers these general prose rules for
-every artifact, review comments included. Recommend-not-command and address-the-code
-tone (above) are specific to review feedback and live only in this section, not in
-`writing-style`. Use whichever severity-label vocabulary and language the project's
-existing review threads already use (`AGENTS.md` / project convention wins, per
-Project Overrides above).
-
----
+Report at the end of a review pass: that feedback is waiting, where it is, what it
+covers, and whether the draft was opened by this pass or reused. The draft mechanics
+belong to the CLI skill of the hosting platform, under its review-thread or draft-note
+section.
 
 ## Pre-Open Checklist
 
-- [ ] CI green on all targets declared in the project
-- [ ] Description carries all four sections, `## Problem` included — see Description Structure
-- [ ] Every checked box in the PR's test plan corresponds to a run that actually passed
-- [ ] PR carries the issue's labels — type label if any, plus topic labels — see `issue-rules` → Labels
-- [ ] `CHANGELOG.md` updated — every user-visible change documented
-- [ ] Every line of the pre-PR check in the module-sync skill of the version control system passes
-- [ ] Every commit in the branch builds independently (no broken intermediate state)
-- [ ] Commit trailers conform to `commit-rules` skill
-- [ ] Branch is rebased onto the current target branch (no stale merge base)
+**Must**
 
----
+Conditions on the branch, each naming the moment it is established at (When a Check
+Runs):
+
+- [ ] Every check the change touches passes — at the round of edits
+- [ ] Branch is rebased onto the current target branch (no stale merge base) — at the push
+- [ ] Every check the project declares passes over the branch as it stands — at the push
+- [ ] Every commit in the branch builds independently (no broken intermediate state) — at the push
+- [ ] Every line of the pre-PR check in the module-sync skill of the version control system passes — at the push
+- [ ] Commit trailers conform to `commit-rules` — at the push
+- [ ] `CHANGELOG.md` updated — every user-visible change documented — at the push
+
+The pull request's own four properties are established with it instead:
+
+- The status of the checks reported on it, which the pipeline answers rather than a local run (`ci-cd-and-automation`)
+- A description carrying all four sections, `## Problem` included — see Description Structure
+- A test-plan box checked only where the run it names has passed
+- The issue's labels — type label if any, plus topic labels — see `issue-rules` → Labels
 
 ## Pre-Merge Checklist
 
-Gates the merge itself — distinct from the Pre-Open Checklist above, which gates opening the PR. Run it against the issue linked in the PR title and against the PR's own test plan; neither one alone is enough.
+**Must**
 
+Gates the merge, where the Pre-Open Checklist gates opening the PR. Run it against the
+issue linked in the PR title and against the PR's own test plan; neither alone is
+enough. Its items are read off the issue and the pull request rather than run, so none
+of them names a moment.
+
+- [ ] Every check reported on the pull request has passed on the commit it now points at (`ci-cd-and-automation`)
 - [ ] Every checklist checkbox in the issue reflects actual current state, not the state at issue-creation time
 - [ ] Each checkbox now checked is verifiable from what shipped in this PR or an earlier merged PR
 - [ ] Every unchecked item either is out of scope for this PR or has a linked follow-up PR/MR
 - [ ] Every module reference the branch records satisfies the merge order the module-sync skill of the version control system fixes
-- [ ] Every test-plan box in the PR description is checked, or the item is named out of scope with a reason — an unchecked box means the work is merging unverified
+- [ ] Every test-plan box in the PR description is checked, or the item is named out of scope with a reason
 - [ ] A comment is added to the issue recording which PR/MR resolves which item (`issue-rules` → Progress Comments)
-
-**Merge gate:** merge only if every item in the issue and every test-plan box in the PR is checked, or the remaining ones already have a follow-up PR/MR linked in an issue comment or a stated reason for staying unrun. Unchecked items with no plan behind them block the merge.
-
----
 
 ## Merge Strategy
 
-**Rebase, then merge with `--no-ff`** — explicit merge commit per topic; linear first-parent history on protected branches.
+**Must**
 
-### Rules
+1. **Checklist gate.** Merge only after the Pre-Merge Checklist passes.
+2. **The human authorises the merge.** An agent merges on an explicit instruction
+   naming this PR, which does not carry to the next one.
+3. **Rebase before merge.** `git rebase <target>`, then merge from the current target
+   tip; the rebase moves the head, so it returns to the push moment and the checks of
+   that moment run again.
+4. **`--no-ff` only.** No fast-forward merge, no squash merge.
+5. **Merge subject:** `Merge PR #<pr-number>: <pr subject>`, the PR subject verbatim
+   and never re-prefixed with `type(scope):`, so a tracker ID in the title leaves both
+   identifiers in place (`Merge PR #7: PROJ-42: Add SipHash...`).
+6. **Merge subject length:** at most 120 characters, superseding the 72-character rule
+   in `commit-rules` for merge commits only.
+7. **Merge body required.** What was integrated and why, never empty (`commit-rules`).
+8. **Trailers:** the ban in `commit-rules` holds; `Co-authored-by` injected by the
+   forge when committer differs from author is allowed.
+9. **Cleanup before the push.** Squash fixups (`commit-rules` → Fixup Commits) before
+   the branch is sent, never at merge time: a rewrite afterwards takes a force-push and
+   owes every check the push ran.
+10. **Rewrite squashed commit bodies** per `commit-rules` → Fixup / Squash Merges.
 
-1. **Issue gate.** Merge only after the Pre-Merge Checklist above passes.
-2. **The human authorises the merge.** An agent does not merge on its own initiative, and an authorisation given for one PR does not carry to the next — the same rule the review feedback follows (Review Comments → Pending by Default), applied to the heavier act.
-3. **Rebase before merge.** `git rebase <target>` first; merge only when the branch sits on the current target tip.
-4. **`--no-ff` only.** No fast-forward merge. No squash merge.
-5. **Merge subject:** `Merge PR #<pr-number>: <pr subject>` — copy the PR subject verbatim. Do not re-prefix with `type(scope):` (the PR title already carries it; re-prefixing duplicates the type in the merged log). When the PR title starts with a tracker ID, `#<pr-number>` and `TRACKER-N` are distinct identifiers — both appear and that is correct (`Merge PR #7: PROJ-42: Add SipHash...`).
-6. **Merge subject length:** ≤ 120 characters (same limit as PR title; supersedes the 72-char rule in `commit-rules` for merge commits only).
-7. **Merge body required** — same rule as ordinary commits (`commit-rules`). Body explains what was integrated and why; never empty.
-8. **Trailers:** same ban as `commit-rules` — no AI-attribution. `Co-authored-by` injected by GitHub when committer differs from author is allowed.
-9. **Cleanup before opening the PR.** Squash fixups via `git commit --fixup=<hash>` + `git rebase -i --autosquash` (per `commit-rules`). Never at merge time.
-10. **Rewrite squashed commit bodies** to reflect the final state (see `commit-rules`).
-
-### Rationale
-
-- `--no-ff` keeps the topic boundary visible. `git log --first-parent <branch>` on a protected branch shows one entry per integrated PR.
-- Rebase before merge ensures no interleaved history under the merge commit.
-- Protected branches — the canonical set is defined and enforced by `hooks/git/pre-commit`. Feature branches commit freely.
-
-### Platform mechanics
-
-The command that performs this merge, and the repository settings it depends on, belong
-to the CLI skill of the hosting platform, in its pull-request or merge-request section.
-
----
+The command performing the merge, and the repository settings it depends on, belong to
+the CLI skill of the hosting platform.
 
 ## PR Size
 
-One logical change per PR. Do not mix:
+**Should**
 
-- Feature + refactoring
-- Bug fix + unrelated cleanup
-- Multiple unrelated features
-
-If a PR touches too many things, split it. A PR that cannot be summarised in one sentence is too large.
-
----
+One logical change per PR: not feature plus refactoring, not bug fix plus unrelated
+cleanup, not several unrelated features. A PR that cannot be summarised in one sentence
+is split before review.
 
 ## Cross-References
 
-- `issue-rules` — the issue this PR resolves: title, description templates, labels, lifecycle.
+**Recommended**
+
+- `issue-rules` — the issue this PR resolves: title, templates, labels, lifecycle, progress comments.
 - `commit-rules` — commit message format and branch naming on the PR's branch.
-- The CLI skill of the hosting platform — the commands behind the Workflow steps above.
+- `code-review-and-quality` — what a review looks for, where this skill states how a finding is worded.
+- `writing-style` — prose register in the description and in the review threads.
+- `ci-cd-and-automation` — the pipeline answering the checks reported on the pull request.
+- The module-sync skill of the version control system — the pre-PR check and the merge order the checklists gate on.
+- The CLI skill of the hosting platform — the commands behind the Workflow steps and the draft mechanics behind Pending by Default.

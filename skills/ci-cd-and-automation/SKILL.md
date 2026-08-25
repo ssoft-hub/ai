@@ -21,9 +21,8 @@ that decides whether a change can merge or ship.
 - The specific checks a gate should run (lint, format, static analysis) are project- and
   language-specific → the coding-conventions skill of the language being written, the
   hook-script skill of the agent tool, and the project's `AGENTS.md`.
-- Merge itself is still gated on the Pre-Open/Pre-Merge Checklists → `pr-rules` skill;
-  this skill is about the pipeline that produces the "CI green" signal those checklists
-  require.
+- Merge itself is still gated on the Pre-Merge Checklist → `pr-rules` skill; this skill is
+  about the pipeline that produces the "CI green" signal that checklist requires.
 - Release tagging and version bump automation → `release` skill.
 - Secrets used by pipeline jobs (deploy keys, tokens) → `security-and-hardening` skill.
 

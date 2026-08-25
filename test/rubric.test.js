@@ -141,7 +141,7 @@ function skillsDeclaringRubric() {
 }
 
 // Extended by the pass that marks the next skill; every name here is checked below.
-const MARKED_SKILLS = ['comments', 'submodule-sync'];
+const MARKED_SKILLS = ['comments', 'pr-rules', 'submodule-sync'];
 
 test('markerFaults accepts each of the four force markers', () => {
   for (const marker of ['**Must**', '**Should**', '**Recommended**', '**May**']) {
