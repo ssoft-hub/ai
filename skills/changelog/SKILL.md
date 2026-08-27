@@ -52,6 +52,9 @@ Use only what applies. Order:
 - Past tense, present-user perspective ("Added", not "Adding")
 - Describe the WHAT and WHY for the user — not the implementation
 - One logical change per bullet
+- At most 300 characters, carrying the change alone: not how it is built, why it was
+  built that way, or what holds it. A rule that moved is stated by naming the skill or
+  file it moved to
 - No PR numbers, no commit hashes, no internal refactor details
 
 ## What Goes In
