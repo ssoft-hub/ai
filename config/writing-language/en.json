@@ -1,0 +1,25 @@
+{
+  "$comment": "The words each binding force is stated with in this language, and the term to use for an operation whose English name is otherwise transliterated. Keyed by the operation, so no banned form is written here. Read by an agent writing text for a person; nothing else reads it. skills/writing-style/SKILL.md states the rules these words serve.",
+  "language": "English",
+  "force": {
+    "must": [
+      "must"
+    ],
+    "should": [
+      "should"
+    ],
+    "recommended": [
+      "is recommended",
+      "better to",
+      "worth"
+    ],
+    "may": [
+      "may",
+      "can"
+    ]
+  },
+  "terms": {
+    "gate": "check, precondition",
+    "porcelain command": "top-level command"
+  }
+}

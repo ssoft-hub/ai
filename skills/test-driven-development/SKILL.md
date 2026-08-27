@@ -16,11 +16,11 @@ metadata:
 # Skill: Test-Driven Development
 
 Apply when implementing a feature or bug fix, before writing implementation code. This
-skill governs the order of work — red, green, refactor. Test structure, naming, and
+skill governs the order of work — fail, pass, refactor. Test structure, naming, and
 coverage rules belong to the testing skill of the language being written.
 
 - Reproducing a bug as a failing test before fixing it → `debugging` skill (Regression Test First).
-- Once tests are green and the implementation stands, reviewing it → `code-review-and-quality` skill.
+- Once the tests pass and the implementation stands, reviewing it → `code-review-and-quality` skill.
 
 ## Project Overrides
 
@@ -30,18 +30,18 @@ Project-local rules win. If the repository's `AGENTS.md` or a project skill defi
 
 ## The Loop
 
-1. **Red** — write a test for the next small behavior, run it, watch it fail. A test
+1. **Fail** — write a test for the next small behavior, run it, watch it fail. A test
    that passes before the implementation exists is testing nothing — it proves the test
    itself is wrong, not that the feature works.
-2. **Green** — write the minimum implementation that makes the test pass. Do not
+2. **Pass** — write the minimum implementation that makes the test pass. Do not
    implement behavior the current test doesn't require yet; that comes in its own
-   red step.
-3. **Refactor** — with tests green, clean up duplication or naming introduced by the
-   minimal implementation, re-running tests after each change. Never refactor with a
-   failing test in the suite — a failing baseline makes it impossible to tell whether
-   a refactor broke something.
+   fail step.
+3. **Refactor** — with the tests passing, clean up duplication or naming introduced
+   by the minimal implementation, re-running tests after each change. Never refactor
+   with a failing test in the suite — a failing baseline makes it impossible to tell
+   whether a refactor broke something.
 
-Repeat in small increments. A "red" step that requires ten new tests before anything
+Repeat in small increments. A fail step that requires ten new tests before anything
 passes again is too large a step — split it.
 
 ## Why Test First, Not Test After
@@ -51,20 +51,20 @@ including its bugs — the author unconsciously writes the assertion to match th
 observed behavior. A test written first specifies the intended behavior independently,
 so it can catch the implementation being wrong, not just being different.
 
-## One Behavior Per Red Step
+## One Behavior Per Fail Step
 
-Each red-green cycle targets one new behavior or boundary case, matching the
+Each fail-pass cycle targets one new behavior or boundary case, matching the
 one-behaviour-per-test rule of the testing skill of the language being written. Do not
 write five tests up front and then implement until all
 five pass — that reintroduces the "test after" problem for tests 2 through 5, which sit
-red for longer than necessary and stop guiding the implementation step by step.
+failing for longer than necessary and stop guiding the implementation step by step.
 
 ## Minimal Implementation
 
 "Minimum to pass" does not mean hardcoding the expected output — it means the simplest
 general logic that satisfies the test without anticipating requirements no test has
 demanded yet. If the minimal-looking implementation is suspicious (e.g. `return 42;`),
-the next red step should add a test that forces generalization.
+the next fail step should add a test that forces generalization.
 
 - Bad: implementing configurable retry, backoff, and logging because the ticket
   mentions them, before any test requires the specific behavior
@@ -74,12 +74,12 @@ the next red step should add a test that forces generalization.
 ## Refactor Is Not Optional
 
 Skipping refactor because "it works" accumulates the duplication and awkward naming
-that minimal implementations produce step by step. Refactor after every green, even
-when the change is small — a green suite is the only safe time to do it.
+that minimal implementations produce step by step. Refactor after every pass step, even
+when the change is small — a passing suite is the only safe time to do it.
 
 ## Prefer the Real Thing Over a Test Double
 
-When a red step needs a collaborator that isn't the unit under test, reach for the
+When a fail step needs a collaborator that isn't the unit under test, reach for the
 least artificial option that keeps the test fast and deterministic, in this order: the
 real implementation, then an in-memory fake, then a stub returning canned data, and
 only last a mock that asserts *which* calls were made. A test built around call-sequence

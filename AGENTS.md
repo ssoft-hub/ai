@@ -75,7 +75,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 
 - `architecture` — how modules, services and processes fit together.
 - `changelog` — the `CHANGELOG.md` file.
-- `ci-cd-and-automation` — the pipeline producing the "CI green" signal.
+- `ci-cd-and-automation` — the pipeline producing the checks-passed signal.
 - `code-review-and-quality` — what a review looks for.
 - `comments` — a comment in any language, whatever marker opens it.
 - `commit-rules` — the commit message and the branch name.
@@ -201,7 +201,7 @@ copied file confers.
 What the modal check holds is the ceiling and only the ceiling. `Never write it. It is
 required.` under `**May**` draws no fault, and neither does a bare imperative, because
 deciding which sentences are normative at all is judgement rather than a match. So writing
-each statement with its own modal is the author's to get right, and a green suite says that
+each statement with its own modal is the author's to get right, and a passing suite says that
 no section speaks above its marker — never that every statement carries one.
 
 ## Adding a skill
@@ -378,6 +378,6 @@ One `test/<name>.test.js` per unit, on node's built-in runner; the conventions a
 
 A test over a skill holds a relation between two artifacts with different authors — a
 frontmatter key against the context vocabulary, a section's marker against the modals
-under it, a citation against the heading it resolves to. An assertion that reddens when a
+under it, a citation against the heading it resolves to. An assertion that fails when a
 sentence is rephrased while its rule stands checks text with text: it is a change
 detector, not a check, and is not written.

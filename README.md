@@ -113,7 +113,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |
 | `shipping-and-launch` | Release readiness, staged rollout, rollback planning |
 | `submodule-sync` | Git submodule sync discipline |
-| `test-driven-development` | Red-green-refactor workflow, before writing implementation code |
+| `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
 | `writing-style` | Prose register and vocabulary — no slang, no unnecessary borrowings, per language |
 
 ## Agents
@@ -201,9 +201,10 @@ on and the decision it returns, the skill and agent frontmatter the routing read
 `CLAUDE_CONFIG_DIR` rather than the real one, the rule that every script under `test/` is a
 test file, since the runner loads each of them as one, the rule that no path
 `config/retired.json` retires is one install still ships, the context each skill declares in
-`bound-to` and what a routing may name or has to state by role under it, and the force
+`bound-to` and what a routing may name or has to state by role under it, the force
 marker under every `##` heading of the skill template and of each skill declaring
-`rubric: applied`.
+`rubric: applied`, and the rule that no colour word in `skills/*/SKILL.md` or `AGENTS.md`
+stands for a state, the proper name of a practice aside.
 
 ## Manual setup
 

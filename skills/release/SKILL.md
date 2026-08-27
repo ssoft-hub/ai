@@ -62,7 +62,7 @@ Gates the commit and tag of Step 5. Whether the release, once built, is safe to 
 to users is a separate gate → `shipping-and-launch` skill.
 
 - [ ] Build passes on all compilers declared in project (check `AGENTS.md`)
-- [ ] All tests pass; CI green on all compiler targets
+- [ ] All tests pass; CI passed on all compiler targets
 - [ ] No breaking API change without `MAJOR` bump, breaking as the API-design skill of
       the language being written defines it in its breaking-changes section
 - [ ] `CHANGELOG.md` covers all changes since last release, reconciled against the

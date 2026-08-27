@@ -22,7 +22,7 @@ that decides whether a change can merge or ship.
   language-specific → the coding-conventions skill of the language being written, the
   hook-script skill of the agent tool, and the project's `AGENTS.md`.
 - Merge itself is still gated on the Pre-Merge Checklist → `pr-rules` skill; this skill is
-  about the pipeline that produces the "CI green" signal that checklist requires.
+  about the pipeline that produces the checks-passed signal that checklist requires.
 - Release tagging and version bump automation → `release` skill.
 - Secrets used by pipeline jobs (deploy keys, tokens) → `security-and-hardening` skill.
 
@@ -57,7 +57,7 @@ matrix) so a broken change fails in seconds, not after a 20-minute matrix build.
 Run the test matrix across every combination the project actually ships to (compiler
 versions, OS, architecture) — see this repo's own workflow (`.github/workflows/`) running
 `npm test` on multiple Node versions as a minimal example. A matrix entry that's
-perpetually red and ignored is worse than not having it — either fix it or remove it.
+perpetually failing and ignored is worse than not having it — either fix it or remove it.
 
 ## What Blocks vs What Warns
 
@@ -75,9 +75,9 @@ job that needs it, never share one broad credential across every job in the pipe
 ## Flaky Checks
 
 A check that fails intermittently without a code change is a defect in the check, not
-noise to route around with retries-until-green. Quarantine it (mark known-flaky,
-tracked with an issue) rather than letting an intermittent red build normalize ignoring
-CI failures generally.
+noise to route around with retries until it passes. Quarantine it (mark known-flaky,
+tracked with an issue) rather than letting an intermittently failing build normalize
+ignoring CI failures generally.
 
 ## Feeding a Pipeline Failure Back to an Agent
 
@@ -99,10 +99,10 @@ change); shard a large test suite across runners; move slow, non-blocking checks
 scheduled run instead of every push. Reach for a larger/faster runner last — it hides
 the cost instead of removing it.
 
-## Someone Owns a Red Build
+## Someone Owns a Failing Build
 
 When the pipeline breaks on the shared branch, whoever is responsible for keeping it
-green (not necessarily whoever caused it) fixes or reverts immediately — waiting for the
+passing (not necessarily whoever caused it) fixes or reverts immediately — waiting for the
 original author, or assuming someone else will handle it, lets a broken baseline
 accumulate further broken changes on top of it.
 
