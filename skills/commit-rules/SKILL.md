@@ -17,6 +17,8 @@ metadata:
 
 Apply when writing commit messages or reviewing commits.
 
+- Prose register, and the rule that a body states the result rather than the process → `writing-style` skill.
+
 ## Project Overrides
 
 Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own commit conventions, follow those instead. This skill is the fallback for projects that do not specify their own.

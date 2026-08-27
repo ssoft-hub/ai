@@ -44,7 +44,7 @@ A developer should be able to run the same checks the pipeline runs, locally, an
 the same result — a check that only exists in CI and can't be reproduced locally forces
 a slow push-and-wait debugging loop for anything that fails there. Prefer a single script
 or command both the pipeline and a developer invoke (see this repo's own
-`npm test` / `hooks/git/pre-commit` as an example of the pattern).
+`npm test` as an example of the pattern).
 
 ## Fast Feedback First
 

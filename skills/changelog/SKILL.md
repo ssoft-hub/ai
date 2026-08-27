@@ -20,6 +20,8 @@ metadata:
 
 Apply when editing `CHANGELOG.md` or asked about changelog format.
 
+- What counts as a breaking change → the API-design skill of the language being written.
+
 ## Project Overrides
 
 Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own changelog conventions, follow those instead. This skill is the fallback for projects that do not specify their own.

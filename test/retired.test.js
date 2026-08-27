@@ -36,9 +36,9 @@ function configFiles() {
 
 // A retired entry names a path relative to the Claude config dir, so the set it is
 // checked against is what install.js writes there rather than what the repo holds:
-// `hooks/` without `git/`, whose pre-commit hook goes into `.git/` instead; `tools/`,
-// `agents/` and `commands/` whole; one `SKILL.md` per skill; and the three names
-// it writes at the root of the config dir.
+// `hooks/` without `README.md`, which documents the dispatchers rather than running
+// beside them; `tools/`, `agents/` and `commands/` whole; one `SKILL.md` per skill; and
+// the three names it writes at the root of the config dir.
 function shipped() {
   const paths = new Set();
   const addAll = dests => { for (const dest of dests) paths.add(dest); };
@@ -49,7 +49,7 @@ function shipped() {
     if (!dests.length) throw new Error(`no file found under ${from}, which install.js copies`);
     addAll(dests);
   };
-  add('hooks/', filesUnder(path.join(repoDir, 'hooks'), new Set(['git'])).map(rel => `hooks/${rel}`));
+  add('hooks/', filesUnder(path.join(repoDir, 'hooks'), new Set(['README.md'])).map(rel => `hooks/${rel}`));
   add('tools/', filesUnder(path.join(repoDir, 'tools')).map(rel => `tools/${rel}`));
   add('skills/', skillFiles());
   add('config/', configFiles());
@@ -75,6 +75,3 @@ test('no entry in config/retired.json names a path this repo still ships', () =>
   }
 });
 
-test('the pre-commit hook install writes into .git/ is not a path the config dir carries', () => {
-  assert.ok(!shipped().has('hooks/git/pre-commit'));
-});

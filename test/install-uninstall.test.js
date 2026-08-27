@@ -25,7 +25,7 @@ const shippedHooks = () => JSON.parse(
   fs.readFileSync(path.join(repoDir, 'config', 'settings.json'), 'utf8')).hooks;
 
 function runInstall(dir, extraArgs = []) {
-  const r = spawnSync('node', [installJs, '--no-git-hook', ...extraArgs], {
+  const r = spawnSync('node', [installJs, ...extraArgs], {
     cwd: repoDir,
     env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
     encoding: 'utf8',
