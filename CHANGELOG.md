@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Added
+- A sentence prescribing an action to a person opens with the word naming its force, then the action, then what it acts on: the force word is addressed to whoever will act, and a sentence led by the thing acted on states a property of it instead
+
 - A skill ships with the whole of its directory, so data a reader consults rather than obeys - a vocabulary, a table of values - sits beside `SKILL.md` and is read when the skill sends them to it, instead of loading with every application
 
 - Hook dispatch system: `PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit` event handlers
