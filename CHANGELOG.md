@@ -4,6 +4,7 @@
 
 ### Added
 - A sentence prescribing an action to a person runs force word, action, what it acts on - "should extract the loop", never "the loop should be extracted"
+- A command declares `bound-to` as a skill does, and `test/skill-contexts.test.js` holds both: `/review-loop` states the isolated checkout and the steps that wait without naming one version control system or forge
 
 - A skill ships with the whole of its directory, so data a reader consults rather than obeys - a vocabulary, a table of values - sits beside `SKILL.md` and is read when the skill sends them to it, instead of loading with every application
 

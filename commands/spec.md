@@ -4,6 +4,8 @@ argument-hint: <idea or task description>
 license: Unlicense
 metadata:
   author: ssoft
+  bound-to:
+    - agent-tool
   tags:
     - pipeline
     - spec

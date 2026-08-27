@@ -7,6 +7,7 @@ const { parseFrontmatter } = require('../tools/skill-catalog');
 
 const repoDir = path.join(__dirname, '..');
 const skillsDir = path.join(repoDir, 'skills');
+const commandsDir = path.join(repoDir, 'commands');
 const vocabularyFile = path.join(repoDir, 'config', 'skill-contexts.json');
 
 // An empty vocabulary would resolve every declaration against nothing, so it throws.
@@ -30,8 +31,12 @@ function chain(contexts, name) {
   return seen;
 }
 
+function read(file) {
+  return fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+}
+
 function readSkill(name) {
-  return fs.readFileSync(path.join(skillsDir, name, 'SKILL.md'), 'utf8').replace(/\r\n/g, '\n');
+  return read(path.join(skillsDir, name, 'SKILL.md'));
 }
 
 function skillCatalogue() {
@@ -61,6 +66,20 @@ function reaches(contexts, own, required) {
 // Read through the parser the gate and the reminder read, so all three agree.
 function boundTo(name) {
   return parseFrontmatter(readSkill(name)).boundTo ?? [];
+}
+
+// A command installs into another project exactly as a skill does and states rules there
+// the same way, so both answer for the declaration and for the routing built on it.
+function documents() {
+  const entries = [...skillCatalogue()]
+    .map(name => ({ what: `skill "${name}"`, skill: name, text: readSkill(name) }));
+  const files = fs.readdirSync(commandsDir).filter(name => name.endsWith('.md'));
+  // A vacuous pass would hide the commands going missing entirely.
+  if (files.length === 0) throw new Error(`no command files in ${commandsDir}`);
+  for (const name of files) {
+    entries.push({ what: `command "${name}"`, skill: null, text: read(path.join(commandsDir, name)) });
+  }
+  return entries.map(entry => ({ ...entry, own: parseFrontmatter(entry.text).boundTo ?? [] }));
 }
 
 test('every context names a parent the vocabulary defines', () => {
@@ -101,28 +120,27 @@ test('every context says what it means', () => {
   }
 });
 
-test('every skill declares a context its rules are bound to', () => {
-  for (const name of skillCatalogue()) {
-    assert.ok(boundTo(name).length > 0,
-      `skill "${name}" declares no bound-to, so nothing says which readers its rules are for`);
+test('every skill and command declares a context its rules are bound to', () => {
+  for (const { what, own } of documents()) {
+    assert.ok(own.length > 0,
+      `${what} declares no bound-to, so nothing says which readers its rules are for`);
   }
 });
 
-test('every context a skill declares is one the vocabulary defines', () => {
+test('every context declared is one the vocabulary defines', () => {
   const contexts = readVocabulary();
-  for (const name of skillCatalogue()) {
-    for (const context of boundTo(name)) {
+  for (const { what, own } of documents()) {
+    for (const context of own) {
       assert.ok(context in contexts,
-        `skill "${name}" declares context "${context}", which the vocabulary does not define`);
+        `${what} declares context "${context}", which the vocabulary does not define`);
     }
   }
 });
 
-test('a skill declaring universal declares nothing beside it', () => {
-  for (const name of skillCatalogue()) {
-    const declared = boundTo(name);
-    assert.ok(!declared.includes('universal') || declared.length === 1,
-      `skill "${name}" declares universal alongside ${declared.filter(c => c !== 'universal').join(', ')}`);
+test('declaring universal declares nothing beside it', () => {
+  for (const { what, own } of documents()) {
+    assert.ok(!own.includes('universal') || own.length === 1,
+      `${what} declares universal alongside ${own.filter(c => c !== 'universal').join(', ')}`);
   }
 });
 
@@ -141,12 +159,12 @@ function roleNouns(contexts) {
 test('every role phrase names a context the vocabulary carries', () => {
   const nouns = roleNouns(readVocabulary());
   const unresolved = [];
-  for (const name of skillCatalogue()) {
+  for (const { what, text } of documents()) {
     // Only the definite form names a context; "of that language" carries it from before.
-    const text = readSkill(name).replace(/\s+/g, ' ');
-    for (const [, tail] of text.matchAll(ROLE_PHRASE)) {
+    const flat = text.replace(/\s+/g, ' ');
+    for (const [, tail] of flat.matchAll(ROLE_PHRASE)) {
       if (!nouns.some(({ noun }) => tail === noun || tail.startsWith(`${noun} `))) {
-        unresolved.push(`${name}: "the ... skill of the ${tail.slice(0, 40)}"`);
+        unresolved.push(`${what}: "the ... skill of the ${tail.slice(0, 40)}"`);
       }
     }
   }
@@ -156,19 +174,18 @@ test('every role phrase names a context the vocabulary carries', () => {
 });
 
 // A backticked skill name here is a routing, never an illustration: the ban is flat.
-test('no skill names a skill bound to an instance its own context does not reach', () => {
+test('nothing names a skill bound to an instance its own context does not reach', () => {
   const contexts = readVocabulary();
   const catalogue = skillCatalogue();
   const forbidden = [];
-  for (const name of catalogue) {
-    const own = boundTo(name);
-    for (const named of skillsNamed(readSkill(name), catalogue)) {
-      if (named === name) continue;
+  for (const { what, skill, own, text } of documents()) {
+    for (const named of skillsNamed(text, catalogue)) {
+      if (named === skill) continue;
       const out = boundTo(named).filter(context => !reaches(contexts, own, context));
-      if (out.length > 0) forbidden.push(`${name} [${own}] names ${named} [${out}]`);
+      if (out.length > 0) forbidden.push(`${what} [${own}] names ${named} [${out}]`);
     }
   }
   assert.deepStrictEqual(forbidden, [],
-    'a skill naming one bound to an instance its own reader may not be in routes by ' +
+    'a file naming a skill bound to an instance its own reader may not be in routes by ' +
     'role — "the API-design skill of the language being written" — and names no skill');
 });

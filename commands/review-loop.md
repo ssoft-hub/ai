@@ -4,6 +4,8 @@ argument-hint: <tool(s)> [quick|light|normal|thorough|ultra] [scope] — e.g. "c
 license: Unlicense
 metadata:
   author: ssoft
+  bound-to:
+    - agent-tool
   tags:
     - pipeline
     - review
@@ -21,15 +23,14 @@ this run.
 
 Pick where every pass of this loop runs, once, before the first pass: the current
 working directory, when it is already checked out to the requested scope and carries no
-uncommitted change or unrelated in-progress work the review would disturb. Otherwise use
-an isolated worktree checked out to the requested scope — except when that scope *is*
-what the current directory already has checked out and the only problem is an
-uncommitted change; git refuses to check out the same branch into a second worktree, so
-there stash the change instead and review in the current directory, popping the stash
-back once the loop ends so nothing stays hidden in it. When a worktree was created for
-this run, remove it (`git worktree remove`) once the loop ends, whichever way it ends,
-after every fix from this run is committed (step 3) — the branch's commits live in the
-shared repo regardless of the worktree directory, so removing it loses nothing.
+uncommitted change or unrelated in-progress work the review would disturb. Otherwise
+take a second, isolated checkout of that scope — except when the scope *is* what the
+current directory already has and the only problem is an uncommitted change; a second
+checkout of the same branch is commonly refused, so set the change aside instead,
+review in the current directory, and restore it once the loop ends so nothing stays
+hidden in it. Discard a checkout taken for this run once the loop ends, whichever way
+it ends, after every fix from this run is committed (step 3) — the commits live in the
+repository, not in the directory they were made from, so discarding it loses nothing.
 
 Loop, for up to 3 passes:
 
@@ -60,11 +61,11 @@ and any nit/question resolved along the way) and what is still open (only possib
 pass found what, so the report reads as a history. Do not report the loop as clean when
 a blocking finding is still open.
 
-Local edits and fixes proceed automatically. What waits, and under which rule: `git push`,
-which a round of this loop does not reach (`pr-rules` → When a Check Runs); `gh issue edit` and
-`gh pr edit`, for the review wording they can put in front of a reader (`pr-rules` →
-Pending by Default); and the merge, which is the human's (`pr-rules` → Merge Strategy 2).
-This command fixes code; it does not publish or merge on its own.
+Local edits and fixes proceed automatically. What waits, and under which rule: the push,
+which a round of this loop does not reach (`pr-rules` → When a Check Runs); editing an
+issue or the pull request, for the review wording it can put in front of a reader
+(`pr-rules` → Pending by Default); and the merge, which is the human's (`pr-rules` →
+Merge Strategy 2). This command fixes code; it does not publish or merge on its own.
 
 This does not replace `/ship`: `/ship` stays a single-pass go/no-go with a fixed
 reviewer pair. Use this command instead when the change needs iteration, a different
