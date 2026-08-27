@@ -39,10 +39,10 @@ behaves the way it does.
 Creating that file is not the whole job: the frontmatter is the only place a skill's
 triggers are declared - the tier it loads in, whether it is announced on every prompt or
 only when a file it owns is edited, and the skills that must arrive with it - and the
-ownership map states its boundary against its neighbours. `AGENTS.md` -> Adding a skill
-carries the steps, from the pre-flight check against that map through to
-`node install.js`; `AGENTS.md` -> Renaming or retiring a skill covers the other
-direction.
+ownership map states its boundary against its neighbours.
+`skills/skill-authoring/SKILL.md` carries the steps for adding, renaming and
+retiring; `AGENTS.md` -> Adding a skill, an agent, a command or a tool states where this
+repository indexes one and how it deploys it.
 
 ## Tests
 

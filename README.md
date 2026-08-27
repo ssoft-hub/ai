@@ -112,6 +112,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
 | `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |
 | `shipping-and-launch` | Release readiness, staged rollout, rollback planning |
+| `skill-authoring` | Writing a skill file — its concern, name, contexts, section markers, rename |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
 | `writing-style` | Prose register and vocabulary — no slang, no unnecessary borrowings, per language |

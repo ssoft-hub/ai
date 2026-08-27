@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- A skill ships with the whole of its directory, so data a reader consults rather than obeys - a vocabulary, a table of values - sits beside `SKILL.md` and is read when the skill sends them to it, instead of loading with every application
 
 - Hook dispatch system: `PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit` event handlers
 - Safety tools: `bash-safety` (blocks destructive shell commands), `secret-guard` (blocks credential leaks)
@@ -37,9 +38,10 @@
 - `skill-gate` denies the first `Edit`/`Write`/`MultiEdit`/`NotebookEdit` on a file whose claiming skills are not loaded and warns on a repeat, so an agent that cannot invoke the Skill tool loses one attempt rather than the task. A shell command writing to such a file passes the same check
 - `statusline` tool: renders the line under the prompt - model, effort, context and the two rate-limit windows with their reset times, coloured by how full they are, and the branch. Installing takes over the single `statusLine` slot, which `uninstall` gives back
 - The statusline keeps whatever the displaced `statusLine` command drew, in front of its own badges. That command runs detached and its output is cached, so it costs nothing per render; a failing or slow one leaves its text absent and changes nothing else
-- Binding force of a skill section: every `##` section of `comments`, `pr-rules` and `submodule-sync` carries one of `**Must**`, `**Should**`, `**Recommended**` or `**May**`, saying how far its statements bind; `config/claude-config-rules.md` states what each entitles a reader to do
+- Binding force of a skill section: every `##` section of a skill declaring `rubric: applied` carries one of `**Must**`, `**Should**`, `**Recommended**` or `**May**`, saying how far its statements bind; `config/claude-config-rules.md` states what each entitles a reader to do
 - A state is named by its condition, never by the colour of an indicator reporting it: not `CI green` but "every check the project declares has passed". `writing-style` -> Name the State, Not the Colour states the rule, and `npm test` fails on a colour word in any skill or in `AGENTS.md`
 - Text addressed to a person names the force of an action it prescribes - must, should, recommended or may, one to one with the four binding-force markers - rather than leaving it in a bare infinitive. The words each force is stated with install as `<config dir>/writing-language/<language>.json`
+- `skill-authoring` skill: naming a skill after its concern, declaring `bound-to`, marking each `##` section with the force it carries, one file per skill, and the rename. `AGENTS.md` states none of them and keeps this repository's own catalog steps
 
 ### Changed
 

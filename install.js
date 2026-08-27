@@ -211,9 +211,9 @@ if (!fs.existsSync(skillsDir)) {
   warn(`source not found: ${skillsDir}`);
 } else {
   for (const name of fs.readdirSync(skillsDir)) {
-    const skillFile = path.join(skillsDir, name, 'SKILL.md');
-    if (!fs.existsSync(skillFile)) continue;
-    copyFile(skillFile, path.join(claudeDir, 'skills', name, 'SKILL.md'));
+    const dir = path.join(skillsDir, name);
+    if (!fs.existsSync(path.join(dir, 'SKILL.md'))) continue;
+    copyDir(dir, path.join(claudeDir, 'skills', name));
   }
 }
 
@@ -227,11 +227,6 @@ else log(`  ${logPrefix} (none)`);
 log('\ncommands/');
 const commandsDir = path.join(repoDir, 'commands');
 if (fs.existsSync(commandsDir)) copyDir(commandsDir, path.join(claudeDir, 'commands'));
-else log(`  ${logPrefix} (none)`);
-
-log('\nwriting-language/');
-const langDir = path.join(repoDir, 'config', 'writing-language');
-if (fs.existsSync(langDir)) copyDir(langDir, path.join(claudeDir, 'writing-language'));
 else log(`  ${logPrefix} (none)`);
 
 log('\nsettings.json');
