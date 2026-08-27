@@ -10,7 +10,7 @@ metadata:
   # on its own topic and must not restate the wider one.
   tier: <process | domain | narrow>
   # Required. The contexts this skill's rules are bound to, from
-  # config/skill-contexts.json. AGENTS.md -> Adding a skill states the rules.
+  # config/skill-contexts.json. skill-authoring states the rules.
   bound-to:
     - <context>
   # Optional. Globs of the files this skill owns, matched against the full path with
@@ -50,19 +50,11 @@ Apply when <trigger condition — one line, specific, actionable>.
 
 **Recommended**
 
-<!-- The marker above is one of exactly four, alone on the first line under every `## `
-     heading, ordered by force and meaning the same in every skill:
-       `**Must**`        ground for refusing work, and appears in checklists
-       `**Should**`      may stop a review with a stated reason; no mechanical check
-       `**Recommended**` raised as a remark, blocks nothing
-       `**May**`         grants permission, forbids nothing
-     `**Must**` is placed only where compliance can be checked: every statement under it
-     meets the three conditions in AGENTS.md → Binding Force. The other three
-     carry no such requirement and are ordered by importance alone. The default above is
-     `**Recommended**`, the weakest marker that still states a norm — raise a section
-     deliberately, and split a checkable statement out into its own section rather than
-     strengthening the marker over neighbours the conditions reject. Keep the line: a
-     skill whose sections all carry one declares `rubric: applied` in its frontmatter. -->
+<!-- Keep the line above: it is this section's binding-force marker, one of exactly four,
+     and this file defaults every section to `**Recommended**`. Where the line sits and
+     what holds it: skill-authoring → Marking a Section. Which of the four a section
+     takes: skill-authoring → Choosing the Marker. What each marker entitles a reader to
+     do: config/claude-config-rules.md → Binding force of a skill section. -->
 
 <!-- Lead with the most important rules. Use bullet lists for rules,
      tables for mappings, fenced code blocks for examples. -->

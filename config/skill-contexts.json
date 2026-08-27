@@ -1,5 +1,5 @@
 {
-  "$comment": "The contexts a skill's `bound-to` draws from, one entry per context with its parent, its kind, what it means, and the noun a role phrase names it by; the rules for reading and extending this file are in AGENTS.md -> Adding a skill.",
+  "$comment": "The contexts a skill's `bound-to` draws from, one entry per context with its parent, its kind, what it means, and the noun a role phrase names it by; the rules for reading and extending this file are in skills/skill-authoring/SKILL.md.",
   "contexts": {
     "universal": {
       "parent": null,

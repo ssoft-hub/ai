@@ -274,7 +274,7 @@ Scripts are portable global↔project without changes — only the command path 
 
 Retiring one is that list read backwards: drop the route, delete the tool and its test,
 update every reference to it, and add its installed path (`tools/<name>.js`) to
-`config/retired.json`, for the reason `AGENTS.md` → Renaming or retiring a skill states.
+`config/retired.json`, for the reason `skill-authoring` → Renaming or Retiring states.
 
 ## Useful Patterns
 

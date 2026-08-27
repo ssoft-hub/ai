@@ -69,7 +69,7 @@ comment in an issue or a thread, a message - the sentence carries the word namin
 binding force - must, should, recommended or may, one to one with the four markers. The
 bare infinitive and the bare noun phrase name no force: not "Extract the loop" but "the
 loop should be extracted". The words each force is stated with:
-`<config dir>/writing-language/<language>.json`.
+`writing-language/<language>.json`, beside this file.
 ## No Figures That Go Stale
 
 Leave out numbers that measure a run rather than describe the subject: test totals and
@@ -99,7 +99,7 @@ Prefer the term the target language's own technical literature established over 
 transliteration borrowed from another language. A borrowed word stays where it is the
 field's standard term in that language; it is a defect where a written technical document
 in that language would not use it. The term to use for an operation:
-`<config dir>/writing-language/<language>.json`.
+`writing-language/<language>.json`, beside this file.
 
 A command, a flag, an identifier and an error string keep their own spelling in every
 language, in backticks: `git push`, not a word transliterating it. What the dictionary
@@ -151,6 +151,6 @@ characters copied from elsewhere.
 ## Self-Check Before Sending
 
 Re-read prose before sending it: replace a transliterated term with the one
-`<config dir>/writing-language/<language>.json` names for that operation, and replace a
+`writing-language/<language>.json` names for that operation, and replace a
 dash, arrow, ellipsis or quote a plain keyboard cannot produce with the form Prefer
 Keyboard-Reachable Characters gives.
