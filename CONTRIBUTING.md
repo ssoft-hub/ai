@@ -2,8 +2,9 @@
 
 ## Workflow
 
-The order of work - issue, branch, commits, PR, pre-merge check, merge, close - is stated
-in full in `skills/pr-rules/SKILL.md` -> Workflow. The pipeline stage each falls in, the
+The order of work - scope and issue, branch, commits, publish, offer for review,
+pre-merge issue check, integrate, close issue - is stated in full in
+`skills/work-sequence/SKILL.md` -> The Sequence. The pipeline stage each falls in, the
 command or persona carrying it, the state the issue is in and the skills that apply are
 in `AGENTS.md` -> Lifecycle map. Follow those two; this file does not carry a third
 version of them.

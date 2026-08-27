@@ -18,8 +18,9 @@ metadata:
 
 Apply when creating or reviewing tracker issues (GitHub Issues, Jira, Linear, …).
 
-This skill states what an issue must contain. The command that creates it, labels it, or
-comments on it belongs to the CLI skill of the hosting platform.
+This skill states what an issue must contain. The step of the work each act on it runs
+at belongs to `work-sequence`, and the command that creates it, labels it, or comments on
+it to the CLI skill of the issue tracker.
 
 ## Project Overrides
 
@@ -115,7 +116,7 @@ Title types other than these three (see Types above) carry no label — the titl
 Every issue also gets a few **topic** labels (2-4, not a tag cloud) — named after the
 actual subject matter (component, subsystem, domain concept), not drawn from a fixed
 list. Before creating one, list the tracker's existing labels — the CLI skill of the
-hosting platform states the command, in its issues section — and reuse one covering the
+issue tracker states the command, in its issues section — and reuse one covering the
 same topic; create a new topic label only the first time a topic has no match. Topic
 labels grow organically with the project.
 
@@ -158,8 +159,8 @@ Open → In Progress → In Review → Done
 
 - **Open** — triaged, not started.
 - **In Progress** — branch exists (see `commit-rules` Branch Naming).
-- **In Review** — PR open.
-- **Done** — merged and deployed, with every checklist checkbox in the issue checked (see `pr-rules` → Pre-Merge Checklist). If checkboxes remain after merge, stay **In Review** with a follow-up PR/MR linked — do not mark Done.
+- **In Review** — the change is offered for review (`work-sequence` → The Sequence).
+- **Done** — merged and deployed, with every checklist checkbox in the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence). If checkboxes remain after merge, stay **In Review** with a follow-up PR/MR linked — do not mark Done.
 - **Closed** — explicitly not going to be fixed; add a comment explaining why.
 
 ---
@@ -178,6 +179,7 @@ A reader should be able to reconstruct, from comments alone, which PR/MR impleme
 
 ## Cross-References
 
+- `work-sequence` — the step of the work each act on this issue runs at, and the condition behind each lifecycle state.
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
-- `pr-rules` — PR title and description mirror the issue being resolved; Pre-Merge Checklist gates merge on this issue's checkbox state.
-- The CLI skill of the hosting platform — the commands that create, label, and comment on an issue.
+- `pr-rules` — PR title and description mirror the issue being resolved; its Pre-Merge Checklist gates merge on this issue's checkbox state.
+- The CLI skill of the issue tracker — the commands that create, label, and comment on an issue.

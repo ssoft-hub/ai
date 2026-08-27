@@ -108,7 +108,7 @@ Local edits and fixes proceed on their own. These three wait, each under its own
 
 | Waits | Rule |
 |---|---|
-| the push | a round of this loop does not reach it (`pr-rules` → When a Check Runs) |
+| the push | a round of this loop does not reach it (`work-sequence` → When a Check Runs) |
 | editing an issue or the pull request | the review wording it can put in front of a reader (`pr-rules` → Pending by Default) |
 | the merge | the human's (`pr-rules` → Merge Strategy 2) |
 

@@ -47,6 +47,7 @@
 - A state is named by its condition, never by the colour of an indicator reporting it: not `CI green` but "every check the project declares has passed". `writing-style` -> Name the State, Not the Colour states the rule, and `npm test` fails on a colour word in any skill or in `AGENTS.md`
 - Text addressed to a person names the force of an action it prescribes - must, should, recommended or may, one to one with the four binding-force markers - rather than leaving it in a bare infinitive. The words each force is stated with install as `<config dir>/writing-language/<language>.json`
 - `skill-authoring` skill: naming a skill after its concern, declaring `bound-to`, marking each `##` section with the force it carries, one file per skill, and the rename. `AGENTS.md` states none of them and keeps this repository's own catalog steps
+- `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
 - `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form
@@ -59,7 +60,7 @@
 - A `PreToolUse` tool whose `verdict` throws is skipped with a line on stderr naming it rather than crashing the runner, and one stating a block whose text cannot be built blocks with a stated reason
 - The global `CLAUDE.md` no longer restates the skill list and its triggers, and the session-start check that policed that copy against `skills/` is gone with it. A subagent never sees the reminder: the skills its persona in `agents/` names are the list it starts from
 - `CONTRIBUTING.md` no longer carries a branch pattern, a commit-type list and a skill recipe contradicting `commit-rules` and `AGENTS.md`; each rule now comes from the file that owns it. `README.md`'s manual setup installs what `node install.js` installs, and states that nothing is backed up
-- `AGENTS.md` -> Lifecycle map lines each pipeline stage up against the command or persona carrying it, the `issue-rules` state the issue is in, and the skills that apply there; the order of the work itself is read from `pr-rules` -> Workflow
+- `AGENTS.md` -> Lifecycle map lines each pipeline stage up against the command or persona carrying it, the `issue-rules` state the issue is in, and the skills that apply there
 - A dot-file or dot-directory is ignored unless `.gitignore` names it as one this repository tracks, so a tool's leftover no longer sits in `git status` beside a file that should have been committed
 - `pr-rules` and `issue-rules` keep the rules and point at `github-cli`/`gitlab-cli` for the command, so a `gh` or `glab` change no longer means editing rules that are not about a CLI
 - `commit-rules`: added Branch Naming - `<user>/<type>/<TRACKER-N>/<subject>`, the tracker segment omitted when no issue exists
@@ -78,7 +79,7 @@
 - `comments`: the default is no comment - reserve one for a critical, non-obvious fact a reader would otherwise get wrong; a warning-signs self-check names the common rationalizations
 - `cpp-doxygen`: one block documents the type on its declaration and members carry no Doxygen; longer type prose moves to the `.cpp` via `@class`/`@struct`/`@enum`, and the `#ifdef DOXYGEN` guard is a last resort for a re-exported type
 - `pr-rules`: the PR description opens with a `## Problem` section stating what is wrong today and what triggered the work, so the motivation no longer overlaps `## Summary`; `## Test plan` items are checkboxes matching the `issue-rules` templates
-- `pr-rules`: an agent no longer publishes its own review feedback. Where a draft mechanism exists it waits there for a human to submit; where none exists nothing is posted and the wording goes to the human. The issue comments the Workflow requires are unaffected
+- `pr-rules`: an agent no longer publishes its own review feedback. Where a draft mechanism exists it waits there for a human to submit; where none exists nothing is posted and the wording goes to the human. The issue comments `work-sequence` requires are unaffected
 - `pr-rules`: Merge Strategy states that the human authorises each merge, matching the rule review feedback already follows
 - `code-reviewer` agent: states an approving verdict in its report instead of approving the PR, and points at `pr-rules` for where review feedback may be published at all
 - `AGENTS.md` -> Adding a skill: states that `install.js` copies only `skills/<name>/SKILL.md`, so a skill stays one file until that copy loop changes
@@ -92,7 +93,7 @@
 - The `PreToolUse` dispatcher emits one permission decision per run: the strictest of those returned, carrying every reason behind it, so two tools deciding on one command no longer write two JSON objects that parse as neither
 - Every skill declares the context its rules are bound to, and a general skill routes by role ("the API-design skill of the language being written") instead of naming a language-specific one. A second language or platform costs an entry in `config/skill-contexts.json` and the skills for it
 - The `security-and-hardening` containment and overflow rules state the control and the input classes a guard must answer, in terms tied to no language. The code examples are gone, and with them the advice they carried: a string comparison of resolved paths, and a check reading the sum
-- `pr-rules` -> Workflow runs in eight steps, the branch sent to the remote at the Push step once the local remarks are exhausted; When a Check Runs assigns every check the skill names to a round of edits, the push, or opening the pull request
+- Renamed three steps of the order of work after what they achieve: `Push` is now `Publish`, `PR` is `Offer for review`, and `Merge commit` is `Integrate`; `AGENTS.md` -> Lifecycle map carries the same names
 - `AGENTS.md` states the project, the two maps and one pointer per mechanism. Writing a hook or a tool, and adding or retiring one, is read from `hook-scripts`; what each dispatcher routes where from `README.md` -> Hooks; adding a persona or a command from its template
 
 ### Removed
