@@ -64,11 +64,10 @@ now, and say what changed only when the reader has to act on the change.
 
 ## Name the Force, Not Just the Action
 
-Where text addressed to a person prescribes an action - a review comment or reply, a
-comment in an issue or a thread, a message - the sentence carries the word naming its
-binding force - must, should, recommended or may, one to one with the four markers. The
-bare infinitive and the bare noun phrase name no force: not "Extract the loop" but "the
-loop should be extracted". The words each force is stated with:
+A sentence prescribing an action to a person - in a review comment or reply, an issue or
+thread comment, a message - runs force word, action, what it acts on: "should extract the
+loop", never "the loop should be extracted", since the force word addresses whoever will
+act. The force is one of the four markers, and the words it is stated with are in
 `writing-language/<language>.json`, beside this file.
 ## No Figures That Go Stale
 

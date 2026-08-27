@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Added
+- A sentence prescribing an action to a person runs force word, action, what it acts on - "should extract the loop", never "the loop should be extracted"
+
 - A skill ships with the whole of its directory, so data a reader consults rather than obeys - a vocabulary, a table of values - sits beside `SKILL.md` and is read when the skill sends them to it, instead of loading with every application
 
 - Hook dispatch system: `PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit` event handlers
