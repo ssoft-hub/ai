@@ -1,7 +1,7 @@
 ---
 name: skill-authoring
 version: "1.0.0"
-description: Apply when adding, marking, renaming or retiring a skill
+description: Apply when adding, marking, renaming or retiring a skill, and when marking a command
 license: Unlicense
 metadata:
   author: ssoft
@@ -12,6 +12,8 @@ metadata:
   paths:
     - "**/skills/*/SKILL.md"
     - "**/templates/SKILL.md"
+    - "**/commands/*.md"
+    - "**/templates/COMMAND.md"
   tags:
     - skills
     - authoring
@@ -19,13 +21,15 @@ metadata:
 
 # Skill: Skill Authoring
 
-Apply when adding, marking, renaming or retiring a skill.
+Apply when adding, marking, renaming or retiring a skill, and when marking a command — of
+what follows, Marking a Section and Choosing the Marker reach a command, and
+`templates/COMMAND.md` carries the rest of writing one.
 
 The paths here are this repository's, where a skill of this catalog is written; elsewhere
 the rules hold and the paths are that repository's own.
 
 What each of the four markers entitles a reader to do is the reader's half of the scale,
-stated in `config/claude-config-rules.md` → Binding force of a skill section, which
+stated in `config/claude-config-rules.md` → Binding force of a section, which
 installs beside every skill. This skill states the author's half.
 
 ## Project Overrides
@@ -117,8 +121,8 @@ of the context every application pays for. The directory holds nothing else.
 
 **Must**
 
-Every `##` section of a skill carries one marker, drawn from the four, alone on the first
-line under its heading:
+Every `##` section of a skill or a command carries one marker, drawn from the four,
+alone on the first line under its heading:
 
 ```markdown
 ## Subject Length
@@ -134,11 +138,11 @@ reproduced in every such reference to keep it quotable verbatim. Once every sect
 one, the frontmatter declares `rubric: applied`, indented under `metadata:` where every
 other key the routing reads sits.
 
-`test/rubric.test.js` then holds it, over that skill and over `templates/SKILL.md` whatever
-the template declares: one marker per section, drawn from the four, first under the heading
-and never inside it; no section speaking above its own marker; and
-`config/claude-config-rules.md` naming the four, so a skill never ships a marker whose
-meaning ships nowhere.
+`test/rubric.test.js` then holds it: one marker per section, drawn from the four, first
+under the heading and never inside it; no section speaking above its own marker; and
+`config/claude-config-rules.md` naming the four, so a marker never ships without its
+meaning. The declaration selects which skill is held; a command and either template are
+held whole, and declare nothing.
 
 ## Choosing the Marker
 
@@ -153,6 +157,12 @@ meaning ships nowhere.
 | Names what to look at to establish compliance — a test name, a file, a build task, a checklist item, a command — which carries the verdict without the author's account of what was intended | `a commit subject must be at most 72 characters`, naming the subject and its length | `a commit subject must be clear`, naming a property nobody counts |
 | Carries no adjective without a scale and no appeal to the reader's state of mind | a stated quantity | long, deeply nested, a reasonable default, a careful reader would get it wrong |
 
+One exemption from the conditions: a section stating a restraint — an act forbidden, or
+force a text does not confer — together with the instruction carrying that restraint and
+nothing else, carries `**Must**` in a skill, in a command and in the template it is copied
+from, whatever in it cannot be counted and whatever the template default says. A restraint
+conferred weakly is no restraint.
+
 What follows from them:
 
 | Subject | Rule |
@@ -162,7 +172,7 @@ What follows from them:
 | The unit marked | The whole section rather than its strongest sentence, so one statement short of the conditions puts it at `**Should**` or below. |
 | A checkable statement among unmeasurable neighbours | Raised by splitting it into a `##` section of its own, never by strengthening the marker in place, which would extend `**Must**` over the very neighbours the conditions reject. |
 | The whole partition | Rewriting reaches a statement that falls short of the conditions, splitting one held down by the company it keeps; a neighbour that no longer earns its place is dropped on its own merits, never as a way to promote the statement beside it. |
-| The rubric's scope | A skill's `##` sections and `templates/SKILL.md`, which every skill is copied from; a file that is not a skill carries no marker. |
+| The rubric's scope | The `##` sections of a skill and of a command, and the two templates each is copied from; a file that is neither carries no marker. |
 | The template's default | `**Recommended**`, the weakest marker that still states a norm, so force is raised deliberately rather than conferred by a copied file. |
 | The modal check | Holds the ceiling and only the ceiling — a bare imperative draws no fault — so writing each statement with its own modal is the author's to get right, and a passing suite says that no section speaks above its marker, never that every statement carries one. |
 

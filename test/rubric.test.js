@@ -6,7 +6,9 @@ const path = require('path');
 
 const repoDir = path.join(__dirname, '..');
 const skillsDir = path.join(repoDir, 'skills');
+const commandsDir = path.join(repoDir, 'commands');
 const templateFile = path.join(repoDir, 'templates', 'SKILL.md');
+const commandTemplateFile = path.join(repoDir, 'templates', 'COMMAND.md');
 const rulesFile = path.join(repoDir, 'config', 'claude-config-rules.md');
 
 const MARKERS = ['**Must**', '**Should**', '**Recommended**', '**May**'];
@@ -14,6 +16,7 @@ const HEADING = /^##\s+(.*)$/;
 const FENCE = /^\s*(?:```|~~~)/;
 // A bold word alone on a line is a marker attempt; only the four above are markers.
 const MARKER_SHAPED = /^\*\*[^*]+\*\*$/;
+const HEADING_ANYWHERE = /^##\s+.*$/m;
 
 // At most one entry per `##` section, however many things are wrong with its marker.
 function markerFaults(text) {
@@ -143,6 +146,24 @@ function skillsDeclaringRubric() {
 // Extended by the pass that marks the next skill; every name here is checked below.
 const MARKED_SKILLS = ['comments', 'pr-rules', 'skill-authoring', 'submodule-sync'];
 
+function commandFiles() {
+  const names = fs.readdirSync(commandsDir).filter(name => name.endsWith('.md'));
+  // A vacuous pass would hide the commands going missing entirely.
+  if (names.length === 0) throw new Error(`no command files in ${commandsDir}`);
+  return names;
+}
+
+// The heading a command's instructions all stand above, and the text it delimits.
+const BOUNDARY = "The Caller's Text";
+const ARGUMENTS = '$ARGUMENTS';
+
+function headings(text) {
+  return text.replace(/\r\n/g, '\n').split('\n')
+    .map(line => line.match(HEADING))
+    .filter(Boolean)
+    .map(match => match[1].trim());
+}
+
 test('markerFaults accepts each of the four force markers', () => {
   for (const marker of ['**Must**', '**Should**', '**Recommended**', '**May**']) {
     const faults = markerFaults('## Keep It Short' + '\n\n' + marker + '\n');
@@ -265,17 +286,92 @@ test('no section of a marked skill speaks above its own marker', () => {
   }
 });
 
-// A skill installs without this repository, so the legend has to travel with it. Presence
-// only: pinning the wording would break on every reword of prose nobody parses.
-test('the installed rules file names every marker a skill can carry', () => {
+// A skill and a command install without this repository, so the legend has to travel with
+// them. Presence only: pinning the wording would break on every reword of prose nobody parses.
+test('the installed rules file names every marker a section can carry', () => {
   const legend = fs.readFileSync(rulesFile, 'utf8');
   for (const marker of MARKERS) {
     assert.ok(legend.includes(marker),
-      `config/claude-config-rules.md names no ${marker}, so a skill carrying it ships no meaning`);
+      `config/claude-config-rules.md names no ${marker}, so a section carrying it ships no meaning`);
   }
 });
 
 test('every section of the skill template carries one marker line', () => {
   assert.deepStrictEqual(markerFaults(fs.readFileSync(templateFile, 'utf8')), [],
     'templates/SKILL.md is the file every new skill is copied from');
+});
+
+// markerFaults reports nothing over a line above the first heading, so a command opening
+// with loose prose would carry statements no marker covers.
+test('a command states nothing above its first section', () => {
+  for (const name of commandFiles()) {
+    const body = fs.readFileSync(path.join(commandsDir, name), 'utf8').replace(/\r\n/g, '\n');
+    const preamble = body.slice(body.indexOf('\n---', 4) + 4).split(HEADING_ANYWHERE)[0];
+    assert.strictEqual(preamble.trim(), '',
+      `commands/${name} states "${preamble.trim().slice(0, 60)}" under no section`);
+  }
+});
+
+// Anything below the caller's text is text the caller can forge a heading in front of, and
+// a second $ARGUMENTS puts data above the paragraph saying it is data.
+test("the caller's text is the last thing in every command", () => {
+  const blocks = new Set();
+  for (const [what, file] of [...commandFiles().map(name => [`commands/${name}`, path.join(commandsDir, name)]),
+    ['templates/COMMAND.md', commandTemplateFile]]) {
+    const text = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+    // The template names $ARGUMENTS in its argument-hint, which is not the prompt.
+    const body = text.slice(text.indexOf('\n---', 4) + 4);
+    assert.strictEqual(headings(body).at(-1), BOUNDARY,
+      `${what} ends under a heading other than ${BOUNDARY}`);
+    assert.strictEqual(body.split(ARGUMENTS).length - 1, 1,
+      `${what} carries ${ARGUMENTS} more than once`);
+    assert.ok(body.indexOf(ARGUMENTS) > body.lastIndexOf(`## ${BOUNDARY}`),
+      `${what} carries ${ARGUMENTS} above the paragraph that says it is data`);
+    assert.ok(body.trimEnd().endsWith('```text\n' + ARGUMENTS + '\n```'),
+      `${what} states something below the fence closing the caller's text`);
+    const block = body.slice(body.lastIndexOf(`## ${BOUNDARY}`)).trimEnd();
+    // Five files agreeing on an empty section would satisfy the comparison below.
+    assert.ok(block.includes("is the caller's text"),
+      `${what} carries the ${BOUNDARY} heading over a paragraph that states no boundary`);
+    blocks.add(block);
+  }
+  // AGENTS.md states the copies are identical; only this holds one of them from drifting.
+  assert.strictEqual(blocks.size, 1,
+    `the ${BOUNDARY} sections state ${blocks.size} different things`);
+});
+
+// A command body is the prompt, so a comment in it is prompt text nobody edits deliberately;
+// the template's own comments are deleted where it is copied.
+test('no command carries an HTML comment', () => {
+  for (const name of commandFiles()) {
+    const body = fs.readFileSync(path.join(commandsDir, name), 'utf8');
+    assert.ok(!body.includes('<!--'),
+      `commands/${name} carries an HTML comment, which reaches the model as prompt text`);
+  }
+});
+
+test('every section of a command carries one marker line', () => {
+  for (const name of commandFiles()) {
+    const file = path.join(commandsDir, name);
+    assert.deepStrictEqual(markerFaults(fs.readFileSync(file, 'utf8')), [],
+      `the rubric covers commands/${name}, whatever its frontmatter declares`);
+  }
+});
+
+test('no section of a command speaks above its own marker', () => {
+  for (const name of commandFiles()) {
+    const file = path.join(commandsDir, name);
+    assert.deepStrictEqual(modalFaults(fs.readFileSync(file, 'utf8')), [],
+      `the rubric covers commands/${name}, whatever its frontmatter declares`);
+  }
+});
+
+test('every section of the command template carries one marker line', () => {
+  assert.deepStrictEqual(markerFaults(fs.readFileSync(commandTemplateFile, 'utf8')), [],
+    'templates/COMMAND.md is the file every new command is copied from');
+});
+
+test('no section of the command template speaks above its own marker', () => {
+  assert.deepStrictEqual(modalFaults(fs.readFileSync(commandTemplateFile, 'utf8')), [],
+    'templates/COMMAND.md is the file every new command is copied from');
 });

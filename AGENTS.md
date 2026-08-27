@@ -101,7 +101,8 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `requirements` — turning an ask into a requirement.
 - `security-and-hardening` — design-time security.
 - `shipping-and-launch` — whether a built release may reach users, and how widely.
-- `skill-authoring` — writing a skill file: its concern, name, contexts, markers, rename.
+- `skill-authoring` — writing a skill file — its concern, name, contexts, markers,
+  rename — and the marker on a command's sections.
 - `submodule-sync` — submodule ref discipline.
 - `test-driven-development` — the order a behaviour is built in, test first.
 - `writing-style` — prose register and vocabulary in any human language.
@@ -111,6 +112,11 @@ Two pairs restate each other on purpose, because no task loads both: `cpp-testin
 conventions) and `github-cli` / `gitlab-cli` (a repository has one host). Their shared
 principles are stated in each one's own runner and command vocabulary; routing a JS test
 task through a `cpp-` prefixed skill for one line would cost more than the duplication.
+
+`## The Caller's Text` is copied byte for byte into every command and restated in
+`config/claude-config-rules.md`: the boundary between an instruction and the text under
+work has to sit immediately above that text, which a rule in a separate file cannot do
+however reliably it ships.
 
 ## Adding a skill, an agent, a command or a tool
 
