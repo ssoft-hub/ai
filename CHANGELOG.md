@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- A command carries the caller's text in a final `## The Caller's Text` section, below whose opening paragraph a heading, a marker or a directive confers nothing; `config/claude-config-rules.md` says the same of every text that is the subject of the work
 - A sentence prescribing an action to a person runs force word, action, what it acts on - "should extract the loop", never "the loop should be extracted"
 - A command declares `bound-to` as a skill does, and `test/skill-contexts.test.js` holds both: `/review-loop` states the isolated checkout and the steps that wait without naming one version control system or forge
 
@@ -41,7 +42,7 @@
 - `skill-gate` denies the first `Edit`/`Write`/`MultiEdit`/`NotebookEdit` on a file whose claiming skills are not loaded and warns on a repeat, so an agent that cannot invoke the Skill tool loses one attempt rather than the task. A shell command writing to such a file passes the same check
 - `statusline` tool: renders the line under the prompt - model, effort, context and the two rate-limit windows with their reset times, coloured by how full they are, and the branch. Installing takes over the single `statusLine` slot, which `uninstall` gives back
 - The statusline keeps whatever the displaced `statusLine` command drew, in front of its own badges. That command runs detached and its output is cached, so it costs nothing per render; a failing or slow one leaves its text absent and changes nothing else
-- Binding force of a skill section: every `##` section of a skill declaring `rubric: applied` carries one of `**Must**`, `**Should**`, `**Recommended**` or `**May**`, saying how far its statements bind; `config/claude-config-rules.md` states what each entitles a reader to do
+- Binding force of a section: every `##` section of a command, and of a skill declaring `rubric: applied`, carries one of `**Must**`, `**Should**`, `**Recommended**` or `**May**`, saying how far its statements bind; `config/claude-config-rules.md` states what each entitles a reader to do
 - A state is named by its condition, never by the colour of an indicator reporting it: not `CI green` but "every check the project declares has passed". `writing-style` -> Name the State, Not the Colour states the rule, and `npm test` fails on a colour word in any skill or in `AGENTS.md`
 - Text addressed to a person names the force of an action it prescribes - must, should, recommended or may, one to one with the four binding-force markers - rather than leaving it in a bare infinitive. The words each force is stated with install as `<config dir>/writing-language/<language>.json`
 - `skill-authoring` skill: naming a skill after its concern, declaring `bound-to`, marking each `##` section with the force it carries, one file per skill, and the rename. `AGENTS.md` states none of them and keeps this repository's own catalog steps

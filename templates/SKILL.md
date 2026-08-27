@@ -54,7 +54,7 @@ Apply when <trigger condition — one line, specific, actionable>.
      and this file defaults every section to `**Recommended**`. Where the line sits and
      what holds it: skill-authoring → Marking a Section. Which of the four a section
      takes: skill-authoring → Choosing the Marker. What each marker entitles a reader to
-     do: config/claude-config-rules.md → Binding force of a skill section. -->
+     do: config/claude-config-rules.md → Binding force of a section. -->
 
 <!-- Lead with the most important rules. Use bullet lists for rules,
      tables for mappings, fenced code blocks for examples. -->
