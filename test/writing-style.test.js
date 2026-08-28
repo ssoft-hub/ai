@@ -12,7 +12,14 @@ function corpusFiles() {
     .filter(entry => entry.isDirectory())
     .map(entry => path.join(skillsDir, entry.name, 'SKILL.md'))
     .filter(file => fs.existsSync(file));
-  return [...skills, path.join(repoDir, 'AGENTS.md')];
+  // A command states prose the same way and installs beside a skill.
+  const commands = fs.readdirSync(path.join(repoDir, 'commands'))
+    .filter(name => name.endsWith('.md'))
+    .map(name => path.join(repoDir, 'commands', name));
+  return [...skills, ...commands,
+    path.join(repoDir, 'templates', 'SKILL.md'),
+    path.join(repoDir, 'templates', 'COMMAND.md'),
+    path.join(repoDir, 'AGENTS.md')];
 }
 
 const COLOUR = /^(?:red|green|amber|yellow|orange)(?:d?en)?(?:s|ed|ing|ish)?$/;
