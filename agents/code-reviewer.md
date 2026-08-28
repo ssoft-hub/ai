@@ -42,8 +42,8 @@ able to act on the report without re-deriving what you checked.
 ## Composition
 
 - **Invoke directly when:** reviewing a diff, file, or change that isn't part of a full
-  `/ship` pass yet.
-- **Invoke via:** `/ship` (parallel fan-out alongside `security-auditor`).
+  `/review` pass yet.
+- **Invoke via:** `/review` (parallel fan-out alongside `security-auditor`).
 - **Do not invoke another persona.** If a finding warrants a deeper security pass,
   surface that as a recommendation in the report — orchestration between personas
   belongs to commands, not to a persona calling another persona directly.

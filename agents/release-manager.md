@@ -27,8 +27,8 @@ first one already passed.
 
 ## Composition
 
-- **Invoke directly when:** cutting a release whose review/audit already happened
-  elsewhere.
-- **Invoke via:** `/ship`, on a "go" verdict.
+- **Invoke directly when:** cutting a release, once the change is merged and its
+  review and audit have passed.
+- **Invoke via:** no command; the release follows the merge, which is the human’s.
 - **Do not invoke another persona.** If release prep surfaces a finding that should have
   blocked review, report it and stop — do not silently re-review.

@@ -101,7 +101,8 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `requirements` — turning an ask into a requirement.
 - `security-and-hardening` — design-time security.
 - `shipping-and-launch` — whether a built release may reach users, and how widely.
-- `skill-authoring` — writing a skill file: its concern, name, contexts, markers, rename.
+- `skill-authoring` — writing a skill file — its concern, name, contexts, markers,
+  rename — and the marker on a command's sections.
 - `submodule-sync` — submodule ref discipline.
 - `test-driven-development` — the order a behaviour is built in, test first.
 - `writing-style` — prose register and vocabulary in any human language.
@@ -111,6 +112,11 @@ Two pairs restate each other on purpose, because no task loads both: `cpp-testin
 conventions) and `github-cli` / `gitlab-cli` (a repository has one host). Their shared
 principles are stated in each one's own runner and command vocabulary; routing a JS test
 task through a `cpp-` prefixed skill for one line would cost more than the duplication.
+
+`## The Caller's Text` is copied byte for byte into every command and restated in
+`config/claude-config-rules.md`: the boundary between an instruction and the text under
+work has to sit immediately above that text, which a rule in a separate file cannot do
+however reliably it ships.
 
 ## Adding a skill, an agent, a command or a tool
 
@@ -146,15 +152,15 @@ the nearest one.
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
 | Issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
 | Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Build | `/build` → `implementer` | `In Progress` | `pr-rules` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
+| Implement | `/implement` → `implementer` | `In Progress` | `pr-rules` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
 | Push | — | `In Progress` | `pr-rules` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
 | PR | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
-| Review | `/ship`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
-| Security audit | `/ship`, or `/review-loop` to iterate → `security-auditor` | `In Review` | `security-and-hardening`, `pr-rules` |
+| Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
+| Security audit | `/review`, or `/review-loop` to iterate → `security-auditor` | `In Review` | `security-and-hardening`, `pr-rules` |
 | Pre-merge check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
 | Merge | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
 | Close | — | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
-| Release | `/ship` on a go verdict → `release-manager` | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
+| Release | — (`release-manager` directly) | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
 
 No row assigns an issue-state transition to a role: `issue-rules` → Lifecycle defines each
 state by a condition rather than by an act with an actor. The acts reserved to the human
@@ -167,20 +173,20 @@ What the rows do not say on their own:
 - **The Spec row may run before the Issue row.** `/spec` names no tracker, so a spec may
   precede the issue or be written against one that exists. An issue without a test plan,
   and acceptance criteria for a feature, is not ready to implement against.
-- **The Build row runs once per task.** `/build` implements one, so a branch whose issue
-  holds several runs it several times; it covers neither the Branch, the Push nor the
-  PR row.
-- **`/ship` spans rows that are not adjacent.** Its review pass covers the Review and
-  Security audit rows and its hand-off the Release row; Pre-merge check, Merge and Close
-  sit between them under no command at all.
+- **The Implement row runs once per task.** `/implement` implements one, so a branch
+  whose issue holds several runs it several times; it covers neither the Branch, the
+  Push nor the PR row.
+- **`/review` covers two adjacent rows and stops there.** It reports a verdict and
+  prepares nothing: the Release row sits four rows below it, behind the merge.
 - **Uncovered stages.** Intake, Issue, Branch, Push, PR, Pre-merge check, Merge and Close
-  have no command and no persona, and are carried out directly under the skill their row
-  names. Only the Merge row states why: Merge Strategy 2 gives the merge to the human.
+  have no command, and Release has none either — `release-manager` is invoked directly
+  once the change is merged. Each is carried out under the skill its row names. Only the
+  Merge row states why: Merge Strategy 2 gives the merge to the human.
 - **The Release row does not run once per pass.** `changelog` → On Release renames one
   `[Unreleased]` section covering everything merged since the previous version.
-- **The changelog entry has two owners.** `pr-rules` → Pre-Open Checklist requires
-  `CHANGELOG.md` updated at the push; `commands/ship.md` has `release-manager` prepare the
-  entry after review. Unresolved — see GH-105.
+- **The changelog entry has one owner.** `pr-rules` → Pre-Open Checklist requires
+  `CHANGELOG.md` updated at the push. What `release-manager` does at the Release row is
+  the `[Unreleased]` rename of `changelog` → On Release, not a second entry — GH-105.
 
 ## Installation
 

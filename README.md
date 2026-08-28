@@ -112,7 +112,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
 | `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |
 | `shipping-and-launch` | Release readiness, staged rollout, rollback planning |
-| `skill-authoring` | Writing a skill file — its concern, name, contexts, section markers, rename |
+| `skill-authoring` | Writing a skill file — its concern, name, contexts, section markers, rename — and the marker on a command's sections |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
 | `writing-style` | Prose register and vocabulary — no slang, no unnecessary borrowings, per language |
@@ -129,7 +129,7 @@ own Composition section.
 | Agent | Stage |
 |-------|-------|
 | `spec-architect` | Spec |
-| `implementer` | Build |
+| `implementer` | Implement |
 | `code-reviewer` | Review |
 | `security-auditor` | Security audit |
 | `release-manager` | Release |
@@ -141,9 +141,9 @@ Slash commands orchestrating the agents above into the idea-to-release pipeline.
 | Command | Orchestrates |
 |---------|---------------|
 | `/spec <idea>` | `spec-architect` — produces a specification (and ADR when warranted) |
-| `/build <task>` | `implementer` — implements one task by TDD from an existing spec |
-| `/ship [scope]` | `code-reviewer` + `security-auditor` in parallel → go/no-go → `release-manager` on go |
-| `/review-loop <tool(s)> [quick..ultra] [scope]` | caller-chosen tool(s) at a tool-agnostic depth, review → fix → re-review until clean or 3 passes, in the current checkout or an isolated one |
+| `/implement <task>` | `implementer` — implements one task by TDD from an existing spec |
+| `/review [scope]` | `code-reviewer` + `security-auditor` in parallel → go/no-go |
+| `/review-loop <tool(s)> [low..max] [scope]` | caller-chosen tool(s) at a tool-agnostic depth, review → fix → re-review until clean or 3 passes, in the current checkout or an isolated one |
 
 ## Installation
 
@@ -203,9 +203,11 @@ on and the decision it returns, the skill and agent frontmatter the routing read
 test file, since the runner loads each of them as one, the rule that no path
 `config/retired.json` retires is one install still ships, the context each skill declares in
 `bound-to` and what a routing may name or has to state by role under it, the force
-marker under every `##` heading of the skill template and of each skill declaring
-`rubric: applied`, and the rule that no colour word in `skills/*/SKILL.md` or `AGENTS.md`
-stands for a state, the proper name of a practice aside.
+marker under every `##` heading of `templates/SKILL.md`, of `templates/COMMAND.md`, of
+every command and of each skill declaring `rubric: applied`, the rule that a command
+ends with the caller's text and carries no HTML comment, and the rule that no colour
+word in `skills/*/SKILL.md` or `AGENTS.md` stands for a state, the proper name of a
+practice aside.
 
 ## Manual setup
 
