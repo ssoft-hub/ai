@@ -1,6 +1,6 @@
 ---
 description: Iterate review and fix rounds, with a caller-chosen tool and depth, until a pass reports no blocking finding, capped at 3 passes
-argument-hint: <tool(s)> [quick|light|normal|thorough|ultra] [scope] — e.g. "code-reviewer + security-auditor, thorough, PR #56"
+argument-hint: <tool(s)> [low|medium|high|xhigh|max] [scope] — e.g. "code-reviewer + security-auditor, high, PR #56"
 license: Unlicense
 metadata:
   author: ssoft
@@ -23,9 +23,9 @@ ask which one before guessing.
 
 **Must**
 
-One fixed, tool-agnostic scale, least to most rigorous, `normal` when omitted:
+One fixed, tool-agnostic scale, least to most rigorous, `medium` when omitted:
 
-`quick` < `light` < `normal` < `thorough` < `ultra`
+`low` < `medium` < `high` < `xhigh` < `max`
 
 Translate the word into that tool's own notion of depth — a setting, an instruction in its
 invocation, which of its own checks to run. This command defines no tool's behaviour at
