@@ -99,8 +99,8 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `debugging` | Root-cause investigation before proposing a fix |
 | `deprecation-and-migration` | Retiring a public API and writing a migration guide |
 | `editing` | File editing workflow (re-read before edit) |
-| `github-cli` | `gh` mechanics — issues, PRs, labels, pending review threads, merges |
-| `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, merges |
+| `github-cli` | `gh` mechanics — issues, PRs, labels, pending review threads, stacks, merges |
+| `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, stacks, merges |
 | `hook-scripts` | Writing Claude Code hooks and tools |
 | `issue-rules` | Tracker issue title, description, labels, priority, lifecycle |
 | `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |

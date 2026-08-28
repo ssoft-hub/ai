@@ -6,6 +6,7 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  rubric: applied
   bound-to:
     - github
   tags:
@@ -29,6 +30,8 @@ help is silent or misleading. No rule about *when* an action is allowed lives he
 
 ## Project Overrides
 
+**Must**
+
 Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own
 `gh` conventions, follow those instead. This skill is the fallback for projects that do not
 specify their own.
@@ -37,22 +40,28 @@ specify their own.
 
 ## Conventions
 
-- `gh api` typing: `-f name=value` sends a **string**, `-F name=value` infers the type
-  (integer, boolean, `null`, `@file`). An integer through `-f` against an `Int!` variable
-  answers `Variable $n of type Int! was provided invalid value`. Neither flag carries a
-  GraphQL list or input object — see Traps.
-- `gh api graphql --input <file>` sends a request too complex for flags. The file holds
-  `{"query":"query(...){...}","variables":{...}}` — query and variables together; a bare
-  variables object answers `A query attribute must be specified and must be a string.`
-- `--jq <expr>` filters a response client-side; `--json <fields>` on the porcelain commands
-  (`gh issue view`, `gh pr view`) selects fields explicitly and prints JSON.
-- `-R <owner>/<repo>` targets a repository other than the current checkout's.
-- `--body-file <path>` takes a body from a file — the only reliable way to pass a
-  description containing backticks, quotes, or newlines through a shell. `-` reads stdin.
+**Should**
+
+| Flag | What it does |
+|---|---|
+| `--jq <expr>` | filters the response client-side |
+| `--json <fields>` | on a porcelain command (`gh issue view`, `gh pr view`) selects fields and prints JSON |
+| `-R <owner>/<repo>` | targets a repository other than the current checkout's |
+| `--body-file <path>` | takes a body from a file, `-` from stdin — the only reliable way to pass backticks, quotes or newlines through a shell |
+
+Three pass data to `gh api`, and each has a shape it will not carry:
+
+| Flag on `gh api` | Sends | Where it bites |
+|---|---|---|
+| `-f name=value` | a string | an integer against an `Int!` variable answers `Variable $n of type Int! was provided invalid value` |
+| `-F name=value` | the inferred type — integer, boolean, `null`, `@file` | carries no GraphQL list or input object, and neither does `-f` — see Traps |
+| `--input <file>` | a whole request body | for GraphQL the file holds query and variables together, `{"query":"...","variables":{...}}`; a bare variables object answers `A query attribute must be specified and must be a string.` |
 
 ---
 
 ## Issues
+
+**Should**
 
 ```
 # existing labels, before inventing one
@@ -83,6 +92,8 @@ Create the label first rather than retrying without it.
 
 ## Pull Requests
 
+**Should**
+
 ```
 # open
 gh pr create --base <target> --title '<title>' --body-file <path> \
@@ -98,55 +109,104 @@ gh pr merge <n> --merge -t "<subject>" -b "<body>" --delete-branch
 gh api repos/{owner}/{repo}/pulls/<n>/merge-async -X PUT \
   -f merge_method=merge -f sha=<full-head-sha> \
   -f commit_title='<subject>' -f commit_message='<body>'
+
+# its result, by the uuid the call above answered with
+gh api repos/{owner}/{repo}/pulls/<n>/merge-async/<uuid>
 ```
 
-- `--merge` is the `--no-ff` equivalent: it always writes a two-parent merge commit, and
-  `-t`/`-b` set that commit's subject and body. `--delete-branch` removes the head branch
-  and leaves the base alone. `--rebase` ignores `-t`/`-b`: the commits it replays keep the
-  branch's own messages.
-- The merge runs server-side against the pushed branch. A commit amended locally and not
-  pushed takes no part in it, and the merge commit is committed by
-  `GitHub <noreply@github.com>`, not by the local git identity.
-- `PUT /repos/{owner}/{repo}/pulls/{n}/merge-async` is a second merge endpoint `gh` exposes
-  no command for, and it is asynchronous. Its four fields — `merge_method`, `commit_title`,
-  `commit_message` and `sha` — are all strings, so each goes through `-f`, as in the block
-  above. It answers
-  `{"status":"pending","details":{"message":"Merge request enqueued.", ...}}` and returns
-  before the merge happens, so read the pull request back for the merge commit rather than
-  taking the response as the result. The synchronous merge above is the default path — see
-  Stacks for the case that needs this one.
-- `merge-async` needs the **full** head sha. An abbreviated one answers `HTTP 400`,
-  `{"status":"failed","details":{"message":"Pull request head branch was modified."}}` — a
-  message naming a race that did not happen, which sends the reader looking for a push
-  nobody made. Take the sha from `gh pr view <n> --json headRefOid` and pass it whole.
-- Repository settings it depends on: "Allow merge commits" ON, and "Require linear history"
-  OFF. The second is a rule on the branch rather than on a person; what varies by person is
-  `enforce_admins`, which decides whether an administrator is held to it. With
-  `required_linear_history` and `enforce_admins` both on, `--merge` answers
-  `GraphQL: Merge commits are not allowed on this repository. (mergePullRequest)`; with
-  `enforce_admins` off, an administrator's merge commit goes through. Read
-  `required_linear_history` and `enforce_admins` with
-  `gh api repos/{owner}/{repo}/branches/{branch}/protection` before treating that refusal
-  as a fault in the command.
+| Flag on `gh pr merge` | What it does |
+|---|---|
+| `--merge` | the `--no-ff` equivalent: always a two-parent merge commit, whose subject and body are `-t`/`-b` |
+| `--rebase` | ignores `-t`/`-b`; the commits it replays keep the branch's own messages |
+| `--delete-branch` | removes the head branch and leaves the base alone. Where an open pull request targets that head branch, read Stacks before passing it |
+
+The merge runs server-side against the pushed branch, so a commit amended locally and not
+pushed takes no part in it, and `GitHub <noreply@github.com>` commits the merge rather
+than the local git identity.
+
+`merge-async` is a second merge endpoint `gh` exposes no command for, and the one a
+registered stack takes — see Stacks. The synchronous merge above is the default path.
+
+| Of `merge-async` | What it is |
+|---|---|
+| its body | `merge_method`, `commit_title`, `commit_message` and `sha`, all strings and so all through `-f`; a fifth, `merge_action`, is optional and defaults to `default` |
+| its answer | `{"status":"pending","details":{"message":"Merge request enqueued.","uuid":"<uuid>","expected_head_sha":"<sha>"}}`, before the merge happens |
+| its result | `GET .../merge-async/<uuid>`, answering `{"status":"merged","details":{"message":"Pull request was merged.","sha":"<merge-sha>"}}` — not the enqueue response |
+| an abbreviated `sha` | `HTTP 400`, `{"status":"failed","details":{"message":"Pull request head branch was modified."}}`, naming a race that did not happen. Take the sha whole from `gh pr view <n> --json headRefOid`; passed whole, that message reports the race it names |
+
+`--merge` needs "Allow merge commits" on and "Require linear history" off. The refusal
+`GraphQL: Merge commits are not allowed on this repository. (mergePullRequest)` names a
+repository setting rather than a fault in the command, and which one takes a read of
+`gh api repos/{owner}/{repo}/branches/{branch}/protection`:
+
+| The refusal comes from | Refused for |
+|---|---|
+| "Allow merge commits" off | everyone |
+| `required_linear_history` on, `enforce_admins` on | everyone |
+| `required_linear_history` on, `enforce_admins` off | everyone but an administrator |
 
 ---
 
 ## Stacks
 
-A pull request opened with `--base` set to another pull request's head branch chains the
-two, and GitHub holds the chain as a **stack**. On such a chain:
+**Should**
 
-- A merge refused with a pointer to `PUT /repos/{owner}/{repo}/pulls/{n}/merge-async` goes
-  through that endpoint instead of through `gh pr merge` — its arguments and its full-sha
-  requirement are under Pull Requests above.
-- When the base merges, the dependent pull request may be retargeted and its head
-  force-pushed, the same tree under a new sha. Read the head sha again with
-  `gh pr view <n> --json headRefOid` before passing it to `merge-async`: one held from
-  before the base merged names a commit that is no longer the head.
+A **stack** is a chain of pull requests, each targeting the head branch of the one below,
+registered with GitHub as an object of its own. Public preview since 30 July 2026. Opening
+one with `--base` on another's head branch builds the chain and nothing else; registering
+it is a separate act:
+
+```
+# once per machine, writing an executable under the user's home
+gh extension install github/gh-stack --pin <commit-sha>
+
+# register open pull requests, bottom first, with no local tracking
+gh stack link <bottom> <next> <top>
+
+# the same over HTTP, the body carrying the whole ordered membership
+gh api repos/{owner}/{repo}/stacks -X POST \
+  -F 'pull_requests[]=<bottom>' -F 'pull_requests[]=<next>' -F 'pull_requests[]=<top>'
+```
+
+Registration decides how the bottom is merged, and what becomes of the rest:
+
+| The chain | Merging the bottom | The pull request that targeted its head branch | The rest above |
+|---|---|---|---|
+| unregistered | `gh pr merge <bottom> --merge --delete-branch` | closes on the deletion, whether it rides the merge or follows it, and while its base ref stays deleted it is neither reopened nor retargeted — the retargeting GitHub documents for a deleted head branch reaches no unregistered chain | untouched: each still targets a branch that is still there |
+| a registered stack | `merge-async` on the bottom, or `gh stack merge <n> --merge --yes` | retargeted onto the merged base and force-pushed by the cascading rebase: `automatic_base_change_succeeded`, then `head_ref_force_pushed` | each keeps the target it had, and the rebase force-pushes both its refs: `base_ref_force_pushed`, `head_ref_force_pushed` |
+
+| Refusal or limit | What it takes |
+|---|---|
+| the synchronous merge on a pull request of a stack | refused: `This pull request is part of a stack and must be merged using the asynchronous merge REST API` |
+| a chain across a fork | cannot be registered at all: every branch of a stack lives in one repository |
+| a history that is not linear | the merge is refused, until `gh stack checkout <stack-number>` then `gh stack rebase` and `gh stack push`, or **Rebase stack** in the merge box, server-side |
+| no branch-deletion parameter on either stack merge | the bottom's head branch goes once `gh pr view <n> --json baseRefName` shows the dependent moved; `merge-async` answers before the merge happens, so its response names no state to act on |
+| "Automatically delete head branches" on | the branch goes with the merge, so an unregistered dependent closes whatever else is done |
+
+`merge-async` merges the one pull request named. `gh stack merge` merges it and every one
+below, and the authorisation that needs is `pr-rules` → Merge Strategy 2; it also takes the
+merge method last used unless `--merge` is given, which is a squash or a rebase where that
+ran last, both forbidden by `pr-rules` → Merge Strategy 4.
+
+The cascading rebase moves every head above the merged pull request and leaves every tree,
+so read the head sha again with `gh pr view <n> --json headRefOid` — full, per Pull
+Requests above — since `merge-async` refuses a stale one.
+
+REST creates and modifies a stack; GraphQL only reads one.
+
+| Call | Effect |
+|---|---|
+| `POST /repos/{owner}/{repo}/stacks`, body `{"pull_requests":[...]}` | creates a stack from an ordered list |
+| `POST /repos/{owner}/{repo}/stacks/{stack_number}/add`, same body | appends onto the top of one |
+| `POST /repos/{owner}/{repo}/stacks/{stack_number}/unstack` | returns the unmerged pull requests to an unregistered chain, where the `unregistered` row above applies to them again. Answers 200 where the stack survives and 204 where it dissolves, which `gh api` tells apart only under `--include` |
+| `GET /repos/{owner}/{repo}/stacks`, `GET .../stacks/{stack_number}` | read |
+| `stack` and `stackEntry` on the GraphQL `PullRequest` | read |
 
 ---
 
 ## Review Threads
+
+**Must**
 
 The GraphQL mutations below keep feedback in a pending review. Sending has one
 granularity, the whole pending review: `submitPullRequestReview` sends every thread hanging
@@ -198,38 +258,35 @@ gh api graphql -f query='mutation($rev:ID!,$thread:ID!,$body:String!){addPullReq
 gh api graphql -f query='mutation($rev:ID!){deletePullRequestReview(input:{pullRequestReviewId:$rev}){pullRequestReview{state}}}' -f rev=<review-id>
 ```
 
-Two variants of the thread mutation reach a line the plain form does not. `side:LEFT` with
-the old file's line number places a finding on a line the branch deletes, and `startLine`
-and `startSide` beside `line` and `side` place one across a range. Neither leaves the
-pending review.
+Two variants of the thread mutation reach a line the plain form does not, and neither
+leaves the pending review:
 
-The discard takes its own threads with it, but not at once: a `reviewThreads` read straight
-after it can still list them. Confirm against the ids `addPullRequestReviewThread` returned
-for that review, not against the connection's size — `reviewThreads` answers every thread
-on the pull request, a submitted review's included, so the count has no zero to reach.
+| To place a finding on | Add to `addPullRequestReviewThread` |
+|---|---|
+| a line the branch deletes | `side:LEFT`, with the old file's line number |
+| a range | `startLine` and `startSide` beside `line` and `side` |
+
+The discard takes its own threads with it, but not at once: a `reviewThreads` read
+straight after it can still list them. Confirm against the ids
+`addPullRequestReviewThread` returned for that review, not against the connection's
+size — `reviewThreads` answers every thread on the pull request, a submitted review's
+included, so the count has no zero to reach.
 
 ### Traps
 
 What the CLI help does not state:
 
-1. One pending review per user per PR. A second `addPullRequestReview` answers
-   `User can only have one pending review per pull request` (`type: UNPROCESSABLE`) — look
-   for an open one and reuse it rather than creating a second.
-2. A typed GraphQL variable cannot go through `-f`/`-F`: the `threads` list on
-   `addPullRequestReview` is a list of input objects, and both flags produce scalars. The
-   JSON arrives as a string and the server answers
-   `Variable $threads of type [DraftPullRequestReviewThread!] was provided invalid value`,
-   `Expected ... to be a key-value object`. Add threads one at a time with
-   `addPullRequestReviewThread`, or send the whole request with `gh api graphql --input
-   <file>` (see Conventions).
-3. `reviewThreads` pages 50 at a time. On a PR carrying more, `first:50` answers
-   `hasNextPage: true` and the rest arrive only on a re-run with `-f after=<endCursor>`.
-   Page while `hasNextPage` is true, or a long PR's later threads are invisible to the
-   lookup.
+| The limit | It answers | The way round it |
+|---|---|---|
+| one pending review per user per pull request | `User can only have one pending review per pull request` (`type: UNPROCESSABLE`) | look for an open one and reuse it |
+| `-f`/`-F` produce scalars, so a typed GraphQL variable cannot go through them — `threads` on `addPullRequestReview` is a list of input objects | `Variable $threads of type [DraftPullRequestReviewThread!] was provided invalid value`, `Expected ... to be a key-value object` | one thread at a time with `addPullRequestReviewThread`, or the whole request through `gh api graphql --input <file>` (Conventions) |
+| `reviewThreads` pages 50 at a time | `hasNextPage: true` on a longer pull request | page while `hasNextPage` is true, or later threads stay invisible to the lookup |
 
 ---
 
 ## Cross-References
+
+**Recommended**
 
 - `pr-rules` — PR title, description, review comment wording, merge strategy, and the
   rules governing which of these commands may be run.

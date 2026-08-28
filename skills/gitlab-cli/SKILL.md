@@ -6,6 +6,7 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: domain
+  rubric: applied
   bound-to:
     - gitlab
   tags:
@@ -29,6 +30,8 @@ help is silent or misleading. No rule about *when* an action is allowed lives he
 
 ## Project Overrides
 
+**Must**
+
 Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own
 `glab` conventions, follow those instead. This skill is the fallback for projects that do
 not specify their own.
@@ -37,37 +40,36 @@ not specify their own.
 
 ## Conventions
 
-- `glab api` types its fields the way `gh api` does: `-F/--field` infers the type,
-  `-f/--raw-field` sends a string. Neither flag parses a JSON array or object — see Draft
-  Notes → Traps for what that costs.
-- **There is no `--jq` flag.** `glab api` filters nothing client-side: it prints JSON
-  (`--output json`, the default) or one object per line (`--output ndjson`, one line per
-  array element), and any filtering is a separate step in the pipe. Copying a
-  `gh api --jq` line over answers `Unknown flag: --jq.`
-- `--input <file>` (`-` for stdin) sends a raw body, and is the only way to send nested
-  JSON. It sets no `Content-Type` of its own: without `-H 'Content-Type: application/json'`
-  GitLab answers `HTTP 415`, `{"error":"The provided content-type '' is not supported."}`
-- Paths take placeholders expanded from the current checkout's project — `:id`,
-  `:fullpath`, `:namespace`, `:repo`, `:branch`, `:user`. Outside a checkout whose remotes
-  reach GitLab they are not expanded but refused, with
-  `Unable to expand placeholder in path`. Pass `--hostname <host>` and the numeric project
-  id or the full path URL-encoded (`group%2Fsubgroup%2Fproject`) instead.
-- `-f` means different things in different commands: a string field on `glab api`, but
-  `--fill` on `glab mr create`, which takes no value — `glab mr create -f title=x` answers
-  `Accepts 0 arg(s), received 1.`
-- **Only `-F/--field` expands `@<path>` into the file's contents.** `-f/--raw-field` sends
-  the literal string `@C:/path/to/file`, and the API accepts it: the issue is created with
-  the path as its description, with no error to notice. A body read from a file therefore
-  goes through `-F description=@<path>`.
-- `:iid` on an issue or MR path is the per-project number shown in the UI, not the
-  instance-wide `id` the same object also carries. The `id` in that position answers
-  `{"message":"404 Not found"}` rather than reaching the object. The numbers that do
-  collide are across types: `projects/:id/issues/1` and `projects/:id/merge_requests/1` are
-  two unrelated objects, since `iid` is numbered per type.
+**Should**
+
+| Flag on `glab api` | Sends | Where it bites |
+|---|---|---|
+| `-F/--field` | the inferred type, and `@<path>` expanded into the file's contents | a body read from a file goes through it, `-F description=@<path>` |
+| `-f/--raw-field` | a string, `@<path>` included | the API accepts the literal `@C:/path/to/file` as the description, with no error to notice |
+| `--input <file>`, `-` for stdin | a raw body — the only way to send nested JSON | sets no `Content-Type`, so without `-H 'Content-Type: application/json'` GitLab answers `HTTP 415`, `{"error":"The provided content-type '' is not supported."}` |
+
+Neither `-F` nor `-f` parses a JSON array or object; Draft Notes → Traps states what that
+costs.
+
+Three more, each of which reads as a `gh` habit that does not carry over:
+
+| Expectation from `gh` | What `glab` does |
+|---|---|
+| `--jq <expr>` filters client-side | there is no such flag: `Unknown flag: --jq.` `glab api` prints JSON (`--output json`, the default) or one object per line (`--output ndjson`), and filtering is a separate step in the pipe |
+| `-f` is a field everywhere | on `glab mr create` it is `--fill` and takes no value: `glab mr create -f title=x` answers `Accepts 0 arg(s), received 1.` |
+| a path placeholder always expands | `:id`, `:fullpath`, `:namespace`, `:repo`, `:branch` and `:user` expand from the current checkout's project. Outside a checkout whose remotes reach GitLab they are refused — `Unable to expand placeholder in path` — and the way round is `--hostname <host>` with the numeric id or the URL-encoded full path (`group%2Fsubgroup%2Fproject`) |
+
+`:iid` on an issue or merge request path is the per-project number the interface shows,
+not the instance-wide `id` the same object also carries; that `id` answers
+`{"message":"404 Not found"}` rather than reaching the object. What does collide is one
+number across two types: `projects/:id/issues/1` and `projects/:id/merge_requests/1` are
+unrelated objects, `iid` being numbered per type.
 
 ---
 
 ## Issues
+
+**Should**
 
 ```
 # existing labels
@@ -105,6 +107,8 @@ glab issue update <iid> --label '<label>' --unlabel '<label>'
 
 ## Merge Requests
 
+**Should**
+
 ```
 # open
 glab mr create --source-branch <branch> --target-branch <target> \
@@ -123,23 +127,30 @@ glab mr merge <iid> --message '<subject>
   does not stand in for them: outside a checkout whose remotes reach GitLab it refuses with
   `None of the git remotes configured for this repository point to a known GitLab host`.
   Run it from the checkout.
-- There is no `--no-ff` flag. Whether the merge produces a merge commit is the project's
-  **Merge method** setting (Settings → Merge requests). The API takes exactly three values
-  on `merge_method` — `merge` (merge commit), `rebase_merge` (semi-linear, still a merge
-  commit), `ff` (fast-forward, which never writes one) — and answers `HTTP 400`,
-  `{"error":"merge_method does not have a valid value"}` for anything else. Read it with
-  `glab api projects/<id>` and set it with
+- There is no `--no-ff` flag: the shape of the merge is the project's **Merge method**
+  (Settings → Merge requests), read with `glab api projects/<id>` and set with
   `glab api projects/<id> -X PUT -f merge_method=merge`, which answers with the updated
-  project. On `merge_method=merge`, the merge above produces a two-parent commit carrying
-  the `--message` text and removes the source branch.
-- `--auto-merge` defaults to on, so the command looks for a pipeline before merging: with
-  one running the merge is queued behind it rather than performed now, and with none on the
-  project it reports `! No pipeline running on <branch>` and merges immediately.
-- `--squash` and `--rebase` change what the source commits look like, not whether a merge
-  commit is written: on `merge_method=merge`, `--squash` collapses the branch into one
-  commit and `--rebase` replays it onto the target (`✓ Rebase successful!`), and either
-  merge still produces a two-parent commit. The shape stays the project's `merge_method`;
-  whether either flag may be used at all is `pr-rules` → Merge Strategy.
+  project. The API takes three values and
+  answers `HTTP 400`, `{"error":"merge_method does not have a valid value"}` for anything
+  else:
+
+| `merge_method` | The merge |
+|---|---|
+| `merge` | a two-parent commit, carrying the `--message` text |
+| `rebase_merge` | semi-linear, still a two-parent commit |
+| `ff` | fast-forward; no merge commit is ever written |
+
+- `--squash` and `--rebase` change the source commits, not that shape: on
+  `merge_method=merge` either still produces a two-parent commit. Whether either may be
+  used at all is `pr-rules` → Merge Strategy.
+
+| Flag | What it does | Default |
+|---|---|---|
+| `--squash` | collapses the branch into one commit | off |
+| `--rebase` | replays the branch onto the target, `✓ Rebase successful!` | off |
+| `--auto-merge` | looks for a pipeline first: with one running the merge queues behind it, with none it reports `! No pipeline running on <branch>` and merges at once | **on** |
+| `--remove-source-branch` | removes the source branch — where another merge request targets it, see Stacks | the project's setting |
+
 - The REST equivalent, when the flag names on the installed `glab` do not match, and the
   form that keeps `--auto-merge` out of the picture entirely:
 
@@ -152,7 +163,33 @@ glab api projects/:id/merge_requests/<iid>/merge -X PUT \
 
 ---
 
+## Stacks
+
+**Should**
+
+A **stack** is a chain of merge requests, each targeting the source branch of the one
+below, which GitLab forms itself: a merge request joins one by targeting another open
+merge request's source branch, or by another targeting its own. Generally available since
+GitLab 19.1, on every tier, up to 20 merge requests, past which the stack control is not
+shown.
+
+| Subject | Rule |
+|---|---|
+| What registers a stack | nothing: no documented API manages one, and a merge request carries no stack field in the API response — the chain is the target branches and nothing else |
+| Which merge request is the bottom | the one whose target branch is no open merge request's source branch, whatever branch that is |
+| What retargets | the merge: it moves the open merge requests targeting its source branch onto its own target, so a stack merges bottom up. At most four move per merge, a cap only a fan-out reaches, one merge request targeting any one branch of a chain |
+| Removing the source branch in the same merge | `--remove-source-branch`, or `should_remove_source_branch=true` on the REST form under Merge Requests, does not stop the retarget |
+| Removing it later | triggers none of its own, GitLab documenting the retarget as working "only when a merge request is merged", so it strands whatever still targets that branch |
+
+`glab stack` drives local stacked diffs rather than linking merge requests already open,
+and is marked experimental and not ready for production; a chain built by targeting
+branches needs none of it.
+
+---
+
 ## Draft Notes
+
+**Must**
 
 A draft written through `POST .../merge_requests/:iid/draft_notes` is absent from both
 `notes` and `discussions`, and shows up only under `draft_notes`. Sending comes in two
@@ -192,7 +229,7 @@ glab api projects/:id/merge_requests/<iid>/draft_notes -X POST \
 glab api projects/:id/merge_requests/<iid>/discussions
 
 # reply into an existing discussion, still a draft - a scalar, so a plain field
-# works; the discussion has to be one a person started - see trap 6
+# works; the discussion has to be one a person started - see the in_reply_to rows of Traps
 glab api projects/:id/merge_requests/<iid>/draft_notes -X POST \
   -f note='<reply>' -f in_reply_to_discussion_id=<discussion-id>
 
@@ -205,42 +242,26 @@ there: an instance older than the release that added `draft_notes` answers `404`
 is `pr-rules` → Pending by Default's "no draft mechanism" row.
 
 Confirm an inline draft landed inline before moving on: the response carries a non-null
-`line_code` and a filled `position`. A null `line_code` means the note was accepted as an
-overall comment — see trap 1.
+`line_code` and a filled `position`. A null `line_code`
+means the note was accepted as an overall comment — see the `position[...]` row of Traps.
 
 ### Traps
 
-1. **`position[...]` bracket fields are accepted and silently dropped.** Passing
-   `-f 'position[new_line]=2'` and friends answers `HTTP 201` with a draft whose
-   `position` fields are all null and whose `line_code` is null: the finding is created,
-   but as an overall comment on the MR, not on the line it names. `-f`/`-F` cannot express
-   a nested object, and nothing in the response says the position was lost. Use `--input`.
-2. **`--input` without a `Content-Type` header is rejected**: `HTTP 415`,
-   `{"error":"The provided content-type '' is not supported."}` Always pass
-   `-H 'Content-Type: application/json'` alongside it.
-3. **`diff_refs` can be null for the first moments after an MR is created**, while
-   `detailed_merge_status` is `preparing`, and it can also arrive already filled, so
-   neither state can be relied on. Re-read it, or take `base_commit_sha`,
-   `head_commit_sha` and `start_commit_sha` from `GET .../merge_requests/:iid/versions`,
-   which is populated while `diff_refs` is still null.
-4. **A stale `head_sha` is not rejected, and not corrected either.** Posting a draft with
-   the refs read before a force-push answers `HTTP 201`, and the stored
-   `position.head_sha` is the one sent, while the MR's own `diff_refs.head_sha` has already
-   moved to the new head. Re-read `diff_refs` after any push.
-5. **Draft notes are not GitHub's single pending review.** There is no review object
-   holding them and no per-user limit: several drafts by one author on one MR are all
-   accepted, where GitHub refuses a second pending review.
-6. **`in_reply_to_discussion_id` needs a discussion a person started.** The field is
-   resolved against the MR before anything is written, and the error names the thread
-   rather than the field carrying its id: an id belonging to no discussion gives
-   `{"message":{"base":["Thread to reply to cannot be found"]}}`, and GitLab's own system
-   note ("added 1 commit" after a push) gives
-   `{"message":{"base":["Replies to system notes are not allowed"]}}`. A merge request that
-   has attracted nothing but system notes has no thread to reply into yet.
+| Doing this | Answers | The way round it |
+|---|---|---|
+| `-f 'position[new_line]=2'` and friends | `HTTP 201`, and a draft whose `position` fields and `line_code` are all null — the finding lands as an overall comment on the merge request, not on the line it names, with nothing in the response saying so | `--input`, `-f`/`-F` expressing no nested object |
+| `--input` with no `Content-Type` | `HTTP 415`, `{"error":"The provided content-type '' is not supported."}` | the flag sets none of its own, so `-H 'Content-Type: application/json'` goes beside it |
+| reading `diff_refs` once, straight after the merge request is created | null, while `detailed_merge_status` is `preparing` — or a filled value, so neither state can be relied on | re-read it, or take `base_commit_sha`, `head_commit_sha` and `start_commit_sha` taken from `GET .../merge_requests/:iid/versions`, which is populated while `diff_refs` is still null |
+| posting a draft with refs read before a force-push | `HTTP 201`, storing the stale `position.head_sha` while the merge request's `diff_refs.head_sha` has already moved | a stale sha is neither rejected nor corrected, so re-read `diff_refs` after any push |
+| expecting one pending review per author | several drafts by one author on one merge request, all accepted | nothing: there is no review object holding them and no per-user limit, where GitHub refuses a second pending review |
+| `in_reply_to_discussion_id` naming no discussion | `{"message":{"base":["Thread to reply to cannot be found"]}}` | the field is resolved against the merge request before anything is written, and the error names the thread rather than the field carrying its id |
+| `in_reply_to_discussion_id` naming a system note — "added 1 commit" after a push | `{"message":{"base":["Replies to system notes are not allowed"]}}` | a merge request that has attracted nothing but system notes has no thread to reply into yet |
 
 ---
 
 ## Cross-References
+
+**Recommended**
 
 - `pr-rules` — MR title, description, review comment wording, merge strategy, and the
   rules governing which of these commands may be run.
