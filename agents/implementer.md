@@ -33,7 +33,7 @@ assumption. Do not review your own diff for merge-readiness — hand that to
 ## Composition
 
 - **Invoke directly when:** resuming work on one task that already has a spec.
-- **Invoke via:** `/build`.
+- **Invoke via:** `/implement`.
 - **Do not invoke another persona.** Handing the finished diff to `code-reviewer` (and
   `security-auditor` when relevant) is the user's or a command's decision — orchestration
   belongs to commands.

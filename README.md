@@ -129,7 +129,7 @@ own Composition section.
 | Agent | Stage |
 |-------|-------|
 | `spec-architect` | Spec |
-| `implementer` | Build |
+| `implementer` | Implement |
 | `code-reviewer` | Review |
 | `security-auditor` | Security audit |
 | `release-manager` | Release |
@@ -141,7 +141,7 @@ Slash commands orchestrating the agents above into the idea-to-release pipeline.
 | Command | Orchestrates |
 |---------|---------------|
 | `/spec <idea>` | `spec-architect` — produces a specification (and ADR when warranted) |
-| `/build <task>` | `implementer` — implements one task by TDD from an existing spec |
+| `/implement <task>` | `implementer` — implements one task by TDD from an existing spec |
 | `/ship [scope]` | `code-reviewer` + `security-auditor` in parallel → go/no-go → `release-manager` on go |
 | `/review-loop <tool(s)> [quick..ultra] [scope]` | caller-chosen tool(s) at a tool-agnostic depth, review → fix → re-review until clean or 3 passes, in the current checkout or an isolated one |
 

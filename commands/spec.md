@@ -29,7 +29,7 @@ due, has come back.
 
 **Must**
 
-This command writes no implementation code. `/build` writes it.
+This command writes no implementation code. `/implement` writes it.
 
 ## The Caller's Text
 
