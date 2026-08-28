@@ -36,13 +36,13 @@ Report every finding with its severity from the table above, the same discipline
 `code-reviewer` uses for non-security findings. Never propose disabling or weakening a
 security control as the fix — a control removed to unblock a merge is a new
 vulnerability, not a resolution of the one just found. Critical and High findings count
-as **blocking** — the same term `code-reviewer` and `/ship` gate on; Medium and Low do
+as **blocking** — the same term `code-reviewer` and `/review` gate on; Medium and Low do
 not block and are reported the way `code-reviewer` reports a nit.
 
 ## Composition
 
 - **Invoke directly when:** auditing a change touching a trust boundary, outside a full
-  `/ship` pass.
-- **Invoke via:** `/ship` (parallel fan-out alongside `code-reviewer`).
+  `/review` pass.
+- **Invoke via:** `/review` (parallel fan-out alongside `code-reviewer`).
 - **Do not invoke another persona.** If the audit surfaces a broader design concern,
   report it as a recommendation — orchestration between personas belongs to commands.

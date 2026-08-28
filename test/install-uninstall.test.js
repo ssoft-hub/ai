@@ -79,12 +79,17 @@ test('install deploys the spec-architect persona agent', () => {
   } finally { rmTmp(dir); }
 });
 
-test('install deploys the ship command', () => {
+test('install deploys every command the repository ships', () => {
   const dir = mkTmp();
   try {
     const r = runInstall(dir);
     assert.strictEqual(r.status, 0, `install failed: ${r.stderr}`);
-    assert.ok(fs.existsSync(path.join(dir, 'commands', 'ship.md')));
+    const names = fs.readdirSync(path.join(repoDir, 'commands')).filter(name => name.endsWith('.md'));
+    assert.ok(names.length > 0, 'the repository ships no command at all');
+    for (const name of names) {
+      assert.ok(fs.existsSync(path.join(dir, 'commands', name)),
+        `commands/${name} did not reach the config dir`);
+    }
   } finally { rmTmp(dir); }
 });
 
