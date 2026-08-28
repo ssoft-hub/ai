@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- `github-cli` and `gitlab-cli` declare `rubric: applied`: every `##` section carries one of the four binding-force markers, and `test/rubric.test.js` holds them
 - A command carries the caller's text in a final `## The Caller's Text` section, below whose opening paragraph a heading, a marker or a directive confers nothing; `config/claude-config-rules.md` says the same of every text that is the subject of the work
 - A sentence prescribing an action to a person runs force word, action, what it acts on - "should extract the loop", never "the loop should be extracted"
 - A command declares `bound-to` as a skill does, and `test/skill-contexts.test.js` holds both: `/review-loop` states the isolated checkout and the steps that wait without naming one version control system or forge
@@ -37,7 +38,7 @@
 - `AGENTS.md`: an Idea-to-Release Pipeline section describing the `/spec` -> `/build` -> `/ship` flow, each command a wrapper over the personas its own `commands/<name>.md` names
 - `comment-check` tool: a `PostToolUse` reminder when an edit adds a new non-Doxygen comment, pointing back at the `comments` skill; it runs unconditionally, unlike the lint tools
 - `review-publish-guard` tool: a `gh` command that publishes review feedback the moment it runs raises a permission prompt naming the pending-review alternative, while the pending path itself runs unprompted
-- Skills: `github-cli` and `gitlab-cli` - the `gh` and `glab` commands behind the process skills: issues, pull and merge requests, labels, the pending-review and draft-note cycles, and merging. Policy stays in `pr-rules` and `issue-rules`
+- Skills: `github-cli` and `gitlab-cli` - the `gh` and `glab` commands behind the process skills: issues, pull and merge requests, labels, the pending-review and draft-note cycles, stacks, and merging. Policy stays in `pr-rules` and `issue-rules`
 - `/review-loop` command: iterates review -> fix -> re-review until a pass reports no blocking finding, capped at 3 passes, with the depth taken from a `quick`/`light`/`normal`/`thorough`/`ultra` scale. A cap reached still blocking reports as not converging
 - `skill-gate` denies the first `Edit`/`Write`/`MultiEdit`/`NotebookEdit` on a file whose claiming skills are not loaded and warns on a repeat, so an agent that cannot invoke the Skill tool loses one attempt rather than the task. A shell command writing to such a file passes the same check
 - `statusline` tool: renders the line under the prompt - model, effort, context and the two rate-limit windows with their reset times, coloured by how full they are, and the branch. Installing takes over the single `statusLine` slot, which `uninstall` gives back
@@ -48,6 +49,9 @@
 - `skill-authoring` skill: naming a skill after its concern, declaring `bound-to`, marking each `##` section with the force it carries, one file per skill, and the rename. `AGENTS.md` states none of them and keeps this repository's own catalog steps
 
 ### Changed
+- `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form
+- `pr-rules` → Merge Strategy 2 answers a command that merges several pull requests at once: the authorisation is per pull request, so such a command needs an instruction naming each of them
+- The flags, limits and traps of `github-cli` and `gitlab-cli` are tables rather than paragraphs, so what a flag does sits beside what it answers when it goes wrong
 - `/ship` is `/review`, and reports a verdict without preparing anything: the release follows the merge, which is the human's, so `release-manager` is invoked directly at the Release row rather than from a command
 - `/build` is `/implement`, and the pipeline stage it carries is Implement: the command implements one task by TDD, where a build is what a compiler produces
 
@@ -97,6 +101,7 @@
 
 ### Fixed
 
+- `github-cli` had the `merge-async` body at four fields where it takes five, and sent the reader to re-read the pull request for a result the endpoint answers by uuid at `GET .../merge-async/<uuid>`
 - The `git submodule status` prefix `+` reads as a difference in either direction, not as the module being ahead: `submodule-sync` gates `git add` on a containment check against the index, so a module reset to an earlier commit is not written back into the superproject
 - `install` no longer replaces `~/.claude/CLAUDE.md`. This repository's rules install as `~/.claude/claude-config-rules.md`, and `CLAUDE.md` gets one `@claude-config-rules.md` import line, keeping every other byte; `uninstall` subtracts exactly that line
 - Each persona agent carries the `Skill` tool and names the skills it loads, so it follows the skills themselves rather than an abridged copy of them in its own definition

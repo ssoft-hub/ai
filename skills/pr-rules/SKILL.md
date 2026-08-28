@@ -157,7 +157,10 @@ None of these runs for review feedback:
   `addPullRequestReviewThreadReply` without a `pullRequestReviewId`.
 
 The one exception is an explicit instruction naming the act on that artifact
-("approve it", "post that reply now"), and it does not carry to the next PR. The issue
+("approve it", "post that reply now"), and it does not carry to the next PR. It is per
+draft, not per pull request: a call that sends every draft the caller holds needs an
+instruction covering each of them, and the single-draft form is what an instruction
+naming one reply admits. The issue
 comments the Scope and issue, Pre-merge issue check and Close issue steps require are
 published as usual (`issue-rules` → Progress Comments).
 
@@ -211,7 +214,8 @@ of them names a moment.
 
 1. **Checklist gate.** Merge only after the Pre-Merge Checklist passes.
 2. **The human authorises the merge.** An agent merges on an explicit instruction
-   naming this PR, which does not carry to the next one.
+   naming this PR, which does not carry to the next one: the authorisation is per pull
+   request, so a command merging several needs an instruction naming each of them.
 3. **Rebase before merge.** `git rebase <target>`, then merge from the current target
    tip; the rebase moves the head, so it returns to the push moment and the checks of
    that moment run again.
