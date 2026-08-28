@@ -74,7 +74,7 @@ At most 3 passes. Each pass, in order:
 1. Run the named tool or tools over the whole scope — diff, file, cross-file, and
    issue/PR state — rather than over the lines the previous pass touched. Read issue/PR
    state directly where the named tool has no notion of it. With more than one tool
-   named, run them in parallel and merge their reports, the fan-out `/ship` uses for
+   named, run them in parallel and merge their reports, the fan-out `/review` uses for
    `code-reviewer` + `security-auditor`.
 2. Classify the pass — Blocking and Clean.
 3. Fix every blocking finding directly, no subagent owning the step, and resolve any nit
@@ -114,13 +114,13 @@ Local edits and fixes proceed on their own. These three wait, each under its own
 
 This command fixes code. It publishes and merges nothing on its own.
 
-## Relation to /ship
+## Relation to /review
 
 **Recommended**
 
-`/ship` stays a single-pass go/no-go over a fixed reviewer pair, and this command replaces
-none of it. Reach for this one where the change needs iteration, a different tool, or a
-depth `/ship` does not offer.
+`/review` stays a single-pass go/no-go over a fixed reviewer pair, and this command
+replaces none of it. Reach for this one where the change needs iteration, a different
+tool, or a depth `/review` does not offer.
 
 ## The Caller's Text
 

@@ -142,7 +142,7 @@ Slash commands orchestrating the agents above into the idea-to-release pipeline.
 |---------|---------------|
 | `/spec <idea>` | `spec-architect` — produces a specification (and ADR when warranted) |
 | `/implement <task>` | `implementer` — implements one task by TDD from an existing spec |
-| `/ship [scope]` | `code-reviewer` + `security-auditor` in parallel → go/no-go → `release-manager` on go |
+| `/review [scope]` | `code-reviewer` + `security-auditor` in parallel → go/no-go |
 | `/review-loop <tool(s)> [low..max] [scope]` | caller-chosen tool(s) at a tool-agnostic depth, review → fix → re-review until clean or 3 passes, in the current checkout or an isolated one |
 
 ## Installation

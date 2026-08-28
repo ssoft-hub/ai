@@ -29,7 +29,7 @@ TDD, from the specification `/spec` has already produced.
 
 **Must**
 
-This command implements one task and reviews no diff for merge-readiness. `/ship` reviews
+This command implements one task and reviews no diff for merge-readiness. `/review` reviews
 it.
 
 ## The Caller's Text

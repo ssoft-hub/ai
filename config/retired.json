@@ -2,6 +2,7 @@
   "$comment": "Paths, relative to the Claude config dir, that this repo shipped once and no longer does. install.js warns when one survives untracked, so a machine whose manifest was lost is not left with a file this repo no longer ships: a retired skill stays loadable, and a retired tool stays on disk. See skills/skill-authoring/SKILL.md -> Renaming or Retiring, and skills/hook-scripts/SKILL.md -> Adding or Retiring a Tool for a tool.",
   "retired": [
     "commands/build.md",
+    "commands/ship.md",
     "skills/api-design/SKILL.md",
     "skills/doxygen/SKILL.md",
     "skills/encapsulation/SKILL.md",
