@@ -48,6 +48,7 @@
 - `skill-authoring` skill: naming a skill after its concern, declaring `bound-to`, marking each `##` section with the force it carries, one file per skill, and the rename. `AGENTS.md` states none of them and keeps this repository's own catalog steps
 
 ### Changed
+- `/build` is `/implement`, and the pipeline stage it carries is Implement: the command implements one task by TDD, where a build is what a compiler produces
 
 - Every guarded tool call waits on one process instead of one per guard, so the pause no longer grows with the number of guards. A `PreToolUse` tool of your own now exports `verdict(payload)`; one left in the old stdin/stdout shape is skipped with a line on stderr
 - A `PreToolUse` tool whose `verdict` throws is skipped with a line on stderr naming it rather than crashing the runner, and one stating a block whose text cannot be built blocks with a stated reason

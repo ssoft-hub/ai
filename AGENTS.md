@@ -152,7 +152,7 @@ the nearest one.
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
 | Issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
 | Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Build | `/build` → `implementer` | `In Progress` | `pr-rules` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
+| Implement | `/implement` → `implementer` | `In Progress` | `pr-rules` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
 | Push | — | `In Progress` | `pr-rules` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
 | PR | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
 | Review | `/ship`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
@@ -173,9 +173,9 @@ What the rows do not say on their own:
 - **The Spec row may run before the Issue row.** `/spec` names no tracker, so a spec may
   precede the issue or be written against one that exists. An issue without a test plan,
   and acceptance criteria for a feature, is not ready to implement against.
-- **The Build row runs once per task.** `/build` implements one, so a branch whose issue
-  holds several runs it several times; it covers neither the Branch, the Push nor the
-  PR row.
+- **The Implement row runs once per task.** `/implement` implements one, so a branch
+  whose issue holds several runs it several times; it covers neither the Branch, the
+  Push nor the PR row.
 - **`/ship` spans rows that are not adjacent.** Its review pass covers the Review and
   Security audit rows and its hand-off the Release row; Pre-merge check, Merge and Close
   sit between them under no command at all.

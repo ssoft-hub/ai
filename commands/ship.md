@@ -63,7 +63,7 @@ changelog entry, version bump, shipping-readiness checklist.
 **Must**
 
 On a **no-go** verdict, stop. Invoke no `release-manager`, and fix no finding as part of
-this command — that goes back through `/build`.
+this command — that goes back through `/implement`.
 
 ## The Caller's Text
 
