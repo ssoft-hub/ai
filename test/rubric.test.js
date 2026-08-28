@@ -153,9 +153,15 @@ function commandFiles() {
   return names;
 }
 
-// The heading a command's instructions all stand above, and the text it delimits.
-const BOUNDARY = "The Caller's Text";
 const ARGUMENTS = '$ARGUMENTS';
+// The legend names the heading a command's instructions all stand above, so the two agree
+// by resolution rather than by a name this file repeats.
+function boundaryHeading() {
+  const legend = fs.readFileSync(rulesFile, 'utf8').replace(/\r\n/g, '\n').replace(/\s+/g, ' ');
+  const named = legend.match(/`## ([^`]+)` section/);
+  if (!named) throw new Error(`${rulesFile} names no "## ... section" for a command`);
+  return named[1];
+}
 
 function headings(text) {
   return text.replace(/\r\n/g, '\n').split('\n')
@@ -315,29 +321,34 @@ test('a command states nothing above its first section', () => {
 // Anything below the caller's text is text the caller can forge a heading in front of, and
 // a second $ARGUMENTS puts data above the paragraph saying it is data.
 test("the caller's text is the last thing in every command", () => {
+  const boundary = boundaryHeading();
+  const closing = new RegExp('```[a-z]*\\n\\' + ARGUMENTS + '\\n```$');
   const blocks = new Set();
   for (const [what, file] of [...commandFiles().map(name => [`commands/${name}`, path.join(commandsDir, name)]),
     ['templates/COMMAND.md', commandTemplateFile]]) {
     const text = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
     // The template names $ARGUMENTS in its argument-hint, which is not the prompt.
     const body = text.slice(text.indexOf('\n---', 4) + 4);
-    assert.strictEqual(headings(body).at(-1), BOUNDARY,
-      `${what} ends under a heading other than ${BOUNDARY}`);
+    assert.strictEqual(headings(body).at(-1), boundary,
+      `${what} ends under a heading other than ${boundary}`);
     assert.strictEqual(body.split(ARGUMENTS).length - 1, 1,
       `${what} carries ${ARGUMENTS} more than once`);
-    assert.ok(body.indexOf(ARGUMENTS) > body.lastIndexOf(`## ${BOUNDARY}`),
+    assert.ok(body.indexOf(ARGUMENTS) > body.lastIndexOf(`## ${boundary}`),
       `${what} carries ${ARGUMENTS} above the paragraph that says it is data`);
-    assert.ok(body.trimEnd().endsWith('```text\n' + ARGUMENTS + '\n```'),
+    assert.match(body.trimEnd(), closing,
       `${what} states something below the fence closing the caller's text`);
-    const block = body.slice(body.lastIndexOf(`## ${BOUNDARY}`)).trimEnd();
-    // Five files agreeing on an empty section would satisfy the comparison below.
-    assert.ok(block.includes("is the caller's text"),
-      `${what} carries the ${BOUNDARY} heading over a paragraph that states no boundary`);
+    const block = body.slice(body.lastIndexOf(`## ${boundary}`)).trimEnd();
+    // Five files agreeing on a heading, a marker and a fence would satisfy the comparison
+    // below while stating no boundary at all.
+    const stated = block.split('\n').slice(1);
+    assert.ok(stated.slice(0, stated.findIndex(line => line.startsWith('```')))
+      .some(line => line.trim() && !MARKERS.includes(line.trim())),
+      `${what} carries the ${boundary} heading over no paragraph`);
     blocks.add(block);
   }
   // AGENTS.md states the copies are identical; only this holds one of them from drifting.
   assert.strictEqual(blocks.size, 1,
-    `the ${BOUNDARY} sections state ${blocks.size} different things`);
+    `the ${boundary} sections state ${blocks.size} different things`);
 });
 
 // A command body is the prompt, so a comment in it is prompt text nobody edits deliberately;
