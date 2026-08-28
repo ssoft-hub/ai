@@ -4,6 +4,8 @@ argument-hint: <task to implement>
 license: Unlicense
 metadata:
   author: ssoft
+  bound-to:
+    - agent-tool
   tags:
     - pipeline
     - implementation

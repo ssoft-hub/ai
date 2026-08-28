@@ -4,6 +4,8 @@ argument-hint: [optional scope, defaults to the current diff/branch]
 license: Unlicense
 metadata:
   author: ssoft
+  bound-to:
+    - agent-tool
   tags:
     - pipeline
     - ship

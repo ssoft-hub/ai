@@ -4,6 +4,8 @@ argument-hint: <what $ARGUMENTS represents, e.g. "<task to implement>" or "[opti
 license: Unlicense
 metadata:
   author: <author or team name>
+  bound-to:
+    - <context from config/skill-contexts.json>
   tags:
     - pipeline
     - <stage-tag>
@@ -22,6 +24,8 @@ $ARGUMENTS
 
 <!-- Adding a command:
      1. Copy this file to commands/<name>.md and fill in the frontmatter and the prompt
-        above.
+        above. `bound-to` names the readers these instructions are for; name a tool or
+        a skill outside them by role instead - skills/skill-authoring/SKILL.md →
+        Contexts a Skill Is Bound To, Naming Another Skill.
      2. Add a row to the commands table in README.md.
      3. Run `node install.js`, which copies it to ~/.claude/commands/<name>.md. -->
