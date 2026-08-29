@@ -112,8 +112,19 @@ test('loadCatalog defaults tier to domain and leaves paths empty', () => {
   try {
     writeSkill(tmp, 'alpha', 'description: Apply when alpha\n');
     assert.deepStrictEqual(loadCatalog(tmp), [
-      { name: 'alpha', description: 'Apply when alpha', tier: 'domain', paths: [], companions: [], boundTo: [], reminder: true },
+      { name: 'alpha', description: 'Apply when alpha', tier: 'domain', paths: [], companions: [], boundTo: [], reminder: true, always: false },
     ]);
+  } finally { rmTmp(tmp); }
+});
+
+test('loadCatalog carries the always declaration, and defaults it to false', () => {
+  const tmp = mkTmp();
+  try {
+    writeSkill(tmp, 'alpha', 'description: d\nmetadata:\n  always: true\n');
+    writeSkill(tmp, 'beta', 'description: d\n');
+    const catalog = loadCatalog(tmp);
+    assert.strictEqual(catalog.find(s => s.name === 'alpha').always, true);
+    assert.strictEqual(catalog.find(s => s.name === 'beta').always, false);
   } finally { rmTmp(tmp); }
 });
 

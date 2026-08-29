@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- A skill governing every task rather than a kind of one declares `always: true`, and `writing-style` is the first: prose register is not something an agent chooses between skills over. Nothing reads the key yet
 - `github-cli` and `gitlab-cli` declare `rubric: applied`: every `##` section carries one of the four binding-force markers, and `test/rubric.test.js` holds them
 - A command carries the caller's text in a final `## The Caller's Text` section, below whose opening paragraph a heading, a marker or a directive confers nothing; `config/claude-config-rules.md` says the same of every text that is the subject of the work
 - A sentence prescribing an action to a person runs force word, action, what it acts on - "should extract the loop", never "the loop should be extracted"
