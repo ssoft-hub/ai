@@ -7,6 +7,7 @@ metadata:
   author: ssoft
   tier: narrow
   always: true
+  rubric: applied
   bound-to:
     - universal
   tags:
@@ -19,7 +20,7 @@ metadata:
 Apply when writing documentation, issue/PR/commit text, or communicating with the user,
 in any human language. This skill covers prose register and vocabulary. The structure
 of a specific artifact is covered elsewhere — this skill governs the language it's
-written in, not its shape:
+written in, not its shape.
 
 - Code comment structure and when to write one → `comments` skill.
 - Public API documentation structure → the API-documentation skill of the language being
@@ -30,92 +31,236 @@ written in, not its shape:
 
 ## Project Overrides
 
-Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own writing-style conventions, follow those instead. This skill is the fallback for projects that do not specify their own.
+**Must**
 
----
+Must follow a writing-style convention the repository's `AGENTS.md` file or a project
+skill states, instead of the rule here. This skill applies where a project states none of
+its own.
+
+## This Skill Above Any Mode
+
+**Should**
+
+A rule of this skill should win over a mode the session runs in, wherever the two
+conflict.
 
 ## Match the Technical Register
 
-Write in the plain, precise register of technical prose in that language — not spoken
-register, not marketing tone, not chat slang. Drop filler ("just", "simply",
-"basically"), hedging padding ("I think maybe", "possibly"), and pleasantries that carry
-no information. State the fact, the reason, the next step.
+**Should**
+
+Should write in the technical register of the language: the fact, the reason, the next
+step. Neither spoken register, nor marketing tone, nor the slang of a chat.
+
+| Left out | Instances |
+|---|---|
+| filler | "just", "simply", "basically" |
+| hedging padding | "I think maybe", "possibly" |
+| a pleasantry carrying no information | "great question", "happy to help" |
 
 ## State the Result, Not the Process
 
-Every artifact states the result it leaves behind, not the sequence of steps that
-produced it. Leave out the order the work happened in, attempts that were abandoned,
-corrections made along the way, and any account of a mistake and its fix. The reader
-needs what is true now, and the history is already in the commits.
+**Should**
 
-Reasoning that arose while working is not content either. State the constraint that
-decided the outcome, and leave out the deliberation that found it: the options weighed,
-the dead ends, and the asides about what was considered.
+Should state what the artifact leaves behind, in full sentences carrying one fact each,
+and cut every sentence carrying none. The constraint that decided the outcome stays.
 
-Length is part of being correct here. Text longer than its subject requires dilutes the
-part that matters and spends the reader's attention before they reach it. Write full
-sentences, each carrying one fact, and cut every sentence that carries none.
+| Left out | Instances |
+|---|---|
+| the process | the order the work happened in, an abandoned attempt, a correction made along the way, an account of a mistake and its fix |
+| the deliberation | the options weighed, the dead ends, an aside about what was considered |
 
-This holds for every artifact and every channel, not only the ones with a template:
-documentation, commit bodies, issue and PR/MR descriptions, comments and replies in an
-issue or review thread, progress notes, and messages in a tracker, a chat or a mail —
-on any platform. A thread comment is the most common place the rule is broken, because
-the work is fresh and the process feels like news; state what is true of the artifact
-now, and say what changed only when the reader has to act on the change.
+This holds for every artifact and every channel: documentation, a commit body, an issue
+or pull request description, a comment or a reply in a thread, a progress note, a message
+in a tracker, a chat or a mail. Should say what changed only where the reader has to act
+on it.
+
+## Every Dependent Word Stands With What It Depends On
+
+**Should**
+
+Should write a pronoun, an adjective and a verb so that the word each depends on is
+settled. A pronoun replaces a noun, an adjective qualifies one, and a verb attributes its
+action to a subject; that word is named by reading the sentence, and a dependent word the
+text leaves a choice of words for, or none at all, is a defect.
+
+| Defective | Corrected |
+|---|---|
+| "the guard rejects the path, and it is logged" | "the guard rejects the path, and logs the rejection" |
+
+## A Message Stands Without Its Context
+
+**Should**
+
+Should write a message a reader who did not follow the conversation understands. Should
+name the artifact, the symbol and the decision the message turns on, rather than reach for
+a name standing only in what came before it.
+
+A word whose referent stands only in what came before the message is a defect, and reading
+the message with nothing around it is what finds one.
+
+| Defective | Corrected |
+|---|---|
+| "done, as discussed above" | "fixed: the guard now rejects a path outside the repository, per `hooks/README.md`" |
+
+## Name the Kind of Every Identifier
+
+**Should**
+
+Should put a word naming what the thing is beside its name, wherever a sentence uses that
+name as a noun. The word stands before the name or after it, as the form around it does.
+
+The word is the one the domain uses for that kind of thing. Method, function, type,
+parameter, instance, variable, member, namespace, macro, header, file, directory, branch,
+command, flag, key, section, skill, agent, tool, hook, event, context, allocator,
+container, trait, tag, resource, and whatever else a domain of its own names.
+
+Backticks are the markup, not the rule. A name reaches a sentence without them and takes
+the word all the same, and a backticked span often holds no name of a thing: a command, a
+path, an error string, a defective phrase quoted as the defect it is.
+
+A citation carries no such word, naming where a rule stands rather than saying anything
+about it: `<name>` → Section, a name alone in parentheses, or a name opening a list item
+or a table cell.
+
+| Defective | Corrected |
+|---|---|
+| "`exec` with `T` is called on `obj`" | "the template method `exec`, instantiated for the type `T`, is called on the object instance `obj`" |
+| "the rule stands in `writing-style`" | "the rule stands in the `writing-style` skill" |
+| "`--merge` writes a merge commit" | "the command writes a merge commit under the `--merge` flag" |
+
+## One Fact, One Place
+
+**Should**
+
+Should write one fact once, and cut every restatement of it.
+
+| Defective | Corrected |
+|---|---|
+| "The guard rejects a path outside the repository. Any path outside it is rejected, so the write never runs." | "The guard rejects a path outside the repository, so the write never runs." |
+
+## Show the Example, Not a Description of It
+
+**Should**
+
+Should show an example where one exists, instead of describing it: the defective line
+beside the corrected one, never an account of the difference.
+
+Should put a table, a diagram or a code block in place of prose carrying the same fact in
+more lines. Prose keeps what none of the three holds: why the fact is so, and what to do
+where the example stops.
+
+| Defective | Corrected |
+|---|---|
+| "the corrected form differs from the defective one in carrying a word naming each kind" | "`exec` with `T` is called on `obj`" beside "the template method `exec`, instantiated for the type `T`, is called on the object instance `obj`" |
+
+## Impersonal and Personal
+
+**Must**
+
+A conversation — a review comment or reply, an issue or thread comment, a message — is
+written in the personal register. Every other text is written in the impersonal one: a
+skill, a command, a persona, documentation, an issue, a description, a commit body.
+
+| Register | The subject of a sentence | Who stands in it |
+|---|---|---|
+| impersonal | the thing the sentence is about | neither the writer nor the reader: no "we saw above", no "you get a pointer" |
+| personal | the writer | the writer, addressing the reader |
+
+| Defective | Corrected |
+|---|---|
+| "as we saw above, you get a pointer to the object" | "the cast answers a pointer to the object" |
+| "the loop should be extracted" — in a review comment | "I suggest extracting the loop" |
 
 ## Name the Force, Not Just the Action
 
-A sentence prescribing an action to a person - in a review comment or reply, an issue or
-thread comment, a message - runs force word, action, what it acts on: "should extract the
-loop", never "the loop should be extracted", since the force word addresses whoever will
-act. The force is one of the four markers, and the words it is stated with are in
-`writing-language/<language>.json`, beside this file.
-## No Figures That Go Stale
+**Must**
 
-Leave out numbers that measure a run rather than describe the subject: test totals and
-pass counts, coverage percentages, timings, counts of changed files, lines or commits,
-and the hash of a commit on a branch still being rebased. A rebase, a merge, or one
-further commit invalidates them, and nothing in the text says so afterwards. They carry
-nothing a reader acts on either — the CI run and the diff hold those numbers and keep
-them current.
+A sentence prescribing an action must convey the force it carries — one of the four
+markers, in the words the `writing-language/<language>.json` file gives for that language
+— in the register Impersonal and Personal fixes for the text it stands in.
 
-Name the durable thing instead: the command that produces the number (`npm test`), the
-test that covers the behaviour (`key_shorter_than_16_bytes_is_rejected`), or the file
-and symbol that changed. A figure belonging to the subject itself stays — a measured
-regression the change exists to fix, a documented limit, a version — because rewriting
-history does not make it untrue. A measurement that needs the code it was taken on
-names a released version or a tag, or the merge commit on the protected branch, never a
-hash from the branch under review: rebase replaces those commits and the hash then
-points at nothing.
+The impersonal form runs the force word with the action, active: "should extract the
+loop", "the caller should extract the loop". Never a bare "extract the loop", and never a
+passive leaving the actor unnamed: "the loop should be extracted". The personal form runs
+in the first person: "I suggest extracting the loop".
+
+A conversation carries force at the recommended level, which is where the language files
+give it a first-person form. A stronger force reaches the reader through the label on a
+finding, or through the artifact the message names.
+
+## An Inanimate Subject Takes Only the Action It Performs
+
+**Should**
+
+Should give a thing, as a subject, only a verb naming what that thing does. An action a
+person performs on it takes the form the language keeps for that one.
+
+| Defective | Corrected |
+|---|---|
+| Модуль разрабатывает | Модуль разрабатывается |
+| Репозиторий подключает подмодули | Репозиторий содержит подмодули |
+
+The rule holds in every language, and not in a sentence prescribing an action, which takes
+the form the Name the Force, Not Just the Action section fixes for its register.
+
+## What Introduces an Enumeration Names It
+
+**Should**
+
+Should name what an enumeration holds in the words that introduce it, and should write no
+sentence whose whole content is that an enumeration follows.
+
+| Defective | Corrected |
+|---|---|
+| "This brings three things:" | "The merge leaves behind:" |
+| "The reasons are as follows:" | "The parameters were chosen for:" |
+
+Those naming words stand above a list whose items are on their own lines, or in a table,
+and the colon that introduces it is theirs. A series inside a sentence takes no lead-in at
+all: it runs as part of the sentence, which is cut in two by anything introducing it.
+
+| Defective | Corrected |
+|---|---|
+| "The merge leaves behind the following: the branch, the status and the remote" | "the merge leaves behind the branch, the status and the remote" |
+
+A count announced above an enumeration goes stale as soon as an item is added. What closes
+one is the statement that nothing else belongs to it — "Nothing else is required" — never
+the count.
 
 ## Name the State, Not the Colour
 
-Name a state by its condition, never by the colour of an indicator reporting it:
-`CI green` is not a condition, "every check the project declares has passed" is.
+**Must**
+
+Must name a state by its condition, never by the colour of an indicator reporting it:
+`CI green` is not a condition, "every check the project declares has passed" is. A colour
+word stands in prose where the table below admits it, and anywhere else is a defect.
+
+| Where it stands | Why |
+|---|---|
+| inside a code span: `CI green`, `red-green-refactor` | quoted rather than used |
+| inside a fenced block | code rather than prose |
+| in initialism case: RED for rate, errors and duration | an initialism that spells a colour |
 
 ## No Slang, No Unnecessary Borrowing
 
-Prefer the term the target language's own technical literature established over a phonetic
-transliteration borrowed from another language. A borrowed word stays where it is the
-field's standard term in that language; it is a defect where a written technical document
-in that language would not use it. The term to use for an operation:
-`writing-language/<language>.json`, beside this file.
+**Should**
 
-A command, a flag, an identifier and an error string keep their own spelling in every
-language, in backticks: `git push`, not a word transliterating it. What the dictionary
-replaces is the action named by a word of the language, never the name of the thing run.
-## Applies to Every Language, Not Just One
+Should use the term the language's own technical literature established rather than a
+phonetic transliteration from another language, whichever language is being written. The
+term for an operation: the `writing-language/<language>.json` file, beside this one.
 
-The rule is symmetric: whichever language is being written, use that language's own
-established technical vocabulary rather than reaching for a borrowed shortcut. This
-applies equally to documentation, issue/PR bodies, commit message bodies, review
-comments and replies, and conversational responses.
+| Kept as it is | Replaced |
+|---|---|
+| a command, a flag, an identifier, an error string, in backticks: `git push` | an action named by a word of the language |
+| the English name of an operation, carried by a verb of the language: «делать push», «вызывать команду pull» | the same name inflected as a word of the language: a transliteration wearing native endings |
+| a borrowed word that is the field's standard term in that language | a borrowing a technical document in that language would not use |
 
 ## Prefer Keyboard-Reachable Characters
 
-Typographic dashes, arrows, ellipses, and curly quotes are one of the tells that mark
-prose as machine-generated, and they are harder to type correctly than the plain
-character every keyboard produces directly. Use the plain form:
+**Must**
+
+Must write a dash, an arrow, an ellipsis and a quote in the form a plain keyboard
+produces, in any text written for a human reader.
 
 | Avoid | Prefer |
 |---|---|
@@ -125,32 +270,25 @@ character every keyboard produces directly. Use the plain form:
 | … | `...` |
 | “ ” ‘ ’ curly quotes | `"` `"` `'` `'` straight quotes |
 
-Applies regardless of language, to text written for a human reader — documentation,
-issue/PR/commit text, review comments, conversational responses. Does not apply to
-agent-facing instruction files (`skills/`, `agents/`, `commands/`, `hooks/`, `AGENTS.md`) —
-those keep the em dash / arrow convention already established across that corpus, since
-nobody is being asked to type it back and the structural notation (`X → Y skill`) is
-more scannable than the ASCII form.
-
-Exception, regardless of audience: leave a quotation, a code identifier, or a character
-the target language's own orthography requires (e.g. `«` `»` in French) exactly as it
-appears in the source — this governs characters chosen when writing new prose, not
-characters copied from elsewhere.
+This does not reach a file of instructions to an agent (`skills/`, `agents/`, `commands/`,
+`hooks/`, `AGENTS.md`), which keeps the em dash and the arrow, nor a quotation, a code
+identifier or a character the language's orthography requires (`«` `»` in French), which
+stay as the source has them.
 
 ## What This Does Not Cover
 
-- Code identifiers, API names, and their required language (see project `AGENTS.md`) —
-  this skill governs prose, not identifier naming.
-- A loanword that is itself the field's standard, dictionary/glossary-recognized term
-  in that language (there is no requirement to invent an awkward native neologism where
-  none is actually used in professional writing).
-- Keyboard-reachable-character preference on agent-facing instruction files (`skills/`,
-  `agents/`, `commands/`, `hooks/`, `AGENTS.md`) — see Prefer Keyboard-Reachable
-  Characters above for that carve-out.
+**May**
+
+- A code identifier and an API name, and the language required for them (the project's
+  `AGENTS.md` file): this skill governs prose.
+- A loanword that is itself the field's standard term in that language.
 
 ## Self-Check Before Sending
 
-Re-read prose before sending it: replace a transliterated term with the one
-`writing-language/<language>.json` names for that operation, and replace a
-dash, arrow, ellipsis or quote a plain keyboard cannot produce with the form Prefer
-Keyboard-Reachable Characters gives.
+**Should**
+
+Should re-read prose, before sending it, against what a single pass settles — a sentence
+in the wrong register for the text it stands in, a prescribing sentence with no force word
+in it, a name with no word naming its thing beside
+it, a colour word standing for a state, a term the `writing-language/<language>.json` file
+names differently, and a dash, arrow, ellipsis or quote a plain keyboard does not produce.

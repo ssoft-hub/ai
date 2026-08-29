@@ -116,7 +116,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
 | `work-sequence` | The eight steps from a task to a closed issue, and the moment each check runs at |
-| `writing-style` | Prose register and vocabulary — no slang, no unnecessary borrowings, per language |
+| `writing-style` | Prose register and vocabulary in any human language, above any mode the session runs in |
 
 ## Agents
 

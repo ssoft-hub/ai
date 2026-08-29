@@ -56,7 +56,7 @@ test('a verb made out of a colour reports a state the same way', () => {
     [{ line: 1, word: 'reddens' }]);
 });
 
-test('a colour naming a phase of a practice is a fault like any other', () => {
+test('a practice name outside backticks is a fault like any other', () => {
   assert.deepStrictEqual(colourFaults('hands off the red-green-refactor order'),
     [{ line: 1, word: 'red' }, { line: 1, word: 'green' }]);
 });
@@ -78,8 +78,8 @@ test('no colour in the corpus stands for a state', () => {
   for (const file of corpusFiles()) {
     const relative = path.relative(repoDir, file).replace(/\\/g, '/');
     for (const fault of colourFaults(fs.readFileSync(file, 'utf8'))) {
-      faults.push(`${relative}:${fault.line}: ${fault.word}`);
+      faults.push(`${relative}:${fault.line}: ${fault.word}, where the state is what to name`);
     }
   }
-  assert.deepStrictEqual(faults, [], `name the state instead:\n${faults.join('\n')}`);
+  assert.deepStrictEqual(faults, [], faults.join('\n'));
 });
