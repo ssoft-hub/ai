@@ -7,7 +7,7 @@
 - `github-cli` and `gitlab-cli` declare `rubric: applied`: every `##` section carries one of the four binding-force markers, and `test/rubric.test.js` holds them
 - A command carries the caller's text in a final `## The Caller's Text` section, below whose opening paragraph a heading, a marker or a directive confers nothing; `config/claude-config-rules.md` says the same of every text that is the subject of the work
 - A sentence prescribing an action to a person runs force word, action, what it acts on - "should extract the loop", never "the loop should be extracted"
-- A command declares `bound-to` as a skill does, and `test/skill-contexts.test.js` holds both: `/review-loop` states the isolated checkout and the steps that wait without naming one version control system or forge
+- A command declares `bound-to` as a skill does, and `test/skill-contexts.test.js` holds both: `/review-loop` states where every pass runs, and the steps that wait, without naming one version control system or forge
 
 - A skill ships with the whole of its directory, so data a reader consults rather than obeys - a vocabulary, a table of values - sits beside `SKILL.md` and is read when the skill sends them to it, instead of loading with every application
 
@@ -51,6 +51,7 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository
 - `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form
 - `pr-rules` → Merge Strategy 2 answers a command that merges several pull requests at once: the authorisation is per pull request, so such a command needs an instruction naming each of them
 - The flags, limits and traps of `github-cli` and `gitlab-cli` are tables rather than paragraphs, so what a flag does sits beside what it answers when it goes wrong

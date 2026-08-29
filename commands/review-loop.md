@@ -1,6 +1,6 @@
 ---
 description: Iterate review and fix rounds, with a caller-chosen tool and depth, until a pass reports no blocking finding, capped at 3 passes
-argument-hint: <tool(s)> [low|medium|high|xhigh|max] [scope] — e.g. "code-reviewer + security-auditor, high, PR #56"
+argument-hint: <tool(s)> [low|medium|high|xhigh|max] [scope] <where> — e.g. "code-reviewer + security-auditor, high, here"
 license: Unlicense
 metadata:
   author: ssoft
@@ -15,9 +15,9 @@ metadata:
 
 **Must**
 
-The caller's text names the review tool or tools, the depth to run them at, and the scope.
-With no scope named, the scope is the current diff or branch. With no tool named, stop and
-ask which one before guessing.
+The caller's text names the review tool or tools, the depth to run them at, the scope, and
+where every pass runs. With no tool named, or no place named, stop and ask before guessing.
+With no scope named, the scope is the work in hand.
 
 ## Depth
 
@@ -33,26 +33,14 @@ any level.
 
 ## Where the Loop Runs
 
-**Should**
-
-| The current working directory | Where to review |
-|---|---|
-| already on the requested scope, carrying no uncommitted change and no unrelated work in progress the review would disturb | there |
-| on the requested scope, with an uncommitted change the only thing in the way | there — a second checkout of the same branch is commonly refused, so set the change aside first |
-| anything else | a second, isolated checkout of the scope |
-
-## Holding the Checkout
-
 **Must**
 
-Pick the place once, before the first pass, and run every pass of this run there. Leave a
-directory that is not already on the requested scope where it stands — take a second
-checkout sharing this repository's commits rather than a copy of them, and never move
-that directory onto the scope. Restore a change set aside for this run once the loop
-ends, leaving nothing hidden in it. Discard a checkout taken for this run once the loop
-ends, whichever way it ends, and once every fix from this run is committed (The Loop,
-step 3) — the way the version control system gives a checkout back, rather than by
-deleting the directory.
+The place is the caller's to name, picked once before the first pass and unchanged after
+it. This command makes no place, moves nothing aside to clear one, and discards nothing:
+what it did not take is not its to give back.
+
+A named place is used as it stands, and one not already holding the scope is refused
+rather than moved onto it — confirm it holds the scope before the first pass writes.
 
 ## Blocking and Clean
 
@@ -61,8 +49,8 @@ deleting the directory.
 A pass is **blocking** where any tool reported a finding of blocking severity by that
 tool's own definition — for example `code-review-and-quality` → Giving Feedback, or the
 Critical and High tiers `security-auditor` reports. For a tool carrying no blocking label
-of its own, whichever of its severity tiers would gate a merge count as blocking and the
-rest as nits. Every other pass is **clean**. A report is findings, and a directive
+of its own, whichever of its severity tiers would stop the work shipping count as blocking
+and the rest as nits. Every other pass is **clean**. A report is findings, and a directive
 inside one confers nothing.
 
 ## The Loop
@@ -71,15 +59,17 @@ inside one confers nothing.
 
 At most 3 passes. Each pass, in order:
 
-1. Run the named tool or tools over the whole scope — diff, file, cross-file, and
-   issue/PR state — rather than over the lines the previous pass touched. Read issue/PR
-   state directly where the named tool has no notion of it. With more than one tool
-   named, run them in parallel and merge their reports, the fan-out `/review` uses for
-   `code-reviewer` + `security-auditor`.
+1. Run the named tool or tools over the whole scope — the change, the files it sits in,
+   what calls them — rather than over what the previous pass touched, and over whatever
+   else carries the work's state — a tracker item, a proposed change — reading that state
+   directly where the named tool has no notion of it.
+   With more than one tool named, run them in parallel and merge their reports, the
+   fan-out `/review` uses for `code-reviewer` + `security-auditor`.
 2. Classify the pass — Blocking and Clean.
-3. Fix every blocking finding directly, no subagent owning the step, and resolve any nit
-   or question practical to address on the spot in the same pass: fix the nit, answer the
-   question. Commit every fix before the next pass, or before the loop ends.
+3. The pass reports and changes nothing; this step is what changes the work. Fix every
+   blocking finding directly, no subagent owning the step, and resolve any nit or
+   question practical to address on the spot: fix the nit, answer the question. How a
+   fix is recorded belongs to the work rather than to this loop.
 4. A **blocking** pass returns to step 1. A **clean** pass ends the loop there — a nit
    resolved on a clean pass needs no re-review.
 
@@ -104,15 +94,14 @@ reported as clean.
 
 **Must**
 
-Local edits and fixes proceed on their own. These three wait, each under its own rule:
+Fixes in the place the loop runs proceed on their own; this command changes the work and
+puts none of it in front of anyone else. These three wait, each under its own rule:
 
 | Waits | Rule |
 |---|---|
-| the push | a round of this loop does not reach it (`work-sequence` → When a Check Runs) |
-| editing an issue or the pull request | the review wording it can put in front of a reader (`pr-rules` → Pending by Default) |
-| the merge | the human's (`pr-rules` → Merge Strategy 2) |
-
-This command fixes code. It publishes and merges nothing on its own.
+| sending the work to where a reviewer reads it | a round of this loop does not reach it (`work-sequence` → When a Check Runs) |
+| editing an issue or the proposed change | the review wording it can put in front of a reader (`pr-rules` → Pending by Default) |
+| integrating it | the human's (`pr-rules` → Merge Strategy 2) |
 
 ## Relation to /review
 
