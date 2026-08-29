@@ -21,8 +21,8 @@ this file:
 4. `cpp-encapsulation` skill — the access level of every member the task adds, justified
    against the spec rather than an anticipated caller.
 5. `cpp-testing` skill — the structure of the tests the loop produces.
-6. `pr-rules` skill — When a Check Runs, for which checks a round of edits runs and which
-   of them belong to a later moment.
+6. `work-sequence` skill — When a Check Runs, for which checks a round of edits runs and
+   which of them belong to a later moment.
 
 If a step in the spec is ambiguous or missing, stop and surface the gap rather than
 guessing — that gap belongs to `spec-architect`, not to an implementation-time

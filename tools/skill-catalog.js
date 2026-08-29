@@ -110,6 +110,8 @@ function parseFrontmatter(source) {
   if (tier !== undefined) fm.tier = tier;
   const reminder = scalar('reminder');
   if (reminder !== undefined) fm.reminder = reminder !== 'false';
+  const always = scalar('always');
+  if (always !== undefined) fm.always = always === 'true';
   const paths = readSequence(block, 'paths');
   if (paths !== undefined) fm.paths = paths;
   const companions = readSequence(block, 'with');
@@ -140,6 +142,7 @@ function loadCatalog(skillsDir) {
       boundTo: fm.boundTo ?? [],
       // Design work precedes the file it produces, so paths alone never opt a skill out.
       reminder: fm.reminder ?? true,
+      always: fm.always ?? false,
     });
   }
   return catalog;

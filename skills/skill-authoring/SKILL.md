@@ -69,6 +69,9 @@ convention and nothing reads it; what the same test decides is `bound-to`.
 
 **Must**
 
+A skill governing every task rather than a kind of one declares `always: true`, which
+takes it out of the set an agent chooses between. Nothing reads the key yet.
+
 `bound-to` is required: a non-empty list of contexts drawn from
 `config/skill-contexts.json`, naming the readers whose rules these are. The list is a
 conjunction, so a skill needing two contexts names both, and `universal` stands alone. A

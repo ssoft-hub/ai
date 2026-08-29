@@ -6,6 +6,7 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  always: true
   bound-to:
     - universal
   tags:

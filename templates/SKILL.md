@@ -25,6 +25,10 @@ metadata:
   # gate. A skill whose intent is wider than its files keeps the default: an API is
   # designed before the header exists, and no edit has happened yet to announce it.
   reminder: false
+  # Optional, defaults to false. Set true where the skill governs every task rather
+  # than a kind of one, so it is not a skill the agent chooses between. Nothing reads
+  # it yet — the reminder that will is GH-208.
+  always: true
   # Optional. Skills that always apply alongside this one; the gate names them too.
   with:
     - <skill-name>

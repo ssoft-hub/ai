@@ -105,6 +105,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
   rename — and the marker on a command's sections.
 - `submodule-sync` — submodule ref discipline.
 - `test-driven-development` — the order a behaviour is built in, test first.
+- `work-sequence` — the order of work from a task to a closed issue.
 - `writing-style` — prose register and vocabulary in any human language.
 
 Two pairs restate each other on purpose, because no task loads both: `cpp-testing` /
@@ -142,51 +143,53 @@ into one pass from idea to release, each command a wrapper over the personas its
 
 This table is the only place the pipeline stage, the command or persona carrying it, and
 the `issue-rules` → Lifecycle state the issue sits in meanwhile are lined up against each
-other; the order of the work itself is `pr-rules` → Workflow. Every rule stays in the skill
-that owns it, and a stage with no command or persona of its own says so rather than naming
-the nearest one.
+other. Where a stage carries a step's name, that step's condition and what it produces
+are in `work-sequence` → The Sequence. Every rule stays in the skill that owns it, and a
+stage with no command or persona of its own says so rather than naming the nearest one.
 
 | Stage | Command / persona | Issue state | Skills |
 |-------|-------------------|-------------|--------|
 | Intake | — | not created yet | `requirements`, `project-planning` |
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
-| Issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
+| Scope and issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
 | Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Implement | `/implement` → `implementer` | `In Progress` | `pr-rules` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
-| Push | — | `In Progress` | `pr-rules` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
-| PR | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
+| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
+| Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
+| Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
 | Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
 | Security audit | `/review`, or `/review-loop` to iterate → `security-auditor` | `In Review` | `security-and-hardening`, `pr-rules` |
-| Pre-merge check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
-| Merge | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
-| Close | — | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
+| Pre-merge issue check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
+| Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
+| Close issue | — | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
 | Release | — (`release-manager` directly) | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
 
 No row assigns an issue-state transition to a role: `issue-rules` → Lifecycle defines each
 state by a condition rather than by an act with an actor. The acts reserved to the human
 are the merge (`pr-rules` → Merge Strategy 2) and submitting review feedback (Pending by
-Default); the issue comments the Scope and issue, Pre-merge issue check and Close issue
-steps require are the one kind an agent publishes freely.
+Default); the issue comments `work-sequence` requires are the one kind an agent
+publishes freely.
 
 What the rows do not say on their own:
 
-- **The Spec row may run before the Issue row.** `/spec` names no tracker, so a spec may
-  precede the issue or be written against one that exists. An issue without a test plan,
-  and acceptance criteria for a feature, is not ready to implement against.
+- **The Spec row may run before the Scope and issue row.** `/spec` names no tracker, so
+  a spec may precede the issue or be written against one that exists. An issue without a
+  test plan, and acceptance criteria for a feature, is not ready to implement against.
 - **The Implement row runs once per task.** `/implement` implements one, so a branch
   whose issue holds several runs it several times; it covers neither the Branch, the
-  Push nor the PR row.
+  Publish nor the Offer for review row.
 - **`/review` covers two adjacent rows and stops there.** It reports a verdict and
   prepares nothing: the Release row sits four rows below it, behind the merge.
-- **Uncovered stages.** Intake, Issue, Branch, Push, PR, Pre-merge check, Merge and Close
-  have no command, and Release has none either — `release-manager` is invoked directly
-  once the change is merged. Each is carried out under the skill its row names. Only the
-  Merge row states why: Merge Strategy 2 gives the merge to the human.
+- **Uncovered stages.** Intake, Scope and issue, Branch, Publish, Offer for review,
+  Pre-merge issue check, Integrate and Close issue have no command, and Release has none
+  either — `release-manager` is invoked directly once the change is merged. Each is
+  carried out under the skill its row names. Only the Integrate row states why: Merge
+  Strategy 2 gives the merge to the human.
 - **The Release row does not run once per pass.** `changelog` → On Release renames one
   `[Unreleased]` section covering everything merged since the previous version.
 - **The changelog entry has one owner.** `pr-rules` → Pre-Open Checklist requires
-  `CHANGELOG.md` updated at the push. What `release-manager` does at the Release row is
-  the `[Unreleased]` rename of `changelog` → On Release, not a second entry — GH-105.
+  `CHANGELOG.md` updated at the Publish step. What `release-manager` does at the Release
+  row is the `[Unreleased]` rename of `changelog` → On Release, not a second entry —
+  GH-105.
 
 ## Installation
 

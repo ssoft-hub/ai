@@ -17,6 +17,7 @@ metadata:
 
 Apply when writing commit messages or reviewing commits.
 
+- The step of the work a commit or a branch is made at → `work-sequence` skill.
 - Prose register, and the rule that a body states the result rather than the process → `writing-style` skill.
 
 ## Project Overrides
@@ -156,7 +157,8 @@ Use `--fixup` when the change belongs to a specific earlier commit — reviewer 
 
 ## Fixup / Squash Merges
 
-Squash fixup commits before opening the PR — not at merge time.
+Squash fixup commits before the Publish step, not at merge time (`work-sequence` →
+The Sequence).
 
 Before running `rebase -i --autosquash`, check whether any fixup changes what its target
 commit's body claims. If so, that fixup must be `--fixup=amend:<hash>`, not plain

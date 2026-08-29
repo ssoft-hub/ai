@@ -57,6 +57,7 @@
     "tracker": {
       "parent": "platform",
       "kind": "category",
+      "role": "issue tracker",
       "means": "A reader with an issue tracker, whether or not the forge hosts it."
     },
     "agent-tool": {

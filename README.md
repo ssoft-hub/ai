@@ -115,6 +115,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `skill-authoring` | Writing a skill file — its concern, name, contexts, section markers, rename — and the marker on a command's sections |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
+| `work-sequence` | The eight steps from a task to a closed issue, and the moment each check runs at |
 | `writing-style` | Prose register and vocabulary — no slang, no unnecessary borrowings, per language |
 
 ## Agents
@@ -143,7 +144,7 @@ Slash commands orchestrating the agents above into the idea-to-release pipeline.
 | `/spec <idea>` | `spec-architect` — produces a specification (and ADR when warranted) |
 | `/implement <task>` | `implementer` — implements one task by TDD from an existing spec |
 | `/review [scope]` | `code-reviewer` + `security-auditor` in parallel → go/no-go |
-| `/review-loop <tool(s)> [low..max] [scope]` | caller-chosen tool(s) at a tool-agnostic depth, review → fix → re-review until clean or 3 passes, in the current checkout or an isolated one |
+| `/review-loop <tool(s)> [low..max] [scope]` | caller-chosen tool(s) at a tool-agnostic depth, review → fix → re-review until clean or 3 passes, in a place the caller names |
 
 ## Installation
 

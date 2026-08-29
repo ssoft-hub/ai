@@ -18,61 +18,15 @@ metadata:
 
 Apply when opening, reviewing, or preparing a PR/MR.
 
+Where the pull request sits in the order of work, and which check runs at which
+moment: `work-sequence` → The Sequence and When a Check Runs.
+
 ## Project Overrides
 
 **Must**
 
 PR conventions defined in the repository's `AGENTS.md` or in a project skill must be
 followed instead of this one.
-
-## Workflow
-
-**Should**
-
-Eight steps, in order. A step that touches the tracker or the PR runs through the CLI
-skill of the hosting platform. Outside this section a step is cited by name, never by
-number.
-
-**1. Scope and issue** — find or create the issue in the repository the change belongs
-to, a submodule's in that submodule rather than in the superproject, and complete it
-per `issue-rules`.
-
-**2. Branch** — name it before the first commit: `commit-rules` → Branch Naming.
-
-**3. Commits** — commit on the branch per `commit-rules`.
-
-**4. Push** — send the branch to the remote once the local remarks are exhausted; a
-later round of review returns here on the same condition.
-
-**5. PR** — open it once the Push step has run: PR Title, Description Structure.
-
-**6. Pre-merge issue check** — reconcile the linked issue against what the PR
-delivers, and comment there which items it resolves: Pre-Merge Checklist.
-
-**7. Merge commit** — after review passes and the Pre-merge issue check clears: Merge
-Strategy.
-
-**8. Close issue** — when every checkbox in the issue is checked; otherwise leave it
-open and name the follow-up PR/MR in a comment (`issue-rules` → Lifecycle).
-
-## When a Check Runs
-
-**Should**
-
-Every check this skill names as run over the change belongs to exactly one of three
-moments. Which checks a project declares is the project's own; the pipeline that runs
-them on the server is `ci-cd-and-automation`.
-
-| Moment | Runs | Does not run |
-|---|---|---|
-| A round of edits — one pass over the branch, the first and every fix answering a review remark alike | the checks the change touches: the tests whose subject the change names, plus any check the change's own files are the input of, on the commit that closes the round | what reads the branch as a whole |
-| The push — the Push step, once per branch state offered for review | what reads the branch as a whole | a round of review and fix, which reads the branch as it stands locally; a check whose answer still stands |
-| Opening the pull request | nothing over the branch, which the push answered | every check of the branch; the pull request's own four properties are established here instead, and the Pre-Open Checklist lists them as what it leaves out |
-
-- A check that has passed stands while the branch head is the commit it ran against;
-  an amend, a rebase or a further commit moves that head and puts the check back.
-- The rebase therefore runs first at the push, ahead of every check measured against
-  the head it moves.
 
 ## PR Title
 
@@ -160,9 +114,8 @@ The one exception is an explicit instruction naming the act on that artifact
 ("approve it", "post that reply now"), and it does not carry to the next PR. It is per
 draft, not per pull request: a call that sends every draft the caller holds needs an
 instruction covering each of them, and the single-draft form is what an instruction
-naming one reply admits. The issue
-comments the Scope and issue, Pre-merge issue check and Close issue steps require are
-published as usual (`issue-rules` → Progress Comments).
+naming one reply admits. The issue comments `work-sequence` requires are published as
+usual (`issue-rules` → Progress Comments).
 
 Report at the end of a review pass: that feedback is waiting, where it is, what it
 covers, and whether the draft was opened by this pass or reused. The draft mechanics
@@ -173,18 +126,19 @@ section.
 
 **Must**
 
-Conditions on the branch, each naming the moment it is established at (When a Check
-Runs):
+Conditions on the branch, each naming the moment it is established at
+(`work-sequence` → When a Check Runs):
 
-- [ ] Every check the change touches passes — at the round of edits
-- [ ] Branch is rebased onto the current target branch (no stale merge base) — at the push
-- [ ] Every check the project declares passes over the branch as it stands — at the push
-- [ ] Every commit in the branch builds independently (no broken intermediate state) — at the push
-- [ ] Every line of the pre-PR check in the module-sync skill of the version control system passes — at the push
-- [ ] Commit trailers conform to `commit-rules` — at the push
-- [ ] `CHANGELOG.md` updated — every user-visible change documented — at the push
+- [ ] Every check the change touches passes — at a round of edits
+- [ ] Branch is rebased onto the current target branch (no stale merge base) — at the Publish step
+- [ ] Every check the project declares passes over the branch as it stands — at the Publish step
+- [ ] Every commit in the branch builds independently (no broken intermediate state) — at the Publish step
+- [ ] Every line of the pre-PR check in the module-sync skill of the version control system passes — at the Publish step
+- [ ] Commit trailers conform to `commit-rules` — at the Publish step
+- [ ] `CHANGELOG.md` updated — every user-visible change documented — at the Publish step
 
-The pull request's own four properties are established with it instead:
+The pull request's own four properties are established at the Offer for review step
+instead:
 
 - The status of the checks reported on it, which the pipeline answers rather than a local run (`ci-cd-and-automation`)
 - A description carrying all four sections, `## Problem` included — see Description Structure
@@ -217,8 +171,8 @@ of them names a moment.
    naming this PR, which does not carry to the next one: the authorisation is per pull
    request, so a command merging several needs an instruction naming each of them.
 3. **Rebase before merge.** `git rebase <target>`, then merge from the current target
-   tip; the rebase moves the head, so it returns to the push moment and the checks of
-   that moment run again.
+   tip; the rebase moves the head, so it returns to the Publish step and the checks of
+   that moment run again (`work-sequence` → When a Check Runs).
 4. **`--no-ff` only.** No fast-forward merge, no squash merge.
 5. **Merge subject:** `Merge PR #<pr-number>: <pr subject>`, the PR subject verbatim
    and never re-prefixed with `type(scope):`, so a tracker ID in the title leaves both
@@ -228,9 +182,9 @@ of them names a moment.
 7. **Merge body required.** What was integrated and why, never empty (`commit-rules`).
 8. **Trailers:** the ban in `commit-rules` holds; `Co-authored-by` injected by the
    forge when committer differs from author is allowed.
-9. **Cleanup before the push.** Squash fixups (`commit-rules` → Fixup Commits) before
-   the branch is sent, never at merge time: a rewrite afterwards takes a force-push and
-   owes every check the push ran.
+9. **Cleanup before the Publish step.** Squash fixups (`commit-rules` → Fixup Commits)
+   before the branch is sent, never at merge time: a rewrite afterwards takes a
+   force-push and owes every check that step ran.
 10. **Rewrite squashed commit bodies** per `commit-rules` → Fixup / Squash Merges.
 
 The command performing the merge, and the repository settings it depends on, belong to
@@ -248,10 +202,11 @@ is split before review.
 
 **Recommended**
 
+- `work-sequence` — the order of work the Offer for review step belongs to, and the moment each check runs at.
 - `issue-rules` — the issue this PR resolves: title, templates, labels, lifecycle, progress comments.
 - `commit-rules` — commit message format and branch naming on the PR's branch.
 - `code-review-and-quality` — what a review looks for, where this skill states how a finding is worded.
 - `writing-style` — prose register in the description and in the review threads.
 - `ci-cd-and-automation` — the pipeline answering the checks reported on the pull request.
 - The module-sync skill of the version control system — the pre-PR check and the merge order the checklists gate on.
-- The CLI skill of the hosting platform — the commands behind the Workflow steps and the draft mechanics behind Pending by Default.
+- The CLI skill of the hosting platform — the commands behind the steps that reach this platform, and the draft mechanics behind Pending by Default.
