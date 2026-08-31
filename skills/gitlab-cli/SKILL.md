@@ -149,7 +149,13 @@ glab mr merge <iid> --message '<subject>
 | `--squash` | collapses the branch into one commit | off |
 | `--rebase` | replays the branch onto the target, `✓ Rebase successful!` | off |
 | `--auto-merge` | looks for a pipeline first: with one running the merge queues behind it, with none it reports `! No pipeline running on <branch>` and merges at once | **on** |
-| `--remove-source-branch` | removes the source branch — where another merge request targets it, see Stacks | the project's setting |
+| `--remove-source-branch` | sets the merge request's own attribute, which GitLab acts on at the merge: the source branch is deleted on the server. Where another merge request targets it, see Stacks | the project's setting |
+
+- `glab mr merge` deletes no local branch and says nothing about one, so the local branch
+  survives the merge and goes with `git branch -d <name>` — refused by git while a worktree
+  holds that branch, and, run from the target branch, refused as not fully merged until that
+  branch carries the merge. A worktree stops the merge itself no more than it stops any
+  other request over the API.
 
 - The REST equivalent, when the flag names on the installed `glab` do not match, and the
   form that keeps `--auto-merge` out of the picture entirely:
