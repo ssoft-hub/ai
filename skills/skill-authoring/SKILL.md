@@ -36,8 +36,8 @@ installs beside every skill. This skill states the author's half.
 
 **Must**
 
-A rule about a skill file stated in the repository's `AGENTS.md` or in a project skill
-must be followed instead of this one. The catalog steps `AGENTS.md` states — where a new
+Must follow a rule about a skill file that the repository's `AGENTS.md` file or a project
+skill states, instead of the rule here. The catalog steps `AGENTS.md` states — where a new
 skill is indexed, and how it reaches the config directory — are additional to these.
 
 ## One Concern per Skill

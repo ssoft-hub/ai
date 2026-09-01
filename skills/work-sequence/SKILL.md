@@ -22,8 +22,8 @@ Apply from the moment a task is taken up until the issue it resolves is closed.
 
 **Must**
 
-An order of work defined in the repository's `AGENTS.md` or in a project skill must be
-followed instead of this one.
+Must follow the order of work the repository's `AGENTS.md` file or a project skill defines,
+instead of the rule here.
 
 ## The Sequence
 

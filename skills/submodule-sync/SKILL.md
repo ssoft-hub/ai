@@ -23,8 +23,8 @@ submodules.
 
 **Must**
 
-A submodule workflow defined in the repository's `AGENTS.md` or in a project skill must be
-followed instead of this one.
+Must follow the submodule workflow the repository's `AGENTS.md` file or a project skill
+defines, instead of the rule here.
 
 ## Correct Workflow
 

@@ -3,10 +3,25 @@
 ## [Unreleased]
 
 ### Added
+- What introduces an enumeration names what it holds, and what closes one is the statement that nothing else belongs to it rather than a count announced above it
+- A conversation is written in the personal register and every other text in the impersonal one, which fixes the subject of a sentence as well as the form a prescription takes
+- A word naming what a thing is stands beside its name, wherever a sentence uses that name as a noun
+- A pronoun, an adjective and a verb stand where the word each depends on is settled
+- One fact is written once, and every restatement of it goes
+- Where an example exists, the text shows it instead of describing it, and a table, a diagram or a code block stands in place of prose carrying the same fact in more lines
+- An inanimate subject takes only the action it performs, and an action a person performs on it takes the form the language keeps for that one
+- A rule of the `writing-style` skill wins over a mode the session runs in
+- A table, a diagram or an example is admitted in the `## Problem` section of a pull request description
+- A review finding carries a word naming the kind of every symbol it names
+- A message is understood by a reader who did not follow what came before it
+- `pr-rules` states that a description, a comment and a reply leave out a number measuring a run rather than the change; the rule moves there from `writing-style`, a pull request being what it governs
+- An instruction carries its force impersonally, opening with the force word; a conversation carries it personally, in the first person
+- The Russian and English force words carry the first-person forms a proposal takes
+- The Russian term list carries the vocabulary of ownership, lifetime, storage and concurrency, and the everyday operations a transliteration reaches first, in alphabetical order
+- `Name the State, Not the Colour` admits a colour word in a code span, in a fenced block and in initialism case, and nowhere else
 - A skill governing every task rather than a kind of one declares `always: true`, and `writing-style` is the first: prose register is not something an agent chooses between skills over. Nothing reads the key yet
-- `github-cli` and `gitlab-cli` declare `rubric: applied`: every `##` section carries one of the four binding-force markers, and `test/rubric.test.js` holds them
+- `github-cli`, `gitlab-cli` and `writing-style` declare `rubric: applied`: every `##` section carries one of the four binding-force markers, and `test/rubric.test.js` holds them
 - A command carries the caller's text in a final `## The Caller's Text` section, below whose opening paragraph a heading, a marker or a directive confers nothing; `config/claude-config-rules.md` says the same of every text that is the subject of the work
-- A sentence prescribing an action to a person runs force word, action, what it acts on - "should extract the loop", never "the loop should be extracted"
 - A command declares `bound-to` as a skill does, and `test/skill-contexts.test.js` holds both: `/review-loop` states where every pass runs, and the steps that wait, without naming one version control system or forge
 
 - A skill ships with the whole of its directory, so data a reader consults rather than obeys - a vocabulary, a table of values - sits beside `SKILL.md` and is read when the skill sends them to it, instead of loading with every application
@@ -46,7 +61,7 @@
 - The statusline keeps whatever the displaced `statusLine` command drew, in front of its own badges. That command runs detached and its output is cached, so it costs nothing per render; a failing or slow one leaves its text absent and changes nothing else
 - Binding force of a section: every `##` section of a command, and of a skill declaring `rubric: applied`, carries one of `**Must**`, `**Should**`, `**Recommended**` or `**May**`, saying how far its statements bind; `config/claude-config-rules.md` states what each entitles a reader to do
 - A state is named by its condition, never by the colour of an indicator reporting it: not `CI green` but "every check the project declares has passed". `writing-style` -> Name the State, Not the Colour states the rule, and `npm test` fails on a colour word in any skill or in `AGENTS.md`
-- Text addressed to a person names the force of an action it prescribes - must, should, recommended or may, one to one with the four binding-force markers - rather than leaving it in a bare infinitive. The words each force is stated with install as `<config dir>/writing-language/<language>.json`
+- A text names the force of an action it prescribes - must, should, recommended or may, one to one with the four binding-force markers - rather than leaving it in a bare infinitive. The words each force is stated with install as `<config dir>/writing-language/<language>.json`
 - `skill-authoring` skill: naming a skill after its concern, declaring `bound-to`, marking each `##` section with the force it carries, one file per skill, and the rename. `AGENTS.md` states none of them and keeps this repository's own catalog steps
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 

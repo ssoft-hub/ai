@@ -106,7 +106,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `submodule-sync` — submodule ref discipline.
 - `test-driven-development` — the order a behaviour is built in, test first.
 - `work-sequence` — the order of work from a task to a closed issue.
-- `writing-style` — prose register and vocabulary in any human language.
+- `writing-style` — prose register and vocabulary in any human language, above any mode the session runs in.
 
 Two pairs restate each other on purpose, because no task loads both: `cpp-testing` /
 `node-testing` (a task edits one language's tests, and `node-testing` says not to mix the

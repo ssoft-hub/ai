@@ -25,8 +25,8 @@ moment: `work-sequence` → The Sequence and When a Check Runs.
 
 **Must**
 
-PR conventions defined in the repository's `AGENTS.md` or in a project skill must be
-followed instead of this one.
+Must follow the PR conventions the repository's `AGENTS.md` file or a project skill
+defines, instead of the rule here.
 
 ## PR Title
 
@@ -48,10 +48,28 @@ PR to split (PR Size), not a description to extend.
 
 | Section | Carries | Budget |
 |---|---|---|
-| `## Problem` | the symptom, its cost and the trigger; the linked issue's Goal restated in one or two sentences; no solution. A change with no problem to state says so in one line | up to five lines |
+| `## Problem` | the symptom, its cost and the trigger; the linked issue's Goal restated in one or two sentences; no solution. A change with no problem to state says so in one line. A table, a diagram or an example may carry the symptom, the cost or the trigger, within the budget (`writing-style` → Show the Example, Not a Description of It) | up to five lines |
 | `## Summary` | what changed, user-visible, one bullet per logical change | up to five bullets, one line each |
 | `## Implementation` | one bullet per decision, each naming the file or symbol it changed and the constraint that decided it | up to six bullets |
 | `## Test plan` | `- [ ]` per item, naming the command that was run or the test that covers it; a box is checked only once that run has passed (`issue-rules` → Description Template) | one line per item |
+
+## No Figures That Go Stale
+
+**Should**
+
+A description, a comment and a reply should leave out a number measuring a run rather than
+the change, and what the pull request itself shows. A rebase, a merge or one further
+commit invalidates such a number, and the run and the diff carry it and keep it current.
+
+| Left out | Named instead |
+|---|---|
+| a test total, a pass count, a coverage percentage, a timing | the command producing it, `npm test` |
+| a count of changed files, lines or commits | nothing: the diff shows them |
+| the hash of a commit on the branch under review | a released version, a tag, or the merge commit on the target branch |
+
+A figure belonging to the change stays: a measured regression it exists to fix, a
+documented limit, a version. A `## Test plan` item names the test itself, which the reader
+runs.
 
 ## Review Comments
 
@@ -81,7 +99,9 @@ test now covering it.
 A disagreement gives reasoning specific enough for the reviewer to check it; a fix
 belonging to another task is named as such rather than left unanswered.
 
-Register: `writing-style`.
+Should write a finding in the register the `writing-style` skill fixes, and should name
+the kind of every symbol the finding names (`writing-style` → Name the Kind of Every
+Identifier).
 
 ## Pending by Default
 
