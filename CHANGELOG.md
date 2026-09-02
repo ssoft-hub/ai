@@ -119,6 +119,8 @@
 
 ### Fixed
 
+- `github-cli` had `--delete-branch` removing the head branch unconditionally, where a worktree can stop it after the merge has gone through with an exit status of 1 - a merge that landed reading as one that failed; the section now carries the refusals and the recovery, measured
+- `gitlab-cli` had `--remove-source-branch` as an act of the command, where it is the merge request's own attribute, which GitLab acts on at the merge, the local branch surviving every merge
 - `github-cli` had the `merge-async` body at four fields where it takes five, and sent the reader to re-read the pull request for a result the endpoint answers by uuid at `GET .../merge-async/<uuid>`
 - The `git submodule status` prefix `+` reads as a difference in either direction, not as the module being ahead: `submodule-sync` gates `git add` on a containment check against the index, so a module reset to an earlier commit is not written back into the superproject
 - `install` no longer replaces `~/.claude/CLAUDE.md`. This repository's rules install as `~/.claude/claude-config-rules.md`, and `CLAUDE.md` gets one `@claude-config-rules.md` import line, keeping every other byte; `uninstall` subtracts exactly that line

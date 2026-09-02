@@ -118,11 +118,39 @@ gh api repos/{owner}/{repo}/pulls/<n>/merge-async/<uuid>
 |---|---|
 | `--merge` | the `--no-ff` equivalent: always a two-parent merge commit, whose subject and body are `-t`/`-b` |
 | `--rebase` | ignores `-t`/`-b`; the commits it replays keep the branch's own messages |
-| `--delete-branch` | removes the head branch and leaves the base alone. Where an open pull request targets that head branch, read Stacks before passing it |
+| `--delete-branch` | deletes the local and the remote head branch, and no base branch. Where an open pull request targets that head branch, the caller should read Stacks before passing the flag |
 
 The merge runs server-side against the pushed branch, so a commit amended locally and not
 pushed takes no part in it, and `GitHub <noreply@github.com>` commits the merge rather
 than the local git identity.
+
+Where the tree `gh pr merge --delete-branch` runs in holds the head branch, the command
+switches that tree to the base branch before deleting the head branch; where that tree
+holds another branch, the command goes straight to the deletion. What comes back from each
+run, by what the tree the command runs in and any other worktree hold:
+
+| The command runs | What comes back |
+|---|---|
+| in a tree that does not hold the head branch, with no worktree holding it | nothing: both deletions run |
+| in the tree holding the head branch, with the base branch held by no other worktree | nothing: that tree switches to the base branch and both deletions run |
+| in a tree that does not hold the head branch, while a worktree holds it | `failed to delete local branch <name>: failed to run git: error: cannot delete branch '<name>' used by worktree at '<path>'` |
+| in the tree holding the head branch, while another worktree holds the base branch | `failed to run git: fatal: '<base>' is already used by worktree at '<path>'` |
+
+The merge has gone through before either refusal, the local head branch stands after both
+of them, and the exit status is 1 either way — a caller reading the status alone takes a
+merge that landed for one that failed. The remote head branch stands too, unless the
+repository setting "Automatically delete head branches" is on, which takes it with the
+merge.
+
+The recovery frees the branch the refusal named — `git -C <path> switch <other>` in the
+worktree holding it, `git -C <path> switch --detach` where that worktree has nowhere else to
+stand, or `git worktree remove <path>` for a linked worktree that is finished with — and
+then what is left takes one command each:
+
+| What is left | What it takes |
+|---|---|
+| the local head branch | the same `gh pr merge <n> --merge --delete-branch` again, after either refusal: it answers `! Pull request <owner>/<repo>#<n> was already merged` with an exit status of 0, switches a tree still holding the head branch onto the base branch, deletes the head branch, and reaches no remote branch. `git branch -d <name>` deletes it too, and, run from the base branch, answers `error: the branch '<name>' is not fully merged` until that branch carries the merge |
+| the remote head branch | `git push origin --delete <name>`, which answers `error: unable to delete '<name>': remote ref does not exist` where the branch went with the merge |
 
 `merge-async` is a second merge endpoint `gh` exposes no command for, and the one a
 registered stack takes — see Stacks. The synchronous merge above is the default path.
