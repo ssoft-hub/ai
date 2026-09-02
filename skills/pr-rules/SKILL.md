@@ -181,6 +181,10 @@ of them names a moment.
 - [ ] Every module reference the branch records satisfies the merge order the module-sync skill of the version control system fixes
 - [ ] Every test-plan box in the PR description is checked, or the item is named out of scope with a reason
 - [ ] A comment is added to the issue recording which PR/MR resolves which item (`issue-rules` → Progress Comments)
+- [ ] No review thread of the pull request stands unresolved, unless `editing` → Guard Against a Stale Reading admits the merge
+
+The head guard the CLI skill of the hosting platform names does not cover the
+review-thread box: a thread opened after the thread list was last read moves no commit.
 
 ## Merge Strategy
 
@@ -191,8 +195,9 @@ of them names a moment.
    naming this PR, which does not carry to the next one: the authorisation is per pull
    request, so a command merging several needs an instruction naming each of them.
 3. **Rebase before merge.** `git rebase <target>`, then merge from the current target
-   tip; the rebase moves the head, so it returns to the Publish step and the checks of
-   that moment run again (`work-sequence` → When a Check Runs).
+   tip; the rebase moves the head, so the branch returns to the Publish step and the
+   checks of that moment run again (`work-sequence` → When a Check Runs). The merge is
+   guarded with the head SHA read afterwards (`editing` → Guard Against a Stale Reading).
 4. **`--no-ff` only.** No fast-forward merge, no squash merge.
 5. **Merge subject:** `Merge PR #<pr-number>: <pr subject>`, the PR subject verbatim
    and never re-prefixed with `type(scope):`, so a tracker ID in the title leaves both
@@ -206,6 +211,9 @@ of them names a moment.
    before the branch is sent, never at merge time: a rewrite afterwards takes a
    force-push and owes every check that step ran.
 10. **Rewrite squashed commit bodies** per `commit-rules` → Fixup / Squash Merges.
+11. **Read the thread list before the merge command.** Immediately before it, read the review
+    threads again and match them against the list read when the review was addressed
+    (`editing` → Guard Against a Stale Reading).
 
 The command performing the merge, and the repository settings it depends on, belong to
 the CLI skill of the hosting platform.
@@ -226,6 +234,7 @@ is split before review.
 - `issue-rules` — the issue this PR resolves: title, templates, labels, lifecycle, progress comments.
 - `commit-rules` — commit message format and branch naming on the PR's branch.
 - `code-review-and-quality` — what a review looks for, where this skill states how a finding is worded.
+- `editing` — the head-SHA read Merge Strategy turns on, the thread-list read it owes before the merge command, and the thread state the Pre-Merge Checklist reads.
 - `writing-style` — prose register in the description and in the review threads.
 - `ci-cd-and-automation` — the pipeline answering the checks reported on the pull request.
 - The module-sync skill of the version control system — the pre-PR check and the merge order the checklists gate on.

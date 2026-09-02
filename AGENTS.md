@@ -87,7 +87,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `ddd` — modelling inside one bounded context.
 - `debugging` — the investigation that precedes a fix.
 - `deprecation-and-migration` — retiring a public path.
-- `editing` — the edit mechanic itself.
+- `editing` — the guard against a stale reading of a file, of a tracker or forge artifact, and of the branch head at a merge.
 - `github-cli` — `gh` mechanics.
 - `gitlab-cli` — `glab` mechanics.
 - `hook-scripts` — writing this repository's hooks and tools.
@@ -171,7 +171,7 @@ missing value.
 | Skill | Stage | Trigger | Input | Output | Entry criterion | Exit criterion |
 |-------|-------|---------|-------|--------|------------------|-----------------|
 | `deprecation-and-migration` | Implement | retiring a public API, planning a breaking change, or writing a migration guide | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
-| `editing` | cross-cutting | an Edit or Write tool call on a file in the project | the file's content before the call | the file's content after the call | the file in scope for the task, per `editing` → Edit Scope | the checks a round of edits runs, per `work-sequence` → When a Check Runs |
+| `editing` | cross-cutting | a write to a file, a tracker issue body or a PR description, and a merge | the artifact as it stands before the write | the artifact as it stands after the write | a reading of the artifact, per `editing` → Guard Against a Stale Reading | the checks a round of edits runs, per `work-sequence` → When a Check Runs |
 | `hook-scripts` | Implement | writing or modifying a file under `hooks/` or `tools/` | the event or tool the change routes to | a dispatcher or tool file matching the Dispatcher or Tool Skeleton | the feature branch named per `commit-rules` → Branch Naming | the test file `node-testing` covers for the tool, `test/<name>.test.js` |
 | `node-testing` | Implement | writing or reviewing a file under `test/*.test.js` | the pure logic exported by the hook or tool under test | a test file asserting that logic's behaviour | the tool's exported logic, per `hook-scripts` → Tool Skeleton | the tool covered and `npm test` run, per `hook-scripts` → Adding or Retiring a Tool |
 | `observability-and-instrumentation` | cross-cutting | adding logging, metrics, or tracing, or checking a running system's reported behaviour | the question an on-call engineer needs answered | a structured log line, metric, or trace answering it | the non-functional requirement `requirements` → Functional vs Non-Functional records | the Readiness Checklist item `shipping-and-launch` → Readiness Checklist for monitoring |
