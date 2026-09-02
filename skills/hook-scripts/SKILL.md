@@ -13,6 +13,7 @@ metadata:
   paths:
     - "**/hooks/*.js"
     - "**/tools/*.js"
+  project-relation: binding
   with:
     - "comments"
   tags:
@@ -23,6 +24,14 @@ metadata:
 # Skill: Claude Code Hook Scripts
 
 Apply when writing or modifying hook scripts in `~/.claude/hooks/` or `~/.claude/tools/`.
+
+## Project Binding
+
+**Must**
+
+Must apply this skill in the `claude-config` repository alone: it states that
+repository's own conventions, and no project with a different layout takes them as a
+fallback.
 
 ## Hard Rules
 

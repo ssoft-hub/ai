@@ -36,9 +36,10 @@ competing designs, or writing an Architecture Decision Record (ADR).
 
 ## Project Overrides
 
-Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its
-own architecture process or ADR location, follow those instead. This skill is the
-fallback for projects that do not specify their own.
+**Must**
+
+Must follow the architecture conventions and the ADR location the repository's
+`AGENTS.md` file or a project skill defines, instead of the rule here.
 
 ---
 

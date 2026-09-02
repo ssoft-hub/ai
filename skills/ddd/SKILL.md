@@ -23,6 +23,13 @@ language being written. This skill covers domain modelling only.
 
 Reference: Eric Evans, *Domain-Driven Design* (2003). Patterns below are the strategic and tactical core.
 
+## Project Overrides
+
+**Must**
+
+Must follow the domain-modelling conventions the repository's `AGENTS.md` file or a
+project skill defines, instead of the rule here.
+
 ---
 
 ## Ubiquitous Language

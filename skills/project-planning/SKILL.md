@@ -31,9 +31,10 @@ meant for stakeholders.
 
 ## Project Overrides
 
-Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its
-own planning process or templates, follow those instead. This skill is the fallback
-for projects that do not specify their own.
+**Must**
+
+Must follow the planning process or templates the repository's `AGENTS.md` file or a
+project skill defines, instead of the rule here.
 
 ---
 

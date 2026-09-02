@@ -12,6 +12,7 @@ metadata:
   reminder: false
   paths:
     - "**/test/*.test.js"
+  project-relation: binding
   with:
     - "test-driven-development"
   tags:
@@ -28,6 +29,14 @@ see `hook-scripts` skill).
 - Writing the hook/tool itself → `hook-scripts` skill.
 - Tests in another language → the testing skill of that language (different runner,
   different conventions — do not mix the two).
+
+## Project Binding
+
+**Must**
+
+Must apply this skill in the `claude-config` repository alone: it states that
+repository's own conventions, and no project with a different layout takes them as a
+fallback.
 
 ---
 

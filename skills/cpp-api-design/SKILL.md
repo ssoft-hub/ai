@@ -22,6 +22,13 @@ Apply when designing a new C++ API, adding public C++ headers, or reviewing publ
 
 Access-level choice within a single type → `cpp-encapsulation` skill.
 
+## Project Overrides
+
+**Must**
+
+Must follow the C++ API design conventions the repository's `AGENTS.md` file or a
+project skill defines, instead of the rule here.
+
 ## Structural Rules
 
 - **Namespace hierarchy**: public symbols in consistent `lib::` or `lib::module::` namespace; check project `AGENTS.md` for exact namespace.
