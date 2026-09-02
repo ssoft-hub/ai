@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
 - A skill declares its relation to the conventions of the project it is applied in, as `project-relation` in its frontmatter: `overrides` where absent, and `binding` for a skill stating this repository's own conventions, which carries `## Project Binding` in place of `## Project Overrides`
 - What introduces an enumeration names what it holds, and what closes one is the statement that nothing else belongs to it rather than a count announced above it
 - A conversation is written in the personal register and every other text in the impersonal one, which fixes the subject of a sentence as well as the form a prescription takes
