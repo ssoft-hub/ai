@@ -39,7 +39,7 @@ project skill defines, instead of the rule here.
 - **`public`** — only members actually used from outside the class: the genuine external contract.
 - **`protected`** — only members actually used by derived classes (extension points, never a substitute for `public` "just in case"). Prefer `protected` virtual methods over `protected` data members — derived classes should go through behavior, not touch raw state.
 - **`private`** — everything else, including implementation helpers and internals derived classes don't need.
-- **Reviewing existing code** — a `public` method with no external caller demotes to `private`; one only called by derived classes demotes to `protected`.
+- **Reviewing existing code** — a `public` method with no external caller demotes to `private`; one only called by derived classes demotes to `protected`. Where the set of callers deciding that comes from → `code-navigation` skill.
 - **`friend`** — only for tightly-coupled pairs (e.g. a builder and its product), never as a shortcut to avoid picking the right access level.
 
 **Why:** every `public` member is a promise to every caller — widening later is free, narrowing is a breaking change. Defaulting to `private` keeps that promise as small as possible until proven otherwise.

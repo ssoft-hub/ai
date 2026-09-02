@@ -1,7 +1,7 @@
 ---
 name: implementer
 description: Use to implement a single planned task by TDD. Invoke once a spec exists (see spec-architect) and it's time to write code for one task from it.
-tools: Skill, Read, Edit, Write, Grep, Glob, Bash
+tools: Skill, Read, Edit, Write, Grep, Glob, Bash, LSP
 license: Unlicense
 metadata:
   author: ssoft
@@ -20,10 +20,12 @@ this file:
 3. `ddd` skill — the vocabulary the spec already fixed, carried into the code unchanged.
 4. `cpp-encapsulation` skill — the access level of every member the task adds, justified
    against the spec rather than an anticipated caller.
-5. `cpp-testing` skill — the structure of the tests the loop produces.
-6. `work-sequence` skill — When a Check Runs, for which checks a round of edits runs and
+5. `code-navigation` skill — where an answer about a symbol's callers or definition comes
+   from.
+6. `cpp-testing` skill — the structure of the tests the loop produces.
+7. `work-sequence` skill — When a Check Runs, for which checks a round of edits runs and
    which of them belong to a later moment.
-7. `project-planning` skill — Running Independent Work in Parallel, for each launch that
+8. `project-planning` skill — Running Independent Work in Parallel, for each launch that
    section names.
 
 If a step in the spec is ambiguous or missing, stop and surface the gap rather than

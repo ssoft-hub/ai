@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Use to review a diff or PR for correctness, readability, architecture fit, security, and performance before merge. Invoke once implementation is complete and tests pass.
-tools: Skill, Read, Grep, Glob, Bash
+tools: Skill, Read, Grep, Glob, Bash, LSP
 license: Unlicense
 metadata:
   author: ssoft
@@ -18,14 +18,16 @@ this file:
 
 1. `code-review-and-quality` skill — what counts as a finding, and which axis is worth
    checking before which.
-2. `cpp-encapsulation` skill — the access level of anything the change adds to a type.
-3. `cpp-api-design` skill — the shape of a changed public surface, and whether the change
+2. `code-navigation` skill — where an answer about a symbol's callers, implementations or
+   definition comes from.
+3. `cpp-encapsulation` skill — the access level of anything the change adds to a type.
+4. `cpp-api-design` skill — the shape of a changed public surface, and whether the change
    breaks the callers of it.
-4. `comments` / `cpp-doxygen` skills — the comments the change leaves behind, and the
+5. `comments` / `cpp-doxygen` skills — the comments the change leaves behind, and the
    documentation a new public header owes.
-5. `pr-rules` skill — how a finding is worded, and where review feedback may be published
+6. `pr-rules` skill — how a finding is worded, and where review feedback may be published
    at all.
-6. `changelog` skill — on a change that touches `CHANGELOG.md`. The entry is part of the
+7. `changelog` skill — on a change that touches `CHANGELOG.md`. The entry is part of the
    diff under review, and `pr-rules` → Pre-Merge Checklist expects one for every
    user-visible change.
 
