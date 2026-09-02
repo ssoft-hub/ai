@@ -115,6 +115,7 @@
 - The `security-and-hardening` containment and overflow rules state the control and the input classes a guard must answer, in terms tied to no language. The code examples are gone, and with them the advice they carried: a string comparison of resolved paths, and a check reading the sum
 - Renamed three steps of the order of work after what they achieve: `Push` is now `Publish`, `PR` is `Offer for review`, and `Merge commit` is `Integrate`; `AGENTS.md` -> Lifecycle map carries the same names
 - `AGENTS.md` states the project, the two maps and one pointer per mechanism. Writing a hook or a tool, and adding or retiring one, is read from `hook-scripts`; what each dispatcher routes where from `README.md` -> Hooks; adding a persona or a command from its template
+- `editing` now covers a tracker issue's body and checklist, a PR description, a review thread and a merge, naming the guard or the re-read procedure for each; `pr-rules` -> Pre-Merge Checklist gains the review-thread box
 
 ### Removed
 
