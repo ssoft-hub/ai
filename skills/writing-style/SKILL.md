@@ -33,9 +33,8 @@ written in, not its shape.
 
 **Must**
 
-Must follow a writing-style convention the repository's `AGENTS.md` file or a project
-skill states, instead of the rule here. This skill applies where a project states none of
-its own.
+Must follow the writing-style conventions the repository's `AGENTS.md` file or a project
+skill defines, instead of the rule here.
 
 ## This Skill Above Any Mode
 

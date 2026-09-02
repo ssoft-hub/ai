@@ -17,6 +17,13 @@ metadata:
 
 Apply when editing any file in the project.
 
+## Project Overrides
+
+**Must**
+
+Must follow the editing workflow the repository's `AGENTS.md` file or a project skill
+defines, instead of the rule here.
+
 ## Re-Read Before Edit
 
 Always issue a fresh `Read` of the target file immediately before editing it — even if it was read earlier in the same session.

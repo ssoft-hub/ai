@@ -32,9 +32,8 @@ help is silent or misleading. No rule about *when* an action is allowed lives he
 
 **Must**
 
-Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own
-`glab` conventions, follow those instead. This skill is the fallback for projects that do
-not specify their own.
+Must follow the `glab` conventions the repository's `AGENTS.md` file or a project skill
+defines, instead of the rule here.
 
 ---
 

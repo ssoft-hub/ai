@@ -25,9 +25,10 @@ acceptance criteria, or turning a vague ask into a spec before design starts.
 
 ## Project Overrides
 
-Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its
-own requirements process, follow those instead. This skill is the fallback for projects
-that do not specify their own.
+**Must**
+
+Must follow the requirements process the repository's `AGENTS.md` file or a project skill
+defines, instead of the rule here.
 
 ---
 

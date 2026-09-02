@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- A skill declares its relation to the conventions of the project it is applied in, as `project-relation` in its frontmatter: `overrides` where absent, and `binding` for a skill stating this repository's own conventions, which carries `## Project Binding` in place of `## Project Overrides`
 - What introduces an enumeration names what it holds, and what closes one is the statement that nothing else belongs to it rather than a count announced above it
 - A conversation is written in the personal register and every other text in the impersonal one, which fixes the subject of a sentence as well as the form a prescription takes
 - A word naming what a thing is stands beside its name, wherever a sentence uses that name as a noun
@@ -66,6 +67,7 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- The `## Project Overrides` section reads the same in every skill, one sentence differing only in the topic it names, and every skill carries one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository
 - `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form
 - `pr-rules` → Merge Strategy 2 answers a command that merges several pull requests at once: the authorisation is per pull request, so such a command needs an instruction naming each of them

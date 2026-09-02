@@ -21,6 +21,13 @@ Framework choice is project-specific (check `AGENTS.md`). This skill covers prin
 
 - The fail, pass, refactor order these tests are written in → `test-driven-development` skill.
 
+## Project Overrides
+
+**Must**
+
+Must follow the C++ test conventions the repository's `AGENTS.md` file or a project skill
+defines, instead of the rule here.
+
 ---
 
 ## What to Test

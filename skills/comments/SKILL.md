@@ -30,6 +30,13 @@ Apply when writing or reviewing a code comment in any language (inline notes, im
 
 Documentation blocks on a public header → the API-documentation skill of the language being written. This skill covers every other comment, in every language: inside function bodies, in implementation files, in a hook script, a build file or a configuration file. Implementation conventions (types, resource handling, naming) → the coding-conventions skill of the language being written.
 
+## Project Overrides
+
+**Must**
+
+Must follow the comment conventions the repository's `AGENTS.md` file or a project skill
+defines, instead of the rule here.
+
 ---
 
 ## Philosophy

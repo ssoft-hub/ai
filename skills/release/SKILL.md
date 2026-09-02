@@ -21,7 +21,10 @@ Project `AGENTS.md` specifies which files contain version strings.
 
 ## Project Overrides
 
-Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own release process, follow those instead. This skill is the fallback for projects that do not specify their own.
+**Must**
+
+Must follow the release process the repository's `AGENTS.md` file or a project skill
+defines, instead of the rule here.
 
 ## Step 1 — Decide Version (semver)
 

@@ -22,7 +22,10 @@ Apply when writing commit messages or reviewing commits.
 
 ## Project Overrides
 
-Project-local rules win. If the repository's `AGENTS.md` or a project skill defines its own commit conventions, follow those instead. This skill is the fallback for projects that do not specify their own.
+**Must**
+
+Must follow the commit and branch-naming conventions the repository's `AGENTS.md`
+file or a project skill defines, instead of the rule here.
 
 ---
 
