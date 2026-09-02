@@ -23,6 +23,8 @@ this file:
 5. `cpp-testing` skill — the structure of the tests the loop produces.
 6. `work-sequence` skill — When a Check Runs, for which checks a round of edits runs and
    which of them belong to a later moment.
+7. `project-planning` skill — Running Independent Work in Parallel, for each launch that
+   section names.
 
 If a step in the spec is ambiguous or missing, stop and surface the gap rather than
 guessing — that gap belongs to `spec-architect`, not to an implementation-time

@@ -107,7 +107,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `observability-and-instrumentation` | Logging, metrics, tracing for production visibility |
 | `performance-optimization` | Profile-measure-optimize workflow for a reported performance problem |
 | `pr-rules` | PR title, description, review comments, merge strategy |
-| `project-planning` | Scoping, estimation, milestones, risk, status updates |
+| `project-planning` | Scoping, estimation, milestones, risk, status updates, and the launch of independent work at once |
 | `release` | Semver release workflow |
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
 | `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |

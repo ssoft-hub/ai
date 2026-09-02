@@ -96,7 +96,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `observability-and-instrumentation` — telemetry for production visibility.
 - `performance-optimization` — the process around one performance problem.
 - `pr-rules` — the pull request, from opening it to merging it.
-- `project-planning` — stakeholder-facing planning.
+- `project-planning` — stakeholder-facing planning, and whether independent work runs at the same time.
 - `release` — the version number and the mechanical steps to ship it.
 - `requirements` — turning an ask into a requirement.
 - `security-and-hardening` — design-time security.
@@ -153,7 +153,7 @@ stage with no command or persona of its own says so rather than naming the neare
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
 | Scope and issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
 | Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `commit-rules` per commit |
+| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
 | Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
 | Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
 | Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |

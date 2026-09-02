@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
 - A skill declares its relation to the conventions of the project it is applied in, as `project-relation` in its frontmatter: `overrides` where absent, and `binding` for a skill stating this repository's own conventions, which carries `## Project Binding` in place of `## Project Overrides`
 - What introduces an enumeration names what it holds, and what closes one is the statement that nothing else belongs to it rather than a count announced above it
