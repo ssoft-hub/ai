@@ -153,7 +153,7 @@ stage with no command or persona of its own says so rather than naming the neare
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
 | Scope and issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
 | Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`; `debugging` on a fix; `commit-rules` per commit |
+| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `commit-rules` per commit |
 | Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
 | Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
 | Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
@@ -162,6 +162,22 @@ stage with no command or persona of its own says so rather than naming the neare
 | Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
 | Close issue | — | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
 | Release | — (`release-manager` directly) | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
+
+A second table follows, one row for each skill named in no `Skills` cell above. Its
+`Stage` cell holds a stage name of the table above, or the word `cross-cutting` — itself
+a declaration that the skill fires at more than one stage of the table above, not a
+missing value.
+
+| Skill | Stage | Trigger | Input | Output | Entry criterion | Exit criterion |
+|-------|-------|---------|-------|--------|------------------|-----------------|
+| `deprecation-and-migration` | Implement | retiring a public API, planning a breaking change, or writing a migration guide | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
+| `editing` | cross-cutting | an Edit or Write tool call on a file in the project | the file's content before the call | the file's content after the call | the file in scope for the task, per `editing` → Edit Scope | the checks a round of edits runs, per `work-sequence` → When a Check Runs |
+| `hook-scripts` | Implement | writing or modifying a file under `hooks/` or `tools/` | the event or tool the change routes to | a dispatcher or tool file matching the Dispatcher or Tool Skeleton | the feature branch named per `commit-rules` → Branch Naming | the test file `node-testing` covers for the tool, `test/<name>.test.js` |
+| `node-testing` | Implement | writing or reviewing a file under `test/*.test.js` | the pure logic exported by the hook or tool under test | a test file asserting that logic's behaviour | the tool's exported logic, per `hook-scripts` → Tool Skeleton | the tool covered and `npm test` run, per `hook-scripts` → Adding or Retiring a Tool |
+| `observability-and-instrumentation` | cross-cutting | adding logging, metrics, or tracing, or checking a running system's reported behaviour | the question an on-call engineer needs answered | a structured log line, metric, or trace answering it | the non-functional requirement `requirements` → Functional vs Non-Functional records | the Readiness Checklist item `shipping-and-launch` → Readiness Checklist for monitoring |
+| `performance-optimization` | Implement | diagnosing a reported performance problem, or evaluating a change's performance cost | a profiler or benchmark baseline for the hot path | a measured before/after comparison for the fix | the symptom and cost the bug template of `issue-rules` → Description Template asks for | the hot-path check `code-review-and-quality` → Performance runs before merge |
+| `skill-authoring` | Implement | adding, marking, renaming or retiring a skill, or marking a command | the skill or command file and its frontmatter | a skill or command file matching the rubric, or its removal | the tracked issue's title naming the skill, per `issue-rules` → Title | the `### Changed` or `### Removed` entry `changelog` → Subsections requires |
+| `writing-style` | cross-cutting | writing documentation, an issue, a PR, a commit, or any text artifact | a draft sentence or document | prose in the technical register with its force word named | the draft of the artifact whose structure `issue-rules`, `pr-rules` or `commit-rules` fixes | the re-read `writing-style` → Self-Check Before Sending requires before the text is sent |
 
 No row assigns an issue-state transition to a role: `issue-rules` → Lifecycle defines each
 state by a condition rather than by an act with an actor. The acts reserved to the human
