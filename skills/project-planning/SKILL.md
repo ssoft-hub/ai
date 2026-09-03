@@ -1,7 +1,7 @@
 ---
 name: project-planning
 version: "1.0.0"
-description: Apply when scoping work, breaking a feature down into tasks, estimating effort, sequencing milestones, identifying risk or dependencies, or writing a project plan or status update
+description: Apply when scoping work, breaking a feature down into tasks, estimating effort, sequencing milestones, identifying risk or dependencies, writing a project plan or status update, or launching a build, a test run, a set of checks or several agents at once
 license: Unlicense
 metadata:
   author: ssoft
@@ -16,14 +16,15 @@ metadata:
 # Skill: Project Planning & Management
 
 Apply when scoping work, breaking a feature into tasks, estimating effort, sequencing
-milestones, identifying risk/dependencies, or writing a project plan or status update
-meant for stakeholders.
+milestones, identifying risk/dependencies, writing a project plan or status update meant
+for stakeholders, or launching a build, a test run, a set of checks or several agents at
+once.
 
-- This is for project-level planning artifacts shared with stakeholders — a roadmap, a
-  scoping doc, a status report. It is not the same thing as Claude's own in-conversation
-  task plan (the `Plan`/writing-plans tooling used to plan a single coding task); don't
-  conflate the two, and don't apply this skill's ceremony to a plan that's just
-  "what I'm about to do this turn."
+- The planning artifacts are the project-level ones shared with stakeholders — a roadmap,
+  a scoping doc, a status report. The ceremony they carry does not reach an
+  in-conversation task plan for a single coding task, which the `Plan` tooling covers.
+  Running Independent Work in Parallel is the exception: it governs a launch whatever the
+  plan behind it.
 - A plan is built from settled requirements — if those don't exist yet, go get them
   first → `requirements` skill.
 - PR Size discipline and the release checklist are the execution-time tail end of a
@@ -76,6 +77,52 @@ work built on top of an assumption that didn't hold.
 A risk worth naming explicitly has: what could go wrong, how you'd notice it happening,
 and what the fallback is if it does. A risk list without those three things is just a
 list of worries, not something the plan can act on.
+
+## Running Independent Work in Parallel
+
+**Should**
+
+Should launch independent units of work at the same time rather than one after another,
+and should treat two units as independent when neither reads what the other writes and
+the two write nothing in common — a file, a database row, a state key, or a path either
+takes from a shared environment variable among them. The path written is what counts, so
+two units contend over a directory only where they create or remove the same entry of it,
+or where one enumerates it while the other adds an entry. Should read the test over every
+pair of the launch, and should run a pair that is not independent in sequence, by the
+dependencies the section Identifying Dependencies and Risk establishes.
+
+Should bound the degree of parallelism by each of the rows below and take the lowest
+bound they give; no bound outside the table applies:
+
+| The resource | The bound it puts on the degree |
+|---|---|
+| the CPU cores no other work holds, for a unit that occupies one while it runs rather than waiting | their number |
+| a resource consumed in a divisible capacity — memory | the free capacity divided by one unit's peak, measured on this unit or on a previous run of it |
+| a resource held one user at a time, a licence and a device only one process may open among them | the number of instances of it |
+| a resource carrying throughput, the disk and the network among them | none, unless the units saturate it, and then the measured degree past which the run stops getting shorter |
+| a quota over units running at once — a rate limit, a runner pool, a platform's own limit on concurrent jobs | the quota |
+
+A split past the lowest of them shortens no run. Each row names instances of its kind
+rather than all of them, and a resource of a kind the table names is bound by that row.
+Should run one unit alone where a row needs a measurement no run has taken yet, and
+should bound the launch by that row once the run has taken it.
+
+Should reconcile a pipeline stage's launch with the cheapest-check-first order of the
+section Fast Feedback First of `ci-cd-and-automation`, by what the stage cancels. A stage
+should launch every independent unit at once where it cancels the rest of that stage on
+the first failure, which the key `fail-fast` of a `strategy` block does at its default of
+`true` over the jobs of one matrix. A stage cancelling nothing should still launch every
+unit at once, except that it should run one check alone first where no other unit of the
+stage can pass if that check fails, taking the one with the shortest recorded run time
+or, where none is recorded, the cheapest to run. The key `cancel-in-progress` of a
+`concurrency` block, which sits at workflow or job level, cancels a run or a job a newer
+one of the same group replaces, and decides nothing here.
+
+The rule reaches a build launched by the commands `make -j`, `cmake --build <dir> -j` or
+`ninja -j`, whose default sits above the bound the table gives; a test run launched by
+`ctest -j`, or by `node --test`, whose degree the flag `--test-concurrency=<n>` sets; a set of checks over one change, whether several tools or
+one tool in several configurations, the jobs of one pipeline stage included; and the
+dispatch of several agents in one message. Nothing else belongs to that list.
 
 ## What a Milestone Plan Should Contain
 

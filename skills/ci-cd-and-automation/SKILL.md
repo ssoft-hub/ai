@@ -55,6 +55,10 @@ Order pipeline stages from fastest/cheapest to slowest/most expensive (lint befo
 build, unit tests before integration tests, single-platform build before the full
 matrix) so a broken change fails in seconds, not after a 20-minute matrix build.
 
+A stage should launch its independent jobs at once by default. Which jobs qualify, what
+bounds the degree, and how the launch squares with the ordering above are stated in
+`project-planning` → Running Independent Work in Parallel.
+
 ## Matrix Coverage
 
 Run the test matrix across every combination the project actually ships to (compiler
@@ -95,12 +99,14 @@ it locally first.
 ## Keeping the Pipeline Fast
 
 Once a pipeline exceeds a comfortable wait (rule of thumb: ~10 minutes), apply these in
-order of impact before adding more hardware: cache dependencies between runs; split
-independent checks (lint, build, test) into parallel jobs instead of one long sequential
-job; skip jobs a change can't affect (e.g. skip a full matrix build for a docs-only
-change); shard a large test suite across runners; move slow, non-blocking checks to a
-scheduled run instead of every push. Reach for a larger/faster runner last — it hides
-the cost instead of removing it.
+order of impact before adding more hardware: cache dependencies between runs; skip jobs a
+change can't affect (e.g. skip a full matrix build for a docs-only change); shard a large
+test suite across runners; move slow, non-blocking checks to a scheduled run instead of
+every push. Reach for a larger/faster runner last — it hides the cost instead of removing
+it.
+
+The parallel split of independent jobs is the default arrangement rather than a remedy on
+this list; the section Fast Feedback First states it.
 
 ## Someone Owns a Failing Build
 
