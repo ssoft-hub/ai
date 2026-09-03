@@ -56,6 +56,17 @@ step. Neither spoken register, nor marketing tone, nor the slang of a chat.
 | hedging padding | "I think maybe", "possibly" |
 | a pleasantry carrying no information | "great question", "happy to help" |
 
+## Cut What Carries No Meaning, Not Words
+
+**Should**
+
+Should cut every part of a text carrying no meaning of its own: what the reader already
+knows, what the text has said once, a quotation of what the reader can open, and a
+retelling of what a named artifact states. Should keep whole whatever survives that cut —
+a full sentence, no word shortened, no structure dropped to save room. Brevity is what a
+text has left once the meaningless is gone, never what it has left once the words are
+counted down.
+
 ## State the Result, Not the Process
 
 **Should**
