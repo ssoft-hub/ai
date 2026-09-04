@@ -15,6 +15,7 @@ metadata:
   project-relation: binding
   with:
     - "test-driven-development"
+    - "testing"
   tags:
     - testing
     - node
@@ -27,6 +28,9 @@ tools, or install/uninstall logic (e.g. `~/.claude/hooks/`, `~/.claude/tools/` �
 see `hook-scripts` skill).
 
 - Writing the hook/tool itself → `hook-scripts` skill.
+- The principles a test holds to whatever the language — the levels of verification, the
+  isolation of a unit test, test data and the environment, determinism between runs, the
+  layout of a test and the boundaries it covers → `testing` skill.
 - Tests in another language → the testing skill of that language (different runner,
   different conventions — do not mix the two).
 
@@ -70,18 +74,17 @@ test('warns on rm -r foo/', () => {
 });
 ```
 
-Name the test after the behavior, not the input — `'blocks rm -rf /'`, not
-`'test case 1'` or `'check function'`. A failing test name should tell you what broke
-without opening the file.
+The name is a string here, and it states the behaviour: `'blocks rm -rf /'`, not
+`'test case 1'` or `'check function'`.
 
 Only reach for `describe` if a file's tests genuinely split into unrelated concerns
 that would otherwise be hard to scan — most tool/hook test files won't need it.
 
 ## One Behavior Per Test
 
-Each `test()` checks one input → one expected outcome. Don't fold multiple unrelated
-assertions into a single test — when it fails, you want the test name to already tell
-you which case broke, not "one of these five assertions."
+The rule is `testing` → One Behaviour per Test, Named by It. Here it reads:
+each `test()` checks one input → one expected outcome, and the string naming it says
+which case broke.
 
 ## Testing Pure Logic Directly
 
@@ -109,10 +112,11 @@ assert.strictEqual(r.status, 2);
 
 ## Filesystem Fixtures
 
-Any test that touches the filesystem (install/uninstall, manifest writes) must run
-against a temp directory, never the real `~/.claude/`. Use the `CLAUDE_CONFIG_DIR`
-env override (the same one the hooks themselves resolve against — see `hook-scripts`
-skill) to redirect the script under test into an isolated temp dir:
+The rule for a test touching the filesystem is `testing` → Test Data and the Environment;
+what Node offers for it is the call `fs.mkdtempSync` over the directory `os.tmpdir()` gives, never the real
+`~/.claude/`. Use the `CLAUDE_CONFIG_DIR` env override (the same one the hooks themselves
+resolve against — see `hook-scripts` skill) to redirect the script under test into that
+directory:
 
 ```javascript
 function mkTmp() {
@@ -136,8 +140,7 @@ test('install creates files and manifest on empty dir', () => {
 });
 ```
 
-Always clean up in a `finally` block — a failed assertion must not leave a stray temp
-directory behind, and must not skip cleanup either.
+The cleanup goes in a `finally` block, which runs on the failing path too.
 
 ## What to Cover
 

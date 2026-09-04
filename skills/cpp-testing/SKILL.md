@@ -8,6 +8,8 @@ metadata:
   tier: domain
   bound-to:
     - cpp
+  with:
+    - "testing"
   tags:
     - cpp
     - testing
@@ -17,9 +19,11 @@ metadata:
 
 Apply when writing, reviewing, or adding tests to C++ code.
 
-Framework choice is project-specific (check `AGENTS.md`). This skill covers principles only.
+The examples are GoogleTest's; a project on another framework substitutes that framework's
+own macros (check `AGENTS.md`).
 
 - The fail, pass, refactor order these tests are written in → `test-driven-development` skill.
+- The levels of verification, the isolation of a unit test, test data and the environment, determinism between runs, the mutation check on a fail step, and an assertion resting on an implementation-defined value → `testing` skill.
 
 ## Project Overrides
 
@@ -38,7 +42,9 @@ defines, instead of the rule here.
 
 ## Test Structure — AAA
 
-Each test follows three clearly separated phases:
+The three phases and the rule that no two of them merge are stated by `testing` → Test
+Layout - Arrangement, Action, Assertion. The three, written with the macro `TEST` of
+GoogleTest:
 
 ```cpp
 TEST(Money, AdditionProducesSumInSameCurrency) {
@@ -54,16 +60,14 @@ TEST(Money, AdditionProducesSumInSameCurrency) {
 }
 ```
 
-Never merge phases. "Arrange" sets up state. "Act" calls exactly one thing. "Assert" checks outcome.
+## One Reason to Fail in GoogleTest
 
-## One Reason to Fail
-
-Each test checks one behaviour — one logical assertion. Multiple `EXPECT_*` are allowed only when they together verify a single concept.
+One behaviour per test, and the name stating it, are `testing` → One Behaviour per Test,
+Named by It. GoogleTest's own means: several `EXPECT_*` in one body only where they
+establish that one behaviour together.
 
 - Bad: a test that checks addition, subtraction, and formatting in one body
 - Good: three separate tests, each failing for a distinct reason
-
-When a test fails, the name alone must tell the reader what broke.
 
 ## Test Names as Documentation
 
@@ -78,9 +82,10 @@ Container_InsertBeyondCapacity_GrowsAutomatically
 
 No `Test` prefix, no `test_` prefix — the framework already marks it as a test.
 
-## Boundary Cases Are Mandatory
+## Boundary Cases in C++
 
-For every function, write tests for:
+The obligation to cover a boundary and the kinds of boundary there are: `testing` →
+Boundary Cases. What each kind is in C++:
 
 | Boundary | Examples |
 |----------|---------|
@@ -90,25 +95,19 @@ For every function, write tests for:
 | Invalid input | null pointer, negative where positive expected |
 | Exact threshold | values at `==`, `<`, `>` of a documented limit |
 
-If the function documents a precondition, test the boundary just inside and just outside it.
+## Isolation and Determinism in C++
 
-## Test Isolation
+What a unit test may reach, and what holds between two runs of one: `testing` → Unit Test
+Isolation and `testing` → Determinism and Independence Between Runs. A collaborator to be
+replaced by a fake, a stub or a mock: `test-driven-development` → Prefer the Real Thing
+Over a Test Double gives the order to reach for.
 
-- Tests must not share mutable state — each test starts from a clean, deterministic state
-- No global variables mutated across tests; use fixtures (setup/teardown) instead
-- No order dependency — tests must pass in any execution order
+GoogleTest's own means for both:
 
-## Unit Test Scope
-
-Unit tests are fast and isolated:
-
-- No network, no disk I/O, no database — mock or stub infrastructure at the boundary
-- No `sleep` or time-based waits — use injectable clocks or time abstractions
-- Each test completes in milliseconds
+- A fixture class deriving from `::testing::Test`, with `SetUp` and `TearDown`, in place of a variable at namespace scope
+- An injected clock in place of `std::this_thread::sleep_for`
 
 ## Do Not
 
 - Do not test private members directly — redesign if they need testing
 - Do not copy production code into tests to "validate" it — test through the public interface
-- Do not suppress or ignore failing tests — fix or explicitly skip with a documented reason
-- Do not write tests that always pass (assertion-free tests)

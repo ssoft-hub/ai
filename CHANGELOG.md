@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- `testing` skill, owning in any language the levels of verification, test data and the environment, a boundary a test crosses, determinism between runs, the mutation showing a fail step failed for its intended reason, the values an assertion may not rest on, and when a suite may be trusted
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
@@ -70,6 +71,7 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- `cpp-testing` and `node-testing` keep the means their runner gives and what their own tests cover, `test-driven-development` the order of the work and `ci-cd-and-automation` the pipeline; the level, layout, data, boundaries and repeatability of a test move to `testing`, which `implementer` loads
 - `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one
 - The `## Project Overrides` section reads the same in every skill, one sentence differing only in the topic it names, and every skill carries one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository

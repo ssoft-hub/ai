@@ -51,9 +51,10 @@ or command both the pipeline and a developer invoke (see this repo's own
 
 ## Fast Feedback First
 
-Order pipeline stages from fastest/cheapest to slowest/most expensive (lint before
-build, unit tests before integration tests, single-platform build before the full
-matrix) so a broken change fails in seconds, not after a 20-minute matrix build.
+Order pipeline stages from fastest/cheapest to slowest/most expensive: lint before build,
+then each level `testing` → Levels of Verification defines, cheapest first, and a
+single-platform build before the full matrix. A broken change then fails in seconds
+rather than after a 20-minute matrix build.
 
 A stage should launch its independent jobs at once by default. Which jobs qualify, what
 bounds the degree, and how the launch squares with the ordering above are stated in
@@ -81,10 +82,11 @@ job that needs it, never share one broad credential across every job in the pipe
 
 ## Flaky Checks
 
-A check that fails intermittently without a code change is a defect in the check, not
-noise to route around with retries until it passes. Quarantine it (mark known-flaky,
-tracked with an issue) rather than letting an intermittently failing build normalize
-ignoring CI failures generally.
+A pipeline must not route around a check that fails intermittently without a code change,
+whether by an automatic retry or by a rerun until it passes: one normalized failure costs
+the pipeline its signal on every check it reports. What such a check is, and what the
+project owes it, are `testing` → Determinism and Independence Between Runs; a check that
+is no test - a lint, a build - owes the same and has no other owner.
 
 ## Feeding a Pipeline Failure Back to an Agent
 

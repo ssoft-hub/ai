@@ -84,7 +84,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `cpp-coding` — C++ implementation conventions.
 - `cpp-doxygen` — Doxygen blocks on public C++ headers.
 - `cpp-encapsulation` — the access level of each member of one C++ type.
-- `cpp-testing` — the structure of a C++ test.
+- `cpp-testing` — what a C++ test covers, and the GoogleTest syntax and naming scheme it is written in.
 - `ddd` — modelling inside one bounded context.
 - `debugging` — the investigation that precedes a fix.
 - `deprecation-and-migration` — retiring a public path.
@@ -93,7 +93,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `gitlab-cli` — `glab` mechanics.
 - `hook-scripts` — writing this repository's hooks and tools.
 - `issue-rules` — what a tracker issue contains.
-- `node-testing` — conventions for the tests under `test/`.
+- `node-testing` — what a test of this repository's hooks and tools covers, and the runner and command vocabulary it is written in.
 - `observability-and-instrumentation` — telemetry for production visibility.
 - `performance-optimization` — the process around one performance problem.
 - `pr-rules` — the pull request, from opening it to merging it.
@@ -106,14 +106,18 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
   rename — and the marker on a command's sections.
 - `submodule-sync` — submodule ref discipline.
 - `test-driven-development` — the order a behaviour is built in, test first.
+- `testing` — the level a test sits at, its layout, its data, its boundaries, and what makes a run repeatable.
 - `work-sequence` — the order of work from a task to a closed issue.
 - `writing-style` — prose register and vocabulary in any human language, above any mode the session runs in.
 
 Two pairs restate each other on purpose, because no task loads both: `cpp-testing` /
-`node-testing` (a task edits one language's tests, and `node-testing` says not to mix the
-conventions) and `github-cli` / `gitlab-cli` (a repository has one host). Their shared
-principles are stated in each one's own runner and command vocabulary; routing a JS test
-task through a `cpp-` prefixed skill for one line would cost more than the duplication.
+`node-testing` (a task edits one language's tests) and `github-cli` / `gitlab-cli` (a
+repository has one host). What the testing pair holds twice is the runner vocabulary alone
+— the macro or the call a test is written with; every
+principle the two share is stated once by `testing`, and what each of the two keeps is
+the means its runner gives for that principle. Routing a JS test task through a `cpp-`
+prefixed skill for one line would
+cost more than the duplication.
 
 `## The Caller's Text` is copied byte for byte into every command and restated in
 `config/claude-config-rules.md`: the boundary between an instruction and the text under
@@ -154,7 +158,7 @@ stage with no command or persona of its own says so rather than naming the neare
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
 | Scope and issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
 | Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
+| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `testing`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
 | Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
 | Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
 | Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
