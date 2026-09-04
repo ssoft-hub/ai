@@ -212,7 +212,9 @@ ends with the caller's text and carries no HTML comment, the skills a built eval
 holds and the roots `tools/eval-plugin.js` refuses to remove (`test/eval-plugin.test.js`),
 the shape of every eval case, the rule that one grader name carries one rubric and the
 rule that a grader's quoted rule is the whole of the section it quotes
-(`test/evals-layout.test.js`), the rule that no colour
+(`test/evals-layout.test.js`), the relation between a citation of the form
+`<name>` → Section and the heading of the skill it names, wherever the citation stands
+(`test/citations.test.js`), the rule that no colour
 word in `skills/*/SKILL.md` or `AGENTS.md` stands for a state, the proper name of a
 practice aside, and the rule that no skill names a file of the project it is applied in
 or a path of this repository, a `binding` skill, the skill stating how a skill is
