@@ -18,7 +18,7 @@ metadata:
 Apply when code accepts external input, crosses a trust boundary (network, file,
 subprocess, IPC, config), or handles secrets/credentials. This skill covers design-time
 decisions; mechanical, write-time enforcement of some of the same concerns is handled by
-the `secret-guard` and `bash-safety` hooks (see `README.md` → Hooks) — this
+the `secret-guard` and `bash-safety` hooks where the agent tool carries them — this
 skill is what to design for before those hooks would ever fire.
 
 - Memory-safety idioms that also happen to prevent whole classes of vulnerability →

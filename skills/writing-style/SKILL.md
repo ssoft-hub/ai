@@ -99,7 +99,7 @@ the message with nothing around it is what finds one.
 
 | Defective | Corrected |
 |---|---|
-| "done, as discussed above" | "fixed: the guard now rejects a path outside the repository, per `hooks/README.md`" |
+| "done, as discussed above" | "fixed: the guard now rejects a path outside the repository, per the `check` function's exit-code contract" |
 
 ## Name the Kind of Every Identifier
 
@@ -269,10 +269,10 @@ produces, in any text written for a human reader.
 | … | `...` |
 | “ ” ‘ ’ curly quotes | `"` `"` `'` `'` straight quotes |
 
-This does not reach a file of instructions to an agent (`skills/`, `agents/`, `commands/`,
-`hooks/`, `AGENTS.md`), which keeps the em dash and the arrow, nor a quotation, a code
-identifier or a character the language's orthography requires (`«` `»` in French), which
-stay as the source has them.
+This does not reach a file of instructions to an agent (a skill, a persona, a command, a
+hook, a project's own instruction file), which keeps the em dash and the arrow, nor a
+quotation, a code identifier or a character the language's orthography requires (`«` `»`
+in French), which stay as the source has them.
 
 ## What This Does Not Cover
 
