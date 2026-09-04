@@ -95,7 +95,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `cpp-coding` | C++ implementation conventions |
 | `cpp-doxygen` | Doxygen tag coverage for public C++ headers |
 | `cpp-encapsulation` | C++ access-specifier discipline (public/protected/private) |
-| `cpp-testing` | Unit test structure (AAA, naming, coverage) |
+| `cpp-testing` | What a C++ test covers, and the GoogleTest syntax and naming scheme it is written in |
 | `ddd` | Domain-Driven Design patterns in C++ |
 | `debugging` | Root-cause investigation before proposing a fix |
 | `deprecation-and-migration` | Retiring a public API and writing a migration guide |
@@ -104,7 +104,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, stacks, merges |
 | `hook-scripts` | Writing Claude Code hooks and tools |
 | `issue-rules` | Tracker issue title, description, labels, priority, lifecycle |
-| `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |
+| `node-testing` | What a test of this repository's hooks and tools covers, and the `node:test` runner and command vocabulary it is written in |
 | `observability-and-instrumentation` | Logging, metrics, tracing for production visibility |
 | `performance-optimization` | Profile-measure-optimize workflow for a reported performance problem |
 | `pr-rules` | PR title, description, review comments, merge strategy |
@@ -116,6 +116,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `skill-authoring` | Writing a skill file — its concern, name, contexts, section markers, rename — and the marker on a command's sections |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
+| `testing` | Levels of verification, test data and the environment, determinism, the mutation check on a fail step, and when a suite may be trusted |
 | `work-sequence` | The eight steps from a task to a closed issue, and the moment each check runs at |
 | `writing-style` | Prose register and vocabulary in any human language, above any mode the session runs in |
 

@@ -53,9 +53,9 @@ wrong):
 
 - Trace at least one success path and one failure path by hand — don't just read that a
   `try`/`catch` exists, check what happens inside it.
-- Check every changed boundary condition against the boundary cases the testing skill of
-  the language being written makes mandatory — a review that doesn't check for
-  off-by-one/empty/null is incomplete.
+- Check every changed boundary condition against the boundary cases `testing` → Boundary
+  Cases makes mandatory — a review that doesn't check for off-by-one/empty/null is
+  incomplete.
 - A bug fix without a regression test (`debugging` → Regression Test First) is not done,
   regardless of how correct the fix looks by inspection.
 

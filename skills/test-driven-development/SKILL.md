@@ -16,9 +16,11 @@ metadata:
 # Skill: Test-Driven Development
 
 Apply when implementing a feature or bug fix, before writing implementation code. This
-skill governs the order of work — fail, pass, refactor. Test structure, naming, and
-coverage rules belong to the testing skill of the language being written.
+skill governs the order of work — fail, pass, refactor. The shape of the test each step
+produces belongs to `testing`, and the runner syntax, the naming scheme and the coverage
+list of one language to the testing skill of the language being written.
 
+- The level a test sits at, its layout, its data, its determinism, and the mutation showing that a fail step failed for the intended reason → `testing` skill.
 - Reproducing a bug as a failing test before fixing it → `debugging` skill (Regression Test First).
 - Once the tests pass and the implementation stands, reviewing it → `code-review-and-quality` skill.
 
@@ -56,10 +58,10 @@ so it can catch the implementation being wrong, not just being different.
 
 ## One Behavior Per Fail Step
 
-Each fail-pass cycle targets one new behavior or boundary case, matching the
-one-behaviour-per-test rule of the testing skill of the language being written. Do not
-write five tests up front and then implement until all
-five pass — that reintroduces the "test after" problem for tests 2 through 5, which sit
+Each fail-pass cycle targets one new behavior or boundary case, matching `testing` → One
+Behaviour per Test, Named by It. Do not write five tests up front and then implement
+until all five pass — that reintroduces the "test after" problem for tests 2 through 5,
+which sit
 failing for longer than necessary and stop guiding the implementation step by step.
 
 ## Minimal Implementation
@@ -89,8 +91,8 @@ only last a mock that asserts *which* calls were made. A test built around call-
 assertions breaks the moment the implementation is refactored, even when the observable
 behavior hasn't changed — assert on outcomes, not on how the outcome was reached. Reach
 for a mock only when the real collaborator is slow, non-deterministic, or has a side
-effect the test can't afford — what that excludes at the unit-test boundary belongs to
-the testing skill of the language being written.
+effect the test can't afford — what that excludes at the unit-test boundary is
+`testing` → Unit Test Isolation.
 
 ## When TDD Doesn't Fit
 
