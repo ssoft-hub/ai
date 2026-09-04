@@ -1,0 +1,1 @@
+The request puts the migration guide for 1.0 in `UPGRADING.md` at the repository root, and the `CONTRIBUTING.md` of `larchpool` puts a migration guide under `docs/migrations/`, named after the release, where `0.8.md` and `0.9.md` sit. Which of the two places takes the 1.0 guide? I will write it once its place is settled.

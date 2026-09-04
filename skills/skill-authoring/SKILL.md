@@ -106,7 +106,7 @@ where they are owed, and a binding skill states the scope.
 
 | Value | The skill declaring it |
 |---|---|
-| `overrides`, which an absent key reads as | States rules the project displaces with its own conventions, wherever it keeps them. `config/claude-config-rules.md` → A project's conventions above a skill's rule installs beside every skill and states this relation, so no skill repeats it |
+| `overrides`, which an absent key reads as | States rules the project displaces with its own conventions, wherever it keeps them, within the exception `config/claude-config-rules.md` → A project's conventions above a skill's rule states. That section installs beside every skill and states this relation and its exception, so no skill repeats either |
 | `binding` | States one repository's own conventions, is applied in that repository alone, and is taken as a fallback by no other project. Its `description` and the `Apply when` line of its body both name that repository, the key standing in frontmatter, which a reader of the body never sees |
 
 ## Creating the File

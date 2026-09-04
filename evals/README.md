@@ -33,6 +33,10 @@ A regex pattern, and an `input_match`, is written in single quotes in the frontm
 double-quoted YAML string reads `\s` as an escape and breaks the pattern. `input_match`
 matches as a substring and honours no `\b`.
 
+A rubric whose verdict turns on what the prompt states should state it, and a rubric
+shared by several cases should state it for each of them: the judge of an `llm` grader is
+shown its rubric and the response alone, never the prompt.
+
 One grader name carries one rubric: a case needing another rubric gives it another name,
 since a case's frontmatter takes no `graders` key and every case holds its own copy of
 the file. `test/evals-layout.test.js` holds every case to the shape above, every shared
@@ -54,7 +58,8 @@ between the two arms is unaffected, the same weighting standing over each of the
 ## Checking the judge
 
 The replies the judge is checked on sit in `test/fixtures/judge-check/`, one file per
-reply, each naming the verdict it must draw. They sit there rather than here, where the
+reply, each naming the verdict it must draw; those of a suite other than `comments` sit in
+a directory named after that suite. They sit there rather than here, where the
 case walk would run them as cases. A check builds a throwaway root outside this tree
 whose case asks the model to output one reply verbatim and whose `graders/` holds a copy
 of the rubric under test, and it runs before a suite's numbers are trusted.

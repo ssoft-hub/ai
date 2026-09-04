@@ -20,10 +20,12 @@
 - `pr-rules`: a pull request states which issue it resolves, and when each comment is owed
 - `work-sequence` names the artifact each condition of the work is read off
 - [skills] `testing`: a test's rules in any language, from its level to when a suite may be trusted
+- [skills] `artifact-placement`: the agent asks where an artifact goes unless one place is named
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table stating, for the skills it names, the input, the output and the artifacts entry and exit turn on, its `Stage` cell naming the stage whose output that skill produces; a skill whose output no single stage produces declares `cross-cutting` there
-- A skill declares its relation to the conventions of the project it is applied in, as `project-relation` in its frontmatter: `overrides` where absent, `binding` for one stating this repository's own conventions. `config/claude-config-rules.md` states that a project's conventions come first
+- [skills] A skill declares `project-relation` in frontmatter: `overrides` if absent, or `binding`
+- [config] Project conventions stand above a skill's rule, save a question the skill asks the user
 - What introduces an enumeration names what it holds, and what closes one is the statement that nothing else belongs to it rather than a count announced above it
 - A conversation is written in the personal register and every other text in the impersonal one, which fixes the subject of a sentence as well as the form a prescription takes
 - A word naming what a thing is stands beside its name, wherever a sentence uses that name as a noun

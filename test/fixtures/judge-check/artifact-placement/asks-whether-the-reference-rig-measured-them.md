@@ -1,0 +1,1 @@
+The `CONTRIBUTING.md` of `pinemeter` records benchmark results under `docs/benchmarks/`, one file per run, only where the run was measured on the reference meter rig, and nothing in the request says which rig measured this run. Was it the reference rig, so the results go under `docs/benchmarks/`, or somewhere else? I will record them once their place is settled.

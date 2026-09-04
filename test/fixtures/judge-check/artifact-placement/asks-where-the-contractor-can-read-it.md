@@ -1,0 +1,1 @@
+The team's rules put notes introducing a new dependency on the team wiki, under Operations / Dependencies, and the contracted developer the notes are for gets repository access alone, with no account on that wiki. Where should the notes introducing `quillbase` go, so that the developer can read them? I will write them once their place is settled.
