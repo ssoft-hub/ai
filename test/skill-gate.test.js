@@ -1,15 +1,22 @@
 'use strict';
-const { test } = require('node:test');
+const { test, after } = require('node:test');
 const assert = require('node:assert');
 const { spawnSync } = require('node:child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+
+// The gate reads its config directory at load, so it gets one this file creates.
+const configRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'skill-gate-config-'));
+after(() => { fs.rmSync(configRoot, { recursive: true, force: true }); });
+const ambientConfigDir = process.env.CLAUDE_CONFIG_DIR;
+process.env.CLAUDE_CONFIG_DIR = configRoot;
 const { skillsIn, notice, loadedSkills, writeTargets, stateOf, denyOnce } = require('../tools/skill-gate');
+if (ambientConfigDir === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+else process.env.CLAUDE_CONFIG_DIR = ambientConfigDir;
 
 const gateJs = path.join(__dirname, '..', 'tools', 'skill-gate.js');
-const sessionEnv = path.join(
-  process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'session-env');
+const sessionEnv = path.join(configRoot, 'session-env');
 
 function insideSessionEnv(target) {
   const rel = path.relative(sessionEnv, path.resolve(target));

@@ -34,7 +34,7 @@ With enough consumers, every observable behavior of a public symbol becomes depe
 on — including behavior never documented as a guarantee (this is Hyrum's Law). That is
 why deprecation needs active migration support, not just an announcement: a consumer
 can't "just switch" to a replacement that doesn't reproduce a behavior they happened to
-rely on, even one this repo never promised.
+rely on, even one the project never promised.
 
 ## Deprecate Before Removing
 
@@ -95,7 +95,7 @@ working.
 Deprecating an internal-only symbol — one the API-design skill of the language being
 written leaves outside the public surface — needs no grace period and no migration
 guide: update every internal call site in the same change. This skill's ceremony is
-proportional to how many consumers outside this repo are affected.
+proportional to how many consumers outside the project are affected.
 
 ## Migrating a Persisted Format (Expand/Contract)
 

@@ -303,5 +303,5 @@ skill.
 
 ## Cross-References
 
-- `node-testing` — the tests covering the hooks and tools written here (`test/*.test.js`).
+- `node-testing` — the form of a Node test; this repository's own test conventions: `AGENTS.md` → Tests.
 - `comments` — comment rules inside these scripts (arrives with this skill via `with`).

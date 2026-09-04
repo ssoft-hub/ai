@@ -1,5 +1,5 @@
 'use strict';
-const { test } = require('node:test');
+const { test, after } = require('node:test');
 const assert = require('node:assert');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -60,10 +60,12 @@ function writeCache(dir, text) {
 
 const RESET_5H = new Date(2026, 7, 7, 14, 12).getTime();
 const RESET_7D = new Date(2026, 7, 10, 16, 0).getTime();
+const workspaceDir = mkTmp();
+after(() => rmTmp(workspaceDir));
 const payload = extra => ({
   model: { display_name: 'Opus 5 (1M context)' },
   context_window: { used_percentage: 34 },
-  workspace: { current_dir: os.tmpdir() },
+  workspace: { current_dir: workspaceDir },
   ...extra,
 });
 const renderPlain = (input, dir) => plain(render(input, { configDir: dir }));

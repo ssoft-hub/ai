@@ -165,7 +165,7 @@ test('matchSkills returns skills whose paths match the edited file', () => {
   const tmp = mkTmp();
   try {
     writeSkill(tmp, 'cpp-coding', 'description: d\nmetadata:\n  paths: ["**/*.cpp"]\n');
-    writeSkill(tmp, 'node-testing', 'description: d\nmetadata:\n  paths: ["**/test/*.test.js"]\n');
+    writeSkill(tmp, 'beta', 'description: d\nmetadata:\n  paths: ["**/test/*.test.js"]\n');
     assert.deepStrictEqual(matchSkills(loadCatalog(tmp), 'D:/repo/src/a.cpp'), ['cpp-coding']);
   } finally { rmTmp(tmp); }
 });

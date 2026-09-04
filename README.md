@@ -96,7 +96,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `cpp-coding` | C++ implementation conventions |
 | `cpp-doxygen` | Doxygen tag coverage for public C++ headers |
 | `cpp-encapsulation` | C++ access-specifier discipline (public/protected/private) |
-| `cpp-testing` | Unit test structure (AAA, naming, coverage) |
+| `cpp-testing` | The test-framework syntax, shown in GoogleTest |
 | `ddd` | Domain-Driven Design patterns in C++ |
 | `debugging` | Root-cause investigation before proposing a fix |
 | `deprecation-and-migration` | Retiring a public API and writing a migration guide |
@@ -105,7 +105,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, stacks, merges |
 | `hook-scripts` | Writing this repository's hooks and tools |
 | `issue-rules` | Tracker issue title, description, labels, priority, lifecycle |
-| `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |
+| `node-testing` | The runner, layout and running of a test on Node.js |
 | `observability-and-instrumentation` | Logging, metrics, tracing for production visibility |
 | `performance-optimization` | Profile-measure-optimize workflow for a reported performance problem |
 | `pr-rules` | The issue a PR resolves, its title, description, review comments, merge strategy |
@@ -117,6 +117,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `skill-authoring` | Writing a skill file — its concern, name, contexts, relation to a project's conventions, what ships with it, section markers, rename — and the marker on a command's sections |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
+| `testing` | The level of a test, its isolation, data and environment, the boundary it crosses, its layout, its determinism, and when a suite may be trusted |
 | `work-sequence` | The eight steps from a task to a closed issue, the moment each check runs at, and the artifact `In Progress`, `In Review` and `Done` are read off where the work is carried on a branch and offered for review |
 | `writing-style` | Prose register and vocabulary in any human language, above any mode the session runs in |
 
