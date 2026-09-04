@@ -144,7 +144,8 @@ function skillsDeclaringRubric() {
 }
 
 // Extended by the pass that marks the next skill; every name here is checked below.
-const MARKED_SKILLS = ['code-navigation', 'comments', 'editing', 'github-cli',
+const MARKED_SKILLS = ['artifact-placement', 'code-navigation', 'comments', 'editing',
+  'github-cli',
   'gitlab-cli', 'pr-rules', 'skill-authoring', 'submodule-sync', 'work-sequence',
   'writing-style'];
 

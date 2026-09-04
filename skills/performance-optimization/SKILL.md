@@ -70,6 +70,8 @@ don't assume" spirit applied to performance instead of correctness.
 - Bad: "this should be faster because it avoids a copy" (no measurement)
 - Good: "p99 latency for a 10k-row export dropped from 480ms to 95ms (benchmark: `export_bench`, 20 runs)"
 
+Where the before-and-after measurement goes: `artifact-placement` → Where the Place Comes From.
+
 ## Common Sources, in Order of Likely Impact
 
 | Source | What to check |

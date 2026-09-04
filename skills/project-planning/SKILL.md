@@ -25,6 +25,7 @@ once.
   in-conversation task plan for a single coding task, which the `Plan` tooling covers.
   Running Independent Work in Parallel is the exception: it governs a launch whatever the
   plan behind it.
+- Where a plan or a status update goes: `artifact-placement` → Where the Place Comes From.
 - A plan is built from settled requirements — if those don't exist yet, go get them
   first → `requirements` skill.
 - PR Size discipline and the release checklist are the execution-time tail end of a

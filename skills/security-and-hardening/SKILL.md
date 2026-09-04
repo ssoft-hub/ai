@@ -224,3 +224,5 @@ regression test. What is specific to a vulnerability: fix the class of weakness 
 than the exploit string that revealed it, and document that class. A silently patched
 security bug leaves the next instance of the same weakness, in a different location,
 undiscovered.
+
+Where the record of the class goes: `artifact-placement` → Where the Place Comes From.

@@ -73,20 +73,9 @@ downsides — an ADR that only lists upsides reads as advocacy, not a decision r
 and won't help the next person who hits the downside in production.
 ```
 
-Where a decision record goes is a requirement rather than a path. It has to carry a
-stable reference a commit or a pull request description can point at (`ADR-0007`, a wiki
-permalink, an issue id), be reachable by everyone who will read it, and outlive the
-decision it records. A file in the repository meets that, and so does a wiki page, a
-tracker issue, or a page in Confluence or Notion; which of them applies comes from the
-project's own conventions — its `AGENTS.md`, or wherever else that project keeps them.
-
-Where the project states none, ask where the record goes and whether this project keeps
-such records at all, and choose neither silently. When Architecture Work Is Warranted
-above answers whether the decision is worth recording; only the project answers where the
-record lives. What a reader checks is the record's location against the two things allowed
-to have chosen it — a stated project convention, or an answer to that question in the
-thread the decision came out of. A record sitting somewhere neither of those names was
-placed by the agent, which is what this rule forbids.
+Where a decision record goes: `artifact-placement` → Where the Place Comes From. The section
+When Architecture Work Is Warranted above answers whether the decision needs a record of
+its own.
 
 ## Quality Priorities
 
