@@ -207,9 +207,11 @@ test file, since the runner loads each of them as one, the rule that no path
 `bound-to` and what a routing may name or has to state by role under it, the force
 marker under every `##` heading of `templates/SKILL.md`, of `templates/COMMAND.md`, of
 every command and of each skill declaring `rubric: applied`, the rule that a command
-ends with the caller's text and carries no HTML comment, and the rule that no colour
+ends with the caller's text and carries no HTML comment, the rule that no colour
 word in `skills/*/SKILL.md` or `AGENTS.md` stands for a state, the proper name of a
-practice aside.
+practice aside, and the rule that no skill names a file of the project it is applied in
+or a path of this repository, a `binding` skill, the skill stating how a skill is
+written and a name an outside convention fixes aside.
 
 ## Manual setup
 
