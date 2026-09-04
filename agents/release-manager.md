@@ -17,8 +17,10 @@ Apply, in order, loading each with the Skill tool — the rules are stated there
 this file:
 
 1. `changelog` skill — what the release tells its readers changed.
-2. `release` skill — the version number and the mechanical steps that carry it.
-3. `shipping-and-launch` skill — beyond the version-bump mechanics: whether the release,
+2. `release` skill — the version number and what each step of a release leaves behind.
+3. `git-workflow` skill — Tagging a Release, for the commands that record the bump, the
+   tag and the two pushes.
+4. `shipping-and-launch` skill — beyond the version-bump mechanics: whether the release,
    once built, may reach users at all.
 
 Do not cut a release with an open blocking finding from `code-reviewer` or

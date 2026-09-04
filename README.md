@@ -90,7 +90,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `code-navigation` | Where an answer about a symbol comes from, and what a text search does not answer |
 | `code-review-and-quality` | Review substance — correctness, readability, architecture, security, performance |
 | `comments` | Code comment style in any language, Doxygen aside (brief, general, no fix narration) |
-| `commit-rules` | Conventional Commits format and branch naming |
+| `commit-rules` | Conventional Commits format |
 | `cpp-api-design` | C++ public API structure and hygiene |
 | `cpp-coding` | C++ implementation conventions |
 | `cpp-doxygen` | Doxygen tag coverage for public C++ headers |
@@ -100,6 +100,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `debugging` | Root-cause investigation before proposing a fix |
 | `deprecation-and-migration` | Retiring a public API and writing a migration guide |
 | `editing` | Guard against a stale reading of a file, of a tracker or forge artifact, and of a branch head |
+| `git-workflow` | The git commands from branch to tag — branch, commit, fixup, rebase, merge, tag, push |
 | `github-cli` | `gh` mechanics — issues, PRs, labels, pending review threads, stacks, merges |
 | `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, stacks, merges |
 | `hook-scripts` | Writing Claude Code hooks and tools |
@@ -109,7 +110,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `performance-optimization` | Profile-measure-optimize workflow for a reported performance problem |
 | `pr-rules` | PR title, description, review comments, merge strategy |
 | `project-planning` | Scoping, estimation, milestones, risk, status updates, and the launch of independent work at once |
-| `release` | Semver release workflow |
+| `release` | Semver version decision and the gates before it is frozen |
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
 | `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |
 | `shipping-and-launch` | Release readiness, staged rollout, rollback planning |

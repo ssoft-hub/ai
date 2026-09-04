@@ -151,10 +151,9 @@ glab mr merge <iid> --message '<subject>
 | `--remove-source-branch` | sets the merge request's own attribute, which GitLab acts on at the merge: the source branch is deleted on the server. Where another merge request targets it, see Stacks | the project's setting |
 
 - `glab mr merge` deletes no local branch and says nothing about one, so the local branch
-  survives the merge and goes with `git branch -d <name>` — refused by git while a worktree
-  holds that branch, and, run from the target branch, refused as not fully merged until that
-  branch carries the merge. A worktree stops the merge itself no more than it stops any
-  other request over the API.
+  survives the merge and goes with the removal the workflow skill of the version control
+  system states, under the refusals stated there. A worktree stops the merge itself no
+  more than it stops any other request over the API.
 
 - The REST equivalent, when the flag names on the installed `glab` do not match, and the
   form that keeps `--auto-merge` out of the picture entirely:

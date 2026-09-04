@@ -16,9 +16,10 @@ metadata:
 # Skill: Shipping and Launch
 
 Apply when preparing to ship a release to users — the readiness, rollout, and rollback
-concerns around a release, beyond the version-bump/changelog/tag mechanics already
-covered by `release` skill. Use both together: `release` for the mechanical steps,
-this skill for whether the release is actually safe to expose to users and how widely.
+concerns around a release, beyond the version and the changelog `release` covers and the
+commands the workflow skill of the version control system states. Use them together:
+those two for what a release records, this skill for whether the release is safe to
+expose to users and how widely.
 
 - Monitoring/alerting that must be in place before launch → `observability-and-instrumentation` skill.
 - A breaking change being shipped → `deprecation-and-migration` skill for how it was

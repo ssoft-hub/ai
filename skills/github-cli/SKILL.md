@@ -148,7 +148,7 @@ then what is left takes one command each:
 
 | What is left | What it takes |
 |---|---|
-| the local head branch | the same `gh pr merge <n> --merge --delete-branch` again, after either refusal: it answers `! Pull request <owner>/<repo>#<n> was already merged` with an exit status of 0, switches a tree still holding the head branch onto the base branch, deletes the head branch, and reaches no remote branch. `git branch -d <name>` deletes it too, and, run from the base branch, answers `error: the branch '<name>' is not fully merged` until that branch carries the merge |
+| the local head branch | the same `gh pr merge <n> --merge --delete-branch` again, after either refusal: it answers `! Pull request <owner>/<repo>#<n> was already merged` with an exit status of 0, switches a tree still holding the head branch onto the base branch, deletes the head branch, and reaches no remote branch. The local removal the workflow skill of the version control system states deletes it too, under the refusals stated there |
 | the remote head branch | `git push origin --delete <name>`, which answers `error: unable to delete '<name>': remote ref does not exist` where the branch went with the merge |
 
 `merge-async` is a second merge endpoint `gh` exposes no command for, and the one a
@@ -213,7 +213,7 @@ Registration decides how the bottom is merged, and what becomes of the rest:
 `merge-async` merges the one pull request named. `gh stack merge` merges it and every one
 below, and the authorisation that needs is `pr-rules` → Merge Strategy 2; it also takes the
 merge method last used unless `--merge` is given, which is a squash or a rebase where that
-ran last, both forbidden by `pr-rules` → Merge Strategy 4.
+ran last, both refused by the workflow skill of the version control system.
 
 The cascading rebase moves every head above the merged pull request and leaves every tree,
 so read the head sha again with `gh pr view <n> --json headRefOid` — full, per Pull

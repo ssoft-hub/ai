@@ -11,9 +11,10 @@ version of them.
 
 ## Commits and branches
 
-Conventional Commits. The message format, the type vocabulary, the body and the branch
-name pattern are owned by `skills/commit-rules/SKILL.md` - read it before the first
-commit rather than copying the shape of a nearby one.
+Conventional Commits. The message format, the type vocabulary and the body are owned by
+`skills/commit-rules/SKILL.md`, and the branch name pattern with every git command
+carrying it by `skills/git-workflow/SKILL.md` - read both before the first commit rather
+than copying the shape of a nearby one.
 
 One of its rules is enforced rather than left to the reader: the `commit-trailer-guard`
 tool blocks a `git commit` an agent runs with an AI-attribution trailer in the message.

@@ -161,7 +161,7 @@ Open → In Progress → In Review → Done
 ```
 
 - **Open** — triaged, not started.
-- **In Progress** — branch exists (see `commit-rules` Branch Naming).
+- **In Progress** — branch exists, named as the workflow skill of the version control system states.
 - **In Review** — the change is offered for review (`work-sequence` → The Sequence).
 - **Done** — merged and deployed, with every checklist checkbox in the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence). If checkboxes remain after merge, stay **In Review** with a follow-up PR/MR linked — do not mark Done.
 - **Closed** — explicitly not going to be fixed; add a comment explaining why.
@@ -183,6 +183,6 @@ A reader should be able to reconstruct, from comments alone, which PR/MR impleme
 ## Cross-References
 
 - `work-sequence` — the step of the work each act on this issue runs at, and the condition behind each lifecycle state.
-- `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
+- The workflow skill of the version control system — the branch name form carrying this issue's identifier (`TRACKER-N`).
 - `pr-rules` — PR title and description mirror the issue being resolved; its Pre-Merge Checklist gates merge on this issue's checkbox state.
 - The CLI skill of the issue tracker — the commands that create, label, and comment on an issue.
