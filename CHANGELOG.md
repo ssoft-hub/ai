@@ -17,7 +17,7 @@
 - `issue-rules` -> Lifecycle requires an assignee from the branch on, and leaves whether what a merge delivers has reached a user to `shipping-and-launch`
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
-- The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
+- The lifecycle map in `AGENTS.md` carries a second table stating each skill's input, output and the artifacts its entry and exit turn on, its `Stage` cell naming the stage whose output that skill produces; a skill whose output no single stage produces declares `cross-cutting` there
 - A skill declares its relation to the conventions of the project it is applied in, as `project-relation` in its frontmatter: `overrides` where absent, `binding` for one stating this repository's own conventions. `config/claude-config-rules.md` states that a project's conventions come first
 - What introduces an enumeration names what it holds, and what closes one is the statement that nothing else belongs to it rather than a count announced above it
 - A conversation is written in the personal register and every other text in the impersonal one, which fixes the subject of a sentence as well as the form a prescription takes
@@ -170,3 +170,4 @@
 
 - GitHub Actions runs `npm test` on Node 18, 20 and 22, on Linux and Windows, on every push and every pull request to `main`. Each combination reports as its own job and none cancels another
 - `npm test` fails when `config/retired.json` lists a path this repository still ships, naming the entry to remove
+- The test file `test/citations.test.js` resolves every citation of the form `skill` -> Section against a heading of the skill it names, wherever the citation stands - a skill, a persona, a command, `AGENTS.md` or `README.md`; a heading standing only inside a fenced block resolves none
