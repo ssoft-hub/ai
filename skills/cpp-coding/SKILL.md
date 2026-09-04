@@ -25,7 +25,7 @@ metadata:
 
 Apply when writing or reviewing C++ implementation code.
 
-Scope: project-level implementation conventions (not the C++ standard). Public API structure → `cpp-api-design`. Docs → `cpp-doxygen`. Inline/implementation comments → `comments`. Naming, namespaces, file layout → project `AGENTS.md`. A specific performance investigation → `performance-optimization`.
+Scope: project-level implementation conventions (not the C++ standard). Public API structure → `cpp-api-design`. Docs → `cpp-doxygen`. Inline/implementation comments → `comments`. Naming, namespaces, file layout → the project's own conventions. A specific performance investigation → `performance-optimization`.
 
 Reference: https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#s-philosophy
 
@@ -133,7 +133,7 @@ Standard attributes — apply where appropriate:
 | `[[likely]]` / `[[unlikely]]` | Branch probability hint for hot paths |
 | `[[deprecated("use X")]]` | Obsolete API — the retirement process is `deprecation-and-migration` |
 
-Library and project attribute macros (e.g. `Q_INVOKABLE`, `MY_LIB_EXPORT`, `BOOST_FORCEINLINE`) follow the same discipline: use only those declared in the project; document the full set in `AGENTS.md`.
+Library and project attribute macros (e.g. `Q_INVOKABLE`, `MY_LIB_EXPORT`, `BOOST_FORCEINLINE`) follow the same discipline: code should use only those the project declares, and the project should document the full set where it keeps its conventions.
 
 ## Modern Idioms
 

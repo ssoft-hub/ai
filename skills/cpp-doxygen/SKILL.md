@@ -100,7 +100,7 @@ Every documented type declares `@ingroup`.
 
 ## Style Rules
 
-- Language: follow the project's `AGENTS.md`
+- Language: the one the project declares for its documentation
 - Document the CONTRACT of the type, not its implementation
 - `@brief` is one line, no period at the end
 - Never document a member — if you are writing `///` on a method or field, delete it

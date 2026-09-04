@@ -17,7 +17,7 @@ metadata:
 
 Apply when writing, reviewing, or adding tests to C++ code.
 
-Framework choice is project-specific (check `AGENTS.md`). This skill covers principles only.
+Framework choice is the project's: a test should use the one it declares. This skill covers principles only.
 
 - The fail, pass, refactor order these tests are written in → `test-driven-development` skill.
 

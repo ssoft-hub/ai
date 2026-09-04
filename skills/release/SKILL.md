@@ -17,7 +17,7 @@ metadata:
 # Skill: Release Preparation
 
 Apply when user says "release", "bump version", "prepare release", or "tag".
-Project `AGENTS.md` specifies which files contain version strings.
+The project declares which files carry version strings.
 
 ## Project Overrides
 
@@ -51,8 +51,9 @@ Find all occurrences of old version (substitute actual version number, e.g. `1.2
 git grep -F "1.2.3"
 ```
 
-Update in every location the project declares (check `AGENTS.md` for the list).
-Typical locations: `CMakeLists.txt`, `Doxyfile` (`PROJECT_NUMBER`), `README.md` badges.
+Should update every location the project declares.
+Typical locations: `CMakeLists.txt`, `Doxyfile` (`PROJECT_NUMBER`), the badges of the
+project's front page.
 
 Verify nothing remains:
 ```bash
@@ -64,7 +65,7 @@ git grep -F "1.2.3"   # must return empty
 Gates the commit and tag of Step 5. Whether the release, once built, is safe to expose
 to users is a separate gate → `shipping-and-launch` skill.
 
-- [ ] Build passes on all compilers declared in project (check `AGENTS.md`)
+- [ ] Build passes on all compilers the project declares
 - [ ] All tests pass; CI passed on all compiler targets
 - [ ] No breaking API change without `MAJOR` bump, breaking as the API-design skill of
       the language being written defines it in its breaking-changes section

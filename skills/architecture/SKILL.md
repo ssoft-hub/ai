@@ -78,7 +78,7 @@ stable reference a commit or a pull request description can point at (`ADR-0007`
 permalink, an issue id), be reachable by everyone who will read it, and outlive the
 decision it records. A file in the repository meets that, and so does a wiki page, a
 tracker issue, or a page in Confluence or Notion; which of them applies comes from the
-project's own conventions — its `AGENTS.md`, or wherever else that project keeps them.
+project's own conventions, wherever that project keeps them.
 
 Where the project states none, ask where the record goes and whether this project keeps
 such records at all, and choose neither silently. When Architecture Work Is Warranted
@@ -122,8 +122,8 @@ to protect.
 
 The list is complete at seven: a property not on it is an instance of one of them, or it
 is a quality this order does not settle, and step 5 below says what to do then. The order
-is itself a fallback: a project whose `AGENTS.md` states an order, or a list of operator
-actions, of its own wins, under Project Overrides above.
+is itself a fallback: a project stating an order, or a list of operator actions, of its
+own wins, under Project Overrides above.
 
 ### Settling a Conflict Between Two Qualities
 

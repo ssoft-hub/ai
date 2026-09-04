@@ -31,9 +31,9 @@ wherever else it keeps its conventions, instead of the rule here.
 
 ## Structural Rules
 
-- **Namespace hierarchy**: public symbols in consistent `lib::` or `lib::module::` namespace; check project `AGENTS.md` for exact namespace.
+- **Namespace hierarchy**: public symbols in consistent `lib::` or `lib::module::` namespace; the exact namespace is the one the project declares.
   **Why:** a consumer including the library should be able to predict where a symbol lives without grepping — inconsistent namespacing forces them to search instead of guess.
-- Identifier language: follow project `AGENTS.md` — comment language belongs to
+- Identifier language: the one the project declares — comment language belongs to
   `cpp-doxygen` (documentation) and `comments` (everything else)
 
 ## Dependencies
@@ -50,8 +50,8 @@ wherever else it keeps its conventions, instead of the rule here.
 
 ## Compatibility
 
-- Target the minimum C++ standard the project declares (check `AGENTS.md`) — a public header compiled at a higher standard than the project promises silently breaks consumers stuck on the older one.
-- No UB, no implementation-defined behaviour in public paths — these are exactly the bugs that only show up on the consumer's compiler/platform, not yours.
+- Should target the minimum C++ standard the project declares — a public header compiled at a higher standard than the project promises silently breaks consumers stuck on the older one.
+- Should admit no UB and no implementation-defined behaviour in public paths — these are exactly the bugs that only show up on the consumer's compiler/platform, not yours.
 
 ## Breaking Changes
 
@@ -100,7 +100,7 @@ meeting it is owned elsewhere:
 
 ## Adding a New Header
 
-1. Create the header at the path the project declares (check `AGENTS.md`)
-2. Add the header guard (`cpp-coding` → Header Guards)
-3. Add Doxygen `@defgroup` or `@ingroup` (see `cpp-doxygen` skill)
-4. Add a test file alongside the implementation
+1. Should create the header at the path the project declares for its public headers
+2. Should add the header guard (`cpp-coding` → Header Guards)
+3. Should add Doxygen `@defgroup` or `@ingroup` (see `cpp-doxygen` skill)
+4. Should add a test file alongside the implementation

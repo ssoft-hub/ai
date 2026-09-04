@@ -278,8 +278,8 @@ stay as the source has them.
 
 **May**
 
-- A code identifier and an API name, and the language required for them (the project's
-  `AGENTS.md` file): this skill governs prose.
+- A code identifier and an API name, and the language the project requires for them:
+  this skill governs prose.
 - A loanword that is itself the field's standard term in that language.
 
 ## Self-Check Before Sending
