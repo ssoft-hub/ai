@@ -8,8 +8,7 @@ const repoDir = path.join(__dirname, '..');
 const agentsPath = path.join(repoDir, 'AGENTS.md');
 const skillsDir = path.join(repoDir, 'skills');
 
-const COLUMNS = ['Skill', 'Stage', 'Trigger', 'Input', 'Output',
-  'Entry criterion', 'Exit criterion'];
+const COLUMNS = ['Skill', 'Stage', 'Input', 'Output', 'Entry criterion', 'Exit criterion'];
 
 function isSeparatorRow(row) {
   return row.length > 0 && row.every(cell => /^:?-+:?$/.test(cell));
@@ -19,8 +18,10 @@ function parseRow(line) {
   return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
 }
 
-// The two markdown tables sitting under the "### Lifecycle map" heading, up to the next
-// heading of level 1-3. Each is returned as { header, rows }, the separator row dropped.
+// The stage table and the second table, sitting under the "### Lifecycle map" heading, up
+// to the next heading of level 1-3. Each is picked by the column its rows are keyed on
+// rather than by position, so a further table under that heading displaces neither. Each
+// is returned as { header, rows }, the separator row dropped.
 function lifecycleMapTables() {
   const text = fs.readFileSync(agentsPath, 'utf8').replace(/\r\n/g, '\n');
   const lines = text.split('\n');
@@ -39,13 +40,20 @@ function lifecycleMapTables() {
       current = null;
     }
   }
-  assert.strictEqual(blocks.length, 2,
-    `### Lifecycle map carries ${blocks.length} table(s) below its heading, expected 2`);
-
-  return blocks.map(rawRows => {
+  const tables = blocks.map(rawRows => {
     const [header, ...rest] = rawRows;
-    return { header, rows: rest.filter(r => !isSeparatorRow(r)) };
+    const rows = rest.filter(r => !isSeparatorRow(r));
+    assert.ok(rows.length > 0, `a table under ### Lifecycle map holds no row: ${JSON.stringify(header)}`);
+    return { header, rows };
   });
+
+  const pick = first => {
+    const matching = tables.filter(table => table.header[0] === first);
+    assert.strictEqual(matching.length, 1,
+      `### Lifecycle map carries ${matching.length} table(s) whose first column is ${first}, expected 1`);
+    return matching[0];
+  };
+  return [pick('Stage'), pick('Skill')];
 }
 
 function columnIndex(header, name) {
@@ -79,7 +87,7 @@ test('every directory under skills/ is named in the stage table or the second ta
   assert.deepStrictEqual(missing, []);
 });
 
-test('the second table carries the seven columns in order', () => {
+test('the second table carries its columns in order', () => {
   const [, secondTable] = lifecycleMapTables();
   assert.deepStrictEqual(secondTable.header, COLUMNS);
 });
@@ -141,4 +149,14 @@ test('a second-table row naming a stage is named in that stage row\'s Skills cel
     }
   }
   assert.deepStrictEqual(disagreements, []);
+});
+
+test('every Skill cell of the second table names a directory under skills/', () => {
+  const [, secondTable] = lifecycleMapTables();
+  const skillCol = columnIndex(secondTable.header, 'Skill');
+
+  const unresolved = secondTable.rows
+    .map(row => row[skillCol].replace(/`/g, ''))
+    .filter(name => !fs.existsSync(path.join(skillsDir, name, 'SKILL.md')));
+  assert.deepStrictEqual(unresolved, []);
 });

@@ -164,30 +164,44 @@ stage with no command or persona of its own says so rather than naming the neare
 | Close issue | — | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
 | Release | — (`release-manager` directly) | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
 
-A second table follows, one row for each skill named in no `Skills` cell above. Its
-`Stage` cell holds a stage name of the table above, or the word `cross-cutting` — itself
-a declaration that the skill fires at more than one stage of the table above, not a
-missing value.
+Where each skill of the catalog stands, the table above being the stage table and the one
+below it the criteria table:
 
-| Skill | Stage | Trigger | Input | Output | Entry criterion | Exit criterion |
-|-------|-------|---------|-------|--------|------------------|-----------------|
-| `code-navigation` | cross-cutting | an edit or a verdict turning on a symbol's callers, its implementations, its definition, what a bare name refers to, or whether the symbol has any user left | the symbol, at the file path, line and character it stands at, or the name a workspace-wide query carries | the set of sites the operation returns | the source `code-navigation` → Where the Answer Comes From names for the language | the answer naming the operation that produced it, per `code-navigation` → Naming the Operation |
-| `deprecation-and-migration` | Implement | retiring a public API, planning a breaking change, or writing a migration guide | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
-| `editing` | cross-cutting | a write to a file, a tracker issue body or a PR description, and a merge | the artifact as it stands before the write | the artifact as it stands after the write | a reading of the artifact, per `editing` → Guard Against a Stale Reading | the checks a round of edits runs, per `work-sequence` → When a Check Runs |
-| `hook-scripts` | Implement | writing or modifying a file under `hooks/` or `tools/` | the event or tool the change routes to | a dispatcher or tool file matching the Dispatcher or Tool Skeleton | the feature branch named per `commit-rules` → Branch Naming | the test file `node-testing` covers for the tool, `test/<name>.test.js` |
-| `node-testing` | Implement | writing or reviewing a file under `test/*.test.js` | the pure logic exported by the hook or tool under test | a test file asserting that logic's behaviour | the tool's exported logic, per `hook-scripts` → Tool Skeleton | the tool covered and `npm test` run, per `hook-scripts` → Adding or Retiring a Tool |
-| `observability-and-instrumentation` | cross-cutting | adding logging, metrics, or tracing, or checking a running system's reported behaviour | the question an on-call engineer needs answered | a structured log line, metric, or trace answering it | the non-functional requirement `requirements` → Functional vs Non-Functional records | the Readiness Checklist item `shipping-and-launch` → Readiness Checklist for monitoring |
-| `performance-optimization` | Implement | diagnosing a reported performance problem, or evaluating a change's performance cost | a profiler or benchmark baseline for the hot path | a measured before/after comparison for the fix | the symptom and cost the bug template of `issue-rules` → Description Template asks for | the hot-path check `code-review-and-quality` → Performance runs before merge |
-| `skill-authoring` | Implement | adding, marking, renaming or retiring a skill, or marking a command | the skill or command file and its frontmatter | a skill or command file matching the rubric, or its removal | the tracked issue's title naming the skill, per `issue-rules` → Title | the `### Changed` or `### Removed` entry `changelog` → Subsections requires |
-| `writing-style` | cross-cutting | writing documentation, an issue, a PR, a commit, or any text artifact | a draft sentence or document | prose in the technical register with its force word named | the draft of the artifact whose structure `issue-rules`, `pr-rules` or `commit-rules` fixes | the re-read `writing-style` → Self-Check Before Sending requires before the text is sent |
+| Stated of the skill | Where it stands |
+|---|---|
+| its name alone, or its name and the clause conditioning it | the `Skills` cell of every stage row it fires at |
+| its input, its output, and the artifact its entry and its exit turn on | a row of the criteria table |
 
-No row assigns an issue-state transition to a role: `issue-rules` → Lifecycle defines each
-state by a condition rather than by an act with an actor. The acts reserved to the human
-are the merge (`pr-rules` → Merge Strategy 2) and submitting review feedback (Pending by
-Default); the issue comments `work-sequence` requires are the one kind an agent
-publishes freely.
+A skill may stand in both, and five do. The `Stage` cell of a criteria row names the
+stage whose output that skill produces, or holds the word `cross-cutting` where its
+output is produced at more than one — a declaration, not a missing value. A cell naming
+a stage requires that stage's `Skills` cell to name the skill; a `Skills` cell may name a
+skill whose `Stage` cell reads `cross-cutting` as well. No cell states a trigger: the
+frontmatter of a skill is the only place its triggers are declared.
 
-What the rows do not say on their own:
+| Skill | Stage | Input | Output | Entry criterion | Exit criterion |
+|-------|-------|-------|--------|------------------|-----------------|
+| `code-navigation` | cross-cutting | the symbol, at the file path, line and character it stands at, or the name a workspace-wide query carries | the set of sites the operation returns | the source `code-navigation` → Where the Answer Comes From names for the language | the answer naming the operation that produced it, per `code-navigation` → Naming the Operation |
+| `deprecation-and-migration` | cross-cutting | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
+| `editing` | cross-cutting | the artifact as it stands before the write | the artifact as it stands after the write | a reading of the artifact, per `editing` → Guard Against a Stale Reading | the checks a round of edits runs, per `work-sequence` → When a Check Runs |
+| `hook-scripts` | Implement | the event or tool the change routes to | a dispatcher or tool file matching the Dispatcher or Tool Skeleton | the feature branch named per `commit-rules` → Branch Naming | the test file `node-testing` covers for the tool, `test/<name>.test.js` |
+| `node-testing` | Implement | the pure logic exported by the hook or tool under test | a test file asserting that logic's behaviour | the tool's exported logic, per `hook-scripts` → Tool Skeleton | the file `test/<name>.test.js` covering that logic, run at the moment `work-sequence` → When a Check Runs gives it |
+| `observability-and-instrumentation` | cross-cutting | the question an on-call engineer needs answered | a structured log line, metric, or trace answering it | the non-functional requirement `requirements` → Functional vs Non-Functional records | the Readiness Checklist item `shipping-and-launch` → Readiness Checklist for monitoring |
+| `performance-optimization` | Implement | a profiler or benchmark baseline for the hot path | a measured before/after comparison for the fix | the symptom and cost the bug template of `issue-rules` → Description Template asks for | the second measurement `performance-optimization` → Measure the Fix requires, read against the baseline |
+| `skill-authoring` | Implement | the skill or command file and its frontmatter | a skill or command file matching the rubric, or its removal | the tracked issue's title naming the skill, per `issue-rules` → Title | the `### Added`, `### Changed` or `### Removed` entry `changelog` → Subsections requires |
+| `writing-style` | cross-cutting | a draft sentence or document | prose in the technical register with its force word named | the draft of the artifact whose structure `issue-rules`, `pr-rules` or `commit-rules` fixes | the re-read `writing-style` → Self-Check Before Sending requires before the text is sent |
+
+No row of the stage table assigns an issue-state transition to a role: `issue-rules` →
+Lifecycle defines each state by a condition rather than by an act with an actor. The acts
+reserved to the human are the merge (`pr-rules` → Merge Strategy 2) and submitting review
+feedback (Pending by Default); the issue comments `work-sequence` requires are the one
+kind an agent publishes freely.
+
+An `Exit criterion` cell may name an artifact a later stage reads, as the rows for
+`hook-scripts`, `node-testing`, `skill-authoring` and `observability-and-instrumentation`
+do: what it fixes is what ends the skill's own work, not where that artifact is used.
+
+What the stage rows do not say on their own:
 
 - **The Spec row may run before the Scope and issue row.** `/spec` names no tracker, so
   a spec may precede the issue or be written against one that exists. An issue without a

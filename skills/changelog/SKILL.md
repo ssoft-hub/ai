@@ -109,7 +109,7 @@ Use only what applies. Order:
      those. With no such version, every bullet reconciles this way.
    - Dropping is not a completeness check. It removes a bullet measured against a state
      no release had; whether `### Added` carries what that bullet said is confirmed by
-     `release` → Step 2.
+     `release` → Step 2 — Update CHANGELOG.md.
 2. Rename `## [Unreleased]` → `## [X.Y.Z] - YYYY-MM-DD` (today's date)
 3. Prepend a new empty `## [Unreleased]` section above it
 4. Leave empty subsections out — add them only when there's content
