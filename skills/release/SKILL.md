@@ -23,8 +23,8 @@ Project `AGENTS.md` specifies which files contain version strings.
 
 **Must**
 
-Must follow the release process the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the release process the project states, in a project skill or wherever else it
+keeps its conventions, instead of the rule here.
 
 ## Step 1 — Decide Version (semver)
 

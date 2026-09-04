@@ -38,8 +38,8 @@ competing designs, or writing an Architecture Decision Record (ADR).
 
 **Must**
 
-Must follow the architecture conventions and the ADR location the repository's
-`AGENTS.md` file or a project skill defines, instead of the rule here.
+Must follow the architecture conventions and the ADR location the project states, in a
+project skill or wherever else it keeps its conventions, instead of the rule here.
 
 ---
 

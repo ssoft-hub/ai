@@ -31,8 +31,8 @@ Header structure and namespace rules → `cpp-api-design` skill; the header guar
 
 **Must**
 
-Must follow the Doxygen conventions the repository's `AGENTS.md` file or a project
-skill defines, instead of the rule here.
+Must follow the Doxygen conventions the project states, in a project skill or wherever
+else it keeps its conventions, instead of the rule here.
 
 ## Core Rule — document the type, not its members
 

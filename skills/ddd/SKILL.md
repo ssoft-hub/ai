@@ -27,8 +27,8 @@ Reference: Eric Evans, *Domain-Driven Design* (2003). Patterns below are the str
 
 **Must**
 
-Must follow the domain-modelling conventions the repository's `AGENTS.md` file or a
-project skill defines, instead of the rule here.
+Must follow the domain-modelling conventions the project states, in a project skill or
+wherever else it keeps its conventions, instead of the rule here.
 
 ---
 

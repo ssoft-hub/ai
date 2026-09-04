@@ -30,8 +30,8 @@ that decides whether a change can merge or ship.
 
 **Must**
 
-Must follow the CI/CD stack and gates the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the CI/CD stack and gates the project states, in a project skill or wherever
+else it keeps its conventions, instead of the rule here.
 
 ---
 

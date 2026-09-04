@@ -34,8 +34,8 @@ Documentation blocks on a public header → the API-documentation skill of the l
 
 **Must**
 
-Must follow the comment conventions the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the comment conventions the project states, in a project skill or wherever
+else it keeps its conventions, instead of the rule here.
 
 ---
 

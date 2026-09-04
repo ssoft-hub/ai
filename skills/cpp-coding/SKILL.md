@@ -33,8 +33,8 @@ Reference: https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#s-philos
 
 **Must**
 
-Must follow the C++ implementation conventions the repository's `AGENTS.md` file or a
-project skill defines, instead of the rule here.
+Must follow the C++ implementation conventions the project states, in a project skill or
+wherever else it keeps its conventions, instead of the rule here.
 
 ## Philosophy
 

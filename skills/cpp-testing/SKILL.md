@@ -25,8 +25,8 @@ Framework choice is project-specific (check `AGENTS.md`). This skill covers prin
 
 **Must**
 
-Must follow the C++ test conventions the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the C++ test conventions the project states, in a project skill or wherever
+else it keeps its conventions, instead of the rule here.
 
 ---
 

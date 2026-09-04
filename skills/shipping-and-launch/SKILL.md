@@ -28,8 +28,8 @@ this skill for whether the release is actually safe to expose to users and how w
 
 **Must**
 
-Must follow the launch process the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the launch process the project states, in a project skill or wherever else it
+keeps its conventions, instead of the rule here.
 
 ---
 

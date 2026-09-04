@@ -12,8 +12,8 @@ const skillsDir = path.join(repoDir, 'skills');
 const TEMPLATES = {
   overrides: {
     heading: 'Project Overrides',
-    paragraph: "Must follow the <topic> the repository's `AGENTS.md` file or a project" +
-      ' skill defines, instead of the rule here.',
+    paragraph: 'Must follow the <topic> the project states, in a project skill or wherever' +
+      ' else it keeps its conventions, instead of the rule here.',
   },
   binding: {
     heading: 'Project Binding',
@@ -141,8 +141,8 @@ const OVERRIDES_SECTION = [
   '',
   '**Must**',
   '',
-  "Must follow the widget conventions the repository's `AGENTS.md` file or a project skill",
-  'defines, instead of the rule here.',
+  'Must follow the widget conventions the project states, in a project skill or wherever',
+  'else it keeps its conventions, instead of the rule here.',
 ].join('\n');
 
 const BINDING_SECTION = [
@@ -227,8 +227,8 @@ test('collapses line breaks to single spaces before matching', () => {
     '',
     'Must follow the widget',
     'conventions',
-    "the repository's `AGENTS.md` file or a project skill defines, instead of the rule",
-    'here.',
+    'the project states, in a project skill or wherever else it keeps its conventions,',
+    'instead of the rule here.',
   ].join('\n');
   assert.deepStrictEqual(relationFaults(skillFile('', rewrapped + '\n')), []);
 });

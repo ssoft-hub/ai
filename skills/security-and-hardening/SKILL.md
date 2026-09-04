@@ -31,8 +31,8 @@ skill is what to design for before those hooks would ever fire.
 
 **Must**
 
-Must follow the security requirements the repository's `AGENTS.md` file or a project
-skill defines, instead of the rule here.
+Must follow the security requirements the project states, in a project skill or wherever
+else it keeps its conventions, instead of the rule here.
 
 ---
 

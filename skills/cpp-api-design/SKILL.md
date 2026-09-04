@@ -26,8 +26,8 @@ Access-level choice within a single type → `cpp-encapsulation` skill.
 
 **Must**
 
-Must follow the C++ API design conventions the repository's `AGENTS.md` file or a
-project skill defines, instead of the rule here.
+Must follow the C++ API design conventions the project states, in a project skill or
+wherever else it keeps its conventions, instead of the rule here.
 
 ## Structural Rules
 

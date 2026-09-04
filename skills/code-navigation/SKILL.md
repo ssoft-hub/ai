@@ -26,8 +26,8 @@ definition, what a bare name refers to, or whether the symbol has any user left.
 
 **Must**
 
-Must follow the code-navigation conventions the repository's `AGENTS.md` file or a project
-skill defines, instead of the rule here.
+Must follow the code-navigation conventions the project states, in a project skill or
+wherever else it keeps its conventions, instead of the rule here.
 
 ---
 

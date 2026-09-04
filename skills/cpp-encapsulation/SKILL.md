@@ -27,8 +27,8 @@ Public API structure across headers/modules → `cpp-api-design`. This skill cov
 
 **Must**
 
-Must follow the C++ encapsulation conventions the repository's `AGENTS.md` file or a
-project skill defines, instead of the rule here.
+Must follow the C++ encapsulation conventions the project states, in a project skill or
+wherever else it keeps its conventions, instead of the rule here.
 
 ---
 

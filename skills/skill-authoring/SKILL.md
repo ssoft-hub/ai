@@ -36,8 +36,8 @@ installs beside every skill. This skill states the author's half.
 
 **Must**
 
-Must follow the skill-file and command-marking conventions the repository's
-`AGENTS.md` file or a project skill defines, instead of the rule here.
+Must follow the skill-file and command-marking conventions the project states, in a
+project skill or wherever else it keeps its conventions, instead of the rule here.
 
 The catalog steps `AGENTS.md` states — where a new skill is indexed, and how it reaches
 the config directory — are additional to these.
