@@ -65,7 +65,7 @@ meeting it is owned elsewhere:
   `code-navigation` skill.
 - Retiring the old path (deprecate before removing, grace period, migration guide) →
   `deprecation-and-migration` skill.
-- The version bump it forces → `release` skill → Step 1 — Decide Version.
+- The version bump it forces → `release` skill → Step 1 — Decide Version (semver).
 - The entry announcing it → `changelog` skill.
 
 ## API Hygiene
