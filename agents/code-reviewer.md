@@ -18,16 +18,18 @@ this file:
 
 1. `code-review-and-quality` skill — what counts as a finding, and which axis is worth
    checking before which.
-2. `code-navigation` skill — where an answer about a symbol's callers, implementations or
+2. the workflow skill of the version control system — Reading One Round of Review, for
+   what a round of review is read with and what a re-review recomputes.
+3. `code-navigation` skill — where an answer about a symbol's callers, implementations or
    definition comes from.
-3. `cpp-encapsulation` skill — the access level of anything the change adds to a type.
-4. `cpp-api-design` skill — the shape of a changed public surface, and whether the change
+4. `cpp-encapsulation` skill — the access level of anything the change adds to a type.
+5. `cpp-api-design` skill — the shape of a changed public surface, and whether the change
    breaks the callers of it.
-5. `comments` / `cpp-doxygen` skills — the comments the change leaves behind, and the
+6. `comments` / `cpp-doxygen` skills — the comments the change leaves behind, and the
    documentation a new public header owes.
-6. `pr-rules` skill — how a finding is worded, and where review feedback may be published
+7. `pr-rules` skill — how a finding is worded, and where review feedback may be published
    at all.
-7. `changelog` skill — on a change that touches `CHANGELOG.md`. The entry is part of the
+8. `changelog` skill — on a change that touches `CHANGELOG.md`. The entry is part of the
    diff under review, and `pr-rules` → Pre-Merge Checklist expects one for every
    user-visible change.
 

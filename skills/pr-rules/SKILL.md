@@ -194,11 +194,13 @@ review-thread box: a thread opened after the thread list was last read moves no 
 2. **The human authorises the merge.** An agent merges on an explicit instruction
    naming this PR, which does not carry to the next one: the authorisation is per pull
    request, so a command merging several needs an instruction naming each of them.
-3. **Rebase before merge.** `git rebase <target>`, then merge from the current target
-   tip; the rebase moves the head, so the branch returns to the Publish step and the
-   checks of that moment run again (`work-sequence` → When a Check Runs). The merge is
-   guarded with the head SHA read afterwards (`editing` → Guard Against a Stale Reading).
-4. **`--no-ff` only.** No fast-forward merge, no squash merge.
+3. **Rebase before merge.** Rebase onto the target as the workflow skill of the version
+   control system states, then merge from the current target tip; the rebase moves the
+   head, so the branch returns to the Publish step and the checks of that moment run
+   again (`work-sequence` → When a Check Runs). The merge is guarded with the head SHA
+   read afterwards (`editing` → Guard Against a Stale Reading).
+4. **The merge form.** Fixed by the workflow skill of the version control system, along
+   with the forms it refuses.
 5. **Merge subject:** `Merge PR #<pr-number>: <pr subject>`, the PR subject verbatim
    and never re-prefixed with `type(scope):`, so a tracker ID in the title leaves both
    identifiers in place (`Merge PR #7: PROJ-42: Add SipHash...`).
@@ -207,10 +209,11 @@ review-thread box: a thread opened after the thread list was last read moves no 
 7. **Merge body required.** What was integrated and why, never empty (`commit-rules`).
 8. **Trailers:** the ban in `commit-rules` holds; `Co-authored-by` injected by the
    forge when committer differs from author is allowed.
-9. **Cleanup before the Publish step.** Squash fixups (`commit-rules` → Fixup Commits)
-   before the branch is sent, never at merge time: a rewrite afterwards takes a
-   force-push and owes every check that step ran.
-10. **Rewrite squashed commit bodies** per `commit-rules` → Fixup / Squash Merges.
+9. **Cleanup before the Publish step.** Squash the corrections, as the workflow skill of
+   the version control system states: a rewrite after the branch is sent takes a forced
+   push and owes every check that step ran.
+10. **Rewrite the messages the squash leaves** — the workflow skill of the version
+    control system states what each one is read against.
 11. **Read the thread list before the merge command.** Immediately before it, read the review
     threads again and match them against the list read when the review was addressed
     (`editing` → Guard Against a Stale Reading).
@@ -232,10 +235,11 @@ is split before review.
 
 - `work-sequence` — the order of work the Offer for review step belongs to, and the moment each check runs at.
 - `issue-rules` — the issue this PR resolves: title, templates, labels, lifecycle, progress comments.
-- `commit-rules` — commit message format and branch naming on the PR's branch.
+- `commit-rules` — the message format of every commit on the PR's branch.
 - `code-review-and-quality` — what a review looks for, where this skill states how a finding is worded.
 - `editing` — the head-SHA read Merge Strategy turns on, the thread-list read it owes before the merge command, and the thread state the Pre-Merge Checklist reads.
 - `writing-style` — prose register in the description and in the review threads.
 - `ci-cd-and-automation` — the pipeline answering the checks reported on the pull request.
+- The workflow skill of the version control system — the commands behind the rebase, the send, the merge and the removal of the merged branch.
 - The module-sync skill of the version control system — the pre-PR check and the merge order the checklists gate on.
 - The CLI skill of the hosting platform — the commands behind the steps that reach this platform, and the draft mechanics behind Pending by Default.

@@ -64,7 +64,9 @@ At most 3 passes. Each pass, in order:
    else carries the work's state — a tracker item, a proposed change — reading that state
    directly where the named tool has no notion of it.
    With more than one tool named, run them in parallel and merge their reports, the
-   fan-out `/review` uses for `code-reviewer` + `security-auditor`.
+   fan-out `/review` uses for `code-reviewer` + `security-auditor`. The workflow skill of the version
+   control system states what a round is read with, and what a re-review recomputes, in
+   Reading One Round of Review.
 2. Classify the pass — Blocking and Clean.
 3. The pass reports and changes nothing; this step is what changes the work. Fix every
    blocking finding directly, no subagent owning the step, and resolve any nit or

@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Added
+- `git-workflow` skill: the git commands moving a branch, a commit or a tag, in one sequence from the branch to the released tag, each with what git records and the refusals it answers; the name form `<user>/<type>/<TRACKER-N>/<subject>`, the protected branch and the removal included
+- `git-workflow` states what one round of review is read with: the three-dot diff against the target, which leaves out the commits the target itself gained, and the range-diff pairing two rounds across a rebase
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
@@ -70,6 +72,8 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- `commit-rules`, `release` and `pr-rules` name no git command for the branch, the correction, the rebase, the pushes, the merge or the tag: those sit in `git-workflow`, which each of the three points to by role, so a project on another version control system reads only rules it can apply
+- `github-cli` and `gitlab-cli` point at `git-workflow` for the removal of a merged local branch, keeping their own account of what the forge itself deletes
 - `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one
 - The `## Project Overrides` section reads the same in every skill, one sentence differing only in the topic it names, and every skill carries one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository
@@ -86,7 +90,6 @@
 - `AGENTS.md` -> Lifecycle map lines each pipeline stage up against the command or persona carrying it, the `issue-rules` state the issue is in, and the skills that apply there
 - A dot-file or dot-directory is ignored unless `.gitignore` names it as one this repository tracks, so a tool's leftover no longer sits in `git status` beside a file that should have been committed
 - `pr-rules` and `issue-rules` keep the rules and point at `github-cli`/`gitlab-cli` for the command, so a `gh` or `glab` change no longer means editing rules that are not about a CLI
-- `commit-rules`: added Branch Naming - `<user>/<type>/<TRACKER-N>/<subject>`, the tracker segment omitted when no issue exists
 - `pr-rules`: the PR title uses the tracker ID in place of `Type(scope)` when a tracked issue exists, and the subject starts with uppercase in every variant
 - `cpp-api-design`: added the rationale behind the structure rules and a wrong/right example for the "no `void*`" rule
 - `skills-reminder` generates its prompt from `skills/*/SKILL.md` frontmatter at runtime instead of a hardcoded list, so a new skill appears automatically

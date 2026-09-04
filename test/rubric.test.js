@@ -144,9 +144,9 @@ function skillsDeclaringRubric() {
 }
 
 // Extended by the pass that marks the next skill; every name here is checked below.
-const MARKED_SKILLS = ['code-navigation', 'comments', 'editing', 'github-cli',
-  'gitlab-cli', 'pr-rules', 'skill-authoring', 'submodule-sync', 'work-sequence',
-  'writing-style'];
+const MARKED_SKILLS = ['code-navigation', 'comments', 'editing', 'git-workflow',
+  'github-cli', 'gitlab-cli', 'pr-rules', 'skill-authoring', 'submodule-sync',
+  'work-sequence', 'writing-style'];
 
 function commandFiles() {
   const names = fs.readdirSync(commandsDir).filter(name => name.endsWith('.md'));

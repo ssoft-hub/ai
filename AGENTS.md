@@ -31,8 +31,9 @@ install.js  Bootstrap script — copies files to ~/.claude/
 - Node built-ins only: no npm package in a hook, a tool, `install.js` or a test.
 - `install.js`, `lib/` and `test/` follow the same two hard rules a hook or a tool does,
   built-ins and no hardcoded user path — `skills/hook-scripts/SKILL.md` → Hard Rules.
-- Commit and branch format: `skills/commit-rules/SKILL.md`. Direct commits to `main` are
-  blocked — work on a feature branch.
+- Commit message format: `skills/commit-rules/SKILL.md`; branch name and every git
+  command: `skills/git-workflow/SKILL.md`. Direct commits to `main` are blocked — work
+  on a feature branch.
 
 ## Hook architecture
 
@@ -79,7 +80,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `code-navigation` — where an answer about a symbol comes from.
 - `code-review-and-quality` — what a review looks for.
 - `comments` — a comment in any language, whatever marker opens it.
-- `commit-rules` — the commit message and the branch name.
+- `commit-rules` — the commit message; the commands making and correcting a commit are `git-workflow`'s.
 - `cpp-api-design` — the shape of a public C++ surface.
 - `cpp-coding` — C++ implementation conventions.
 - `cpp-doxygen` — Doxygen blocks on public C++ headers.
@@ -89,6 +90,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `debugging` — the investigation that precedes a fix.
 - `deprecation-and-migration` — retiring a public path.
 - `editing` — the guard against a stale reading of a file, of a tracker or forge artifact, and of the branch head at a merge.
+- `git-workflow` — every git command moving a branch, a commit, a tag or a remote ref, in one ordered sequence; what a commit message, a version and a pull request say sit in `commit-rules`, `release` and `pr-rules`.
 - `github-cli` — `gh` mechanics.
 - `gitlab-cli` — `glab` mechanics.
 - `hook-scripts` — writing this repository's hooks and tools.
@@ -96,9 +98,9 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `node-testing` — conventions for the tests under `test/`.
 - `observability-and-instrumentation` — telemetry for production visibility.
 - `performance-optimization` — the process around one performance problem.
-- `pr-rules` — the pull request, from opening it to merging it.
+- `pr-rules` — the pull request, from opening it to the decision to merge; the merge command is `git-workflow`'s.
 - `project-planning` — stakeholder-facing planning, and whether independent work runs at the same time.
-- `release` — the version number and the mechanical steps to ship it.
+- `release` — the version number and what holds before it is frozen; the tag and the pushes shipping it are `git-workflow`'s.
 - `requirements` — turning an ask into a requirement.
 - `security-and-hardening` — design-time security.
 - `shipping-and-launch` — whether a built release may reach users, and how widely.
@@ -153,16 +155,16 @@ stage with no command or persona of its own says so rather than naming the neare
 | Intake | — | not created yet | `requirements`, `project-planning` |
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
 | Scope and issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
-| Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
-| Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
+| Branch | — | → `In Progress` | `git-workflow` → Naming the Branch |
+| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` and `git-workflow` per commit |
+| Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules`, `git-workflow` → Sending the Branch |
 | Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
-| Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
+| Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`, the workflow skill of the version control system → Reading One Round of Review; `changelog` when the change touches `CHANGELOG.md` |
 | Security audit | `/review`, or `/review-loop` to iterate → `security-auditor` | `In Review` | `security-and-hardening`, `pr-rules` |
 | Pre-merge issue check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
-| Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
+| Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `git-workflow` → Merging, `github-cli` / `gitlab-cli` |
 | Close issue | — | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
-| Release | — (`release-manager` directly) | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
+| Release | — (`release-manager` directly) | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync`, `git-workflow` → Tagging a Release |
 
 A second table follows, one row for each skill named in no `Skills` cell above. Its
 `Stage` cell holds a stage name of the table above, or the word `cross-cutting` — itself
@@ -174,7 +176,7 @@ missing value.
 | `code-navigation` | cross-cutting | an edit or a verdict turning on a symbol's callers, its implementations, its definition, what a bare name refers to, or whether the symbol has any user left | the symbol, at the file path, line and character it stands at, or the name a workspace-wide query carries | the set of sites the operation returns | the source `code-navigation` → Where the Answer Comes From names for the language | the answer naming the operation that produced it, per `code-navigation` → Naming the Operation |
 | `deprecation-and-migration` | Implement | retiring a public API, planning a breaking change, or writing a migration guide | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
 | `editing` | cross-cutting | a write to a file, a tracker issue body or a PR description, and a merge | the artifact as it stands before the write | the artifact as it stands after the write | a reading of the artifact, per `editing` → Guard Against a Stale Reading | the checks a round of edits runs, per `work-sequence` → When a Check Runs |
-| `hook-scripts` | Implement | writing or modifying a file under `hooks/` or `tools/` | the event or tool the change routes to | a dispatcher or tool file matching the Dispatcher or Tool Skeleton | the feature branch named per `commit-rules` → Branch Naming | the test file `node-testing` covers for the tool, `test/<name>.test.js` |
+| `hook-scripts` | Implement | writing or modifying a file under `hooks/` or `tools/` | the event or tool the change routes to | a dispatcher or tool file matching the Dispatcher or Tool Skeleton | the feature branch named per `git-workflow` → Naming the Branch | the test file `node-testing` covers for the tool, `test/<name>.test.js` |
 | `node-testing` | Implement | writing or reviewing a file under `test/*.test.js` | the pure logic exported by the hook or tool under test | a test file asserting that logic's behaviour | the tool's exported logic, per `hook-scripts` → Tool Skeleton | the tool covered and `npm test` run, per `hook-scripts` → Adding or Retiring a Tool |
 | `observability-and-instrumentation` | cross-cutting | adding logging, metrics, or tracing, or checking a running system's reported behaviour | the question an on-call engineer needs answered | a structured log line, metric, or trace answering it | the non-functional requirement `requirements` → Functional vs Non-Functional records | the Readiness Checklist item `shipping-and-launch` → Readiness Checklist for monitoring |
 | `performance-optimization` | Implement | diagnosing a reported performance problem, or evaluating a change's performance cost | a profiler or benchmark baseline for the hot path | a measured before/after comparison for the fix | the symptom and cost the bug template of `issue-rules` → Description Template asks for | the hot-path check `code-review-and-quality` → Performance runs before merge |

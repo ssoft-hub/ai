@@ -77,13 +77,10 @@ to users is a separate gate → `shipping-and-launch` skill.
 
 ## Step 5 — Commit and Tag
 
-```bash
-git add CHANGELOG.md <version-files>
-git commit -m "chore(release): bump version to X.Y.Z"
-git tag vX.Y.Z
-git push
-git push --tags    # separate push — triggers CI release workflow
-```
+The release commit carries `CHANGELOG.md` and every version file of Step 3, under the
+subject `chore(release): bump version to X.Y.Z`. The commit, the tag on it and the
+pushes that publish both belong to the workflow skill of the version control system,
+which fixes the order they run in and what each one leaves behind.
 
 ## Step 6 — Submodule Root Update (if applicable)
 

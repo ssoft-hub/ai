@@ -41,7 +41,7 @@ git add module/foo
 git commit -m "chore: update module/foo ref"
 ```
 
-Branch name → `commit-rules`. Never record a ref pointing at an uncommitted or half-merged
+Branch name → `git-workflow` → Naming the Branch. Never record a ref pointing at an uncommitted or half-merged
 module state.
 
 ## Detached HEAD
@@ -180,7 +180,7 @@ on no target branch. `pr-rules` → Pre-Merge Checklist gates on this.
 
 `submodule.<name>.branch` in `.gitmodules` is the second reference, which that condition
 does not reach. `--remote` follows the key, so its value must not take the working branch
-shape `<user>/<type>/<TRACKER-N>/<subject>` that `commit-rules` → Branch Naming fixes,
+shape `<user>/<type>/<TRACKER-N>/<subject>` that `git-workflow` → Naming the Branch fixes,
 and the module's remote must carry a branch by that name:
 
 ```bash
