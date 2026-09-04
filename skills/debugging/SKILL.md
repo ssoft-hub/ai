@@ -17,6 +17,7 @@ metadata:
 
 Apply when investigating a bug, test failure, or unexpected behavior, before proposing a fix.
 
+- Where the call path reaching the failing site comes from → `code-navigation` skill.
 - Once the cause is understood and a fix is being written → the coding-conventions skill
   of the language being written.
 - The fix needs a test that fails before it and passes after → `test-driven-development` skill.

@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
 - A skill declares its relation to the conventions of the project it is applied in, as `project-relation` in its frontmatter: `overrides` where absent, and `binding` for a skill stating this repository's own conventions, which carries `## Project Binding` in place of `## Project Overrides`
@@ -69,6 +70,7 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one
 - The `## Project Overrides` section reads the same in every skill, one sentence differing only in the topic it names, and every skill carries one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository
 - `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form

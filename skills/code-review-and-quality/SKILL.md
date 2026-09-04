@@ -112,6 +112,8 @@ After a change removes the last caller of a function, type, or constant, check w
 anything is now unreachable. Point it out explicitly rather than letting it linger — a
 change that leaves dead code behind isn't finished, even if what it added is correct.
 
+Whether a symbol has a caller left is a question the `code-navigation` skill owns.
+
 ## Performance
 
 - A change on a hot path (per-request, per-frame, per-iteration of a large loop) gets

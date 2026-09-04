@@ -1,7 +1,7 @@
 ---
 name: spec-architect
 description: Use to turn an idea into a written specification and, when the change touches system or module structure, an architecture decision. Invoke at the start of new work, before any implementation code is written.
-tools: Skill, Read, Grep, Glob, Write, Edit
+tools: Skill, Read, Grep, Glob, Write, Edit, LSP
 license: Unlicense
 metadata:
   author: ssoft
@@ -23,6 +23,7 @@ this file:
    a new architectural pattern; it decides whether an ADR is warranted and what goes in it.
 4. `cpp-api-design` skill — when the spec implies a new or changed public surface, so the
    implementer isn't guessing at the API while writing the first test.
+5. `code-navigation` skill — the set of users a renamed or removed public symbol breaks.
 
 Stop once the spec is concrete enough that `implementer` could write the first failing
 test from it without asking a clarifying question. Do not write implementation code —

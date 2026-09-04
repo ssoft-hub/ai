@@ -76,6 +76,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `architecture` — how modules, services and processes fit together.
 - `changelog` — the `CHANGELOG.md` file.
 - `ci-cd-and-automation` — the pipeline producing the checks-passed signal.
+- `code-navigation` — where an answer about a symbol comes from.
 - `code-review-and-quality` — what a review looks for.
 - `comments` — a comment in any language, whatever marker opens it.
 - `commit-rules` — the commit message and the branch name.
@@ -170,6 +171,7 @@ missing value.
 
 | Skill | Stage | Trigger | Input | Output | Entry criterion | Exit criterion |
 |-------|-------|---------|-------|--------|------------------|-----------------|
+| `code-navigation` | cross-cutting | an edit or a verdict turning on a symbol's callers, its implementations, its definition, what a bare name refers to, or whether the symbol has any user left | the symbol, at the file path, line and character it stands at, or the name a workspace-wide query carries | the set of sites the operation returns | the source `code-navigation` → Where the Answer Comes From names for the language | the answer naming the operation that produced it, per `code-navigation` → Naming the Operation |
 | `deprecation-and-migration` | Implement | retiring a public API, planning a breaking change, or writing a migration guide | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
 | `editing` | cross-cutting | a write to a file, a tracker issue body or a PR description, and a merge | the artifact as it stands before the write | the artifact as it stands after the write | a reading of the artifact, per `editing` → Guard Against a Stale Reading | the checks a round of edits runs, per `work-sequence` → When a Check Runs |
 | `hook-scripts` | Implement | writing or modifying a file under `hooks/` or `tools/` | the event or tool the change routes to | a dispatcher or tool file matching the Dispatcher or Tool Skeleton | the feature branch named per `commit-rules` → Branch Naming | the test file `node-testing` covers for the tool, `test/<name>.test.js` |

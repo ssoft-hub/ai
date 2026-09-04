@@ -61,6 +61,8 @@ meeting it is owned elsewhere:
 
 - Avoid one unless it is necessary — an addition beside the existing symbol is almost
   always available.
+- The set of the public symbol's users, which a removal or a rename breaks →
+  `code-navigation` skill.
 - Retiring the old path (deprecate before removing, grace period, migration guide) →
   `deprecation-and-migration` skill.
 - The version bump it forces → `release` skill → Step 1 — Decide Version.

@@ -134,3 +134,6 @@ Open an issue for the actual removal at the same time the deprecation ships, tar
 at the release where the grace period ends (`issue-rules` → Milestone), so the removal
 isn't forgotten and doesn't slip indefinitely once the deprecation notice stops being
 visible in day-to-day work.
+
+The set of the deprecated symbol's users, which the removal is planned against, is a
+question the `code-navigation` skill owns.
