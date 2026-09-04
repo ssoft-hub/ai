@@ -80,6 +80,7 @@ meets it. A rule belongs to exactly one line — a second statement is not empha
 a copy that drifts, and the agent reading both has nothing telling it which one wins.
 
 - `architecture` — how modules, services and processes fit together.
+- `artifact-placement` — where an artifact a rule produces is put.
 - `changelog` — the project's changelog, in the Keep a Changelog format.
 - `ci-cd-and-automation` — the pipeline producing the checks-passed signal.
 - `code-navigation` — where an answer about a symbol comes from.
@@ -189,6 +190,7 @@ states a trigger.
 
 | Skill | Stage | Input | Output | Entry criterion | Exit criterion |
 |-------|-------|-------|--------|------------------|-----------------|
+| `artifact-placement` | cross-cutting | the artifact, and the conventions the project states for a record of its kind | the location the artifact is written to | the requirement `artifact-placement` → The Requirement, Not the Path names for a location | the location traced to a stated convention or to an answer, per `artifact-placement` → Where the Place Comes From |
 | `code-navigation` | cross-cutting | the symbol, at the file path, line and character it stands at, or the name a workspace-wide query carries | the set of sites the operation returns | the source `code-navigation` → Where the Answer Comes From names for the language | the answer naming the operation that produced it, per `code-navigation` → Naming the Operation |
 | `deprecation-and-migration` | cross-cutting | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
 | `editing` | cross-cutting | the artifact as it stands before the write | the artifact as it stands after the write | a reading of the artifact, per `editing` → Guard Against a Stale Reading | the checks a round of edits runs, per `work-sequence` → When a Check Runs |

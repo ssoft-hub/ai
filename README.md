@@ -86,6 +86,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | Skill | Description |
 |-------|-------------|
 | `architecture` | System/module architecture design, ADRs, tradeoffs |
+| `artifact-placement` | Where an artifact a rule produces is put: the requirement its location meets, and who chose it |
 | `changelog` | Keep a Changelog format |
 | `ci-cd-and-automation` | CI/CD pipeline design and quality gates |
 | `code-navigation` | Where an answer about a symbol comes from, and what a text search does not answer |

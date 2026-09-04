@@ -46,6 +46,9 @@ search instead of retrying the same steps:
 - **Genuinely intermittent** — add durable logging at the suspected site and wait for it
   to recur; document the exact conditions observed each time it does.
 
+Where the record of the observed conditions goes: `artifact-placement` → Where the Place
+Comes From.
+
 ## Root Cause, Not Symptom
 
 A fix that makes the immediate symptom disappear without explaining why it occurred is
