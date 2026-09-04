@@ -40,6 +40,8 @@ with their own assumption. Writing it down once, in a shared format, means every
 fills the gaps the same way, and disagreements surface before code is written instead
 of in review.
 
+Where the written requirement goes: `artifact-placement` → Where the Place Comes From.
+
 ## Structure of a Requirement
 
 Every requirement should make these explicit, even briefly:

@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- `artifact-placement` skill: where an artifact a rule produces is put is the project's to decide, and the skill producing it states the requirement its location meets rather than a path, asking where the project is silent; a path an external convention or a tool fixes names its basis instead
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there

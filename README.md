@@ -85,6 +85,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | Skill | Description |
 |-------|-------------|
 | `architecture` | System/module architecture design, ADRs, tradeoffs |
+| `artifact-placement` | Where an artifact a rule produces is put: the requirement its location meets, and who chose it |
 | `changelog` | Keep a Changelog format |
 | `ci-cd-and-automation` | CI/CD pipeline design and quality gates |
 | `code-navigation` | Where an answer about a symbol comes from, and what a text search does not answer |
@@ -99,7 +100,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `ddd` | Domain-Driven Design patterns in C++ |
 | `debugging` | Root-cause investigation before proposing a fix |
 | `deprecation-and-migration` | Retiring a public API and writing a migration guide |
-| `editing` | Guard against a stale reading of a file, of a tracker or forge artifact, and of a branch head |
+| `editing` | Guard against a stale reading of a file, of a tracker or forge artifact and of a branch head |
 | `github-cli` | `gh` mechanics — issues, PRs, labels, pending review threads, stacks, merges |
 | `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, stacks, merges |
 | `hook-scripts` | Writing Claude Code hooks and tools |

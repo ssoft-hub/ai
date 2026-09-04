@@ -92,6 +92,8 @@ case, and what silently changes behavior (not just signature) if anything does. 
 migration guide that only shows the new signature, without a behavior diff, misses the
 cases that compile after migration but behave differently.
 
+Where the guide goes: `artifact-placement` → Where the Place Comes From.
+
 ## Coexistence During the Grace Period
 
 The deprecated and replacement paths must both work correctly during the grace period —

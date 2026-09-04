@@ -81,6 +81,8 @@ plan discovered under incident pressure is not a plan; if reverting is not
 straightforward (irreversible migration, external side effects), say so explicitly
 before launch, not after something goes wrong.
 
+Where the plan goes: `artifact-placement` → Where the Place Comes From.
+
 ## Feature Flags
 
 For a change too risky to expose to everyone at once but also not practical to hold in
