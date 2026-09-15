@@ -142,3 +142,37 @@ test('a second-table row naming a stage is named in that stage row\'s Skills cel
   }
   assert.deepStrictEqual(disagreements, []);
 });
+
+// The Issue state column names a state in backticks, and a citation of a skill in the same
+// cell wears the same markup; a name the skills directory carries is the citation.
+function statesNamed(stageTable) {
+  const stateCol = columnIndex(stageTable.header, 'Issue state');
+  const named = new Set();
+  for (const row of stageTable.rows)
+    for (const [, token] of row[stateCol].matchAll(/`([^`]+)`/g))
+      if (!fs.existsSync(path.join(skillsDir, token, 'SKILL.md'))) named.add(token);
+  return [...named];
+}
+
+// The section of issue-rules the map's own heading text cites for these states.
+function lifecycleSection() {
+  const text = fs.readFileSync(path.join(skillsDir, 'issue-rules', 'SKILL.md'), 'utf8')
+    .replace(/\r\n/g, '\n');
+  const lines = text.split('\n');
+  const start = lines.indexOf('## Lifecycle');
+  assert.notStrictEqual(start, -1, 'issue-rules carries a ## Lifecycle section');
+  let end = lines.findIndex((l, i) => i > start && l.startsWith('## '));
+  if (end === -1) end = lines.length;
+  return lines.slice(start, end).join('\n');
+}
+
+test('every issue state the stage table names is a state issue-rules -> Lifecycle carries', () => {
+  const [stageTable] = lifecycleMapTables();
+  const named = statesNamed(stageTable);
+  // A cell wording that names no state at all would leave the walk with nothing to check.
+  assert.ok(named.length > 0, 'the Issue state column names a state');
+
+  const lifecycle = lifecycleSection();
+  const absent = named.filter(state => !lifecycle.includes('`' + state + '`'));
+  assert.deepStrictEqual(absent, []);
+});

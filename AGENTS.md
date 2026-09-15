@@ -168,8 +168,8 @@ stage with no command or persona of its own says so rather than naming the neare
 | Security audit | `/review`, or `/review-loop` to iterate → `security-auditor` | `In Review` | `security-and-hardening`, `pr-rules` |
 | Pre-merge issue check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
 | Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
-| Close issue | — | issue closed; not `Done` until deployed (`issue-rules` → Lifecycle), or left `In Review` with a follow-up linked | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
-| Release | — (`release-manager` directly) | → `Done` | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
+| Close issue | — | → `Done`, read off the merge (`issue-rules` → Lifecycle) | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
+| Release | — (`release-manager` directly) | `Done` since the merge, which the release moves no further | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
 
 A second table follows, one row for each skill named in no `Skills` cell above. Its
 `Stage` cell holds a stage name of the table above, or the word `cross-cutting` — itself

@@ -20,7 +20,7 @@ Apply when creating or reviewing tracker issues (GitHub Issues, Jira, Linear, �
 
 This skill states what an issue must contain. The step of the work each act on it runs
 at belongs to `work-sequence`, and the command that searches for it, creates it, labels it,
-or comments on it to the CLI skill of the issue tracker.
+assigns it or comments on it to the CLI skill of the issue tracker.
 
 ## One Issue per Concern
 
@@ -190,16 +190,32 @@ Assign to a milestone when the issue must ship in a specific release. Leave unse
 
 ## Lifecycle
 
+**Should**
+
 ```
 Open → In Progress → In Review → Done
-                              ↘ Closed (won't fix / duplicate)
+  ↘         ↘            ↘
+   Closed (won't fix / duplicate)
 ```
 
 - **Open** — triaged, not started.
-- **In Progress** — branch exists (see `commit-rules` Branch Naming).
+- **In Progress** — branch exists; the assignee field, where the tracker has one, should name the user the `<user>` segment of the branch name carries (`commit-rules` → Branch Naming).
 - **In Review** — the change is offered for review (`work-sequence` → The Sequence).
-- **Done** — merged and deployed, with every checklist checkbox in the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence). If checkboxes remain after merge, stay **In Review** with a follow-up PR/MR linked — do not mark Done.
-- **Closed** — explicitly not going to be fixed; add a comment explaining why.
+- **Done** — the change sits on the target branch after the merge, with every checklist checkbox in the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence). Whether what it delivers has reached a user is no state of the issue: the release carries that, under `shipping-and-launch`.
+- **Closed** — explicitly not going to be fixed, or a duplicate of an open issue; a comment should state which, naming the issue a duplicate repeats.
+
+Closing the issue on the tracker is an act; `Done` and `Closed` are states an issue closed
+on the tracker stands in, and a reader should tell them apart by the artifact below, never
+by the act.
+
+A reader should read a state off the tracker's state field where that field carries these
+states, else off the artifact whose existence defines the state — the issue itself, with
+none of the other artifacts existing, for `Open`; the branch for `In Progress`; the offer
+for review for `In Review`; the merge for `Done`; the closing comment for `Closed` — so
+that no state requires a label the project has not declared.
+
+An issue in `In Progress` or `In Review` with the assignee field empty is a defect of the
+issue; one in `Open` with the field set is not.
 
 ---
 
@@ -220,4 +236,4 @@ A reader should be able to reconstruct, from comments alone, which PR/MR impleme
 - `work-sequence` — the step of the work each act on this issue runs at, and the condition behind each lifecycle state.
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
 - `pr-rules` — PR title and description mirror the issue being resolved; its Pre-Merge Checklist gates merge on this issue's checkbox state.
-- The CLI skill of the issue tracker — the commands that search for, create, label, and comment on an issue.
+- The CLI skill of the issue tracker — the commands that search for, create, label, assign, and comment on an issue.
