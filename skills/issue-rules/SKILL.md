@@ -51,6 +51,13 @@ difference an issue makes is capitalization:
 
 ## Description Template
 
+An issue body must carry the sections of the template for its type and no section
+outside them, so that a heading the writer invents is not where the origin of the
+problem is recorded. `Fix` takes the Bug template; every other type takes Feature /
+improvement. The `## Acceptance criteria` slot of either template must take what a
+criterion states from `requirements` → Acceptance Criteria (Given/When/Then), and this
+skill restates nothing of it.
+
 ### Feature / improvement
 
 ```markdown
@@ -92,6 +99,30 @@ What happens instead.
 ## Environment
 OS, version, relevant config.
 ```
+
+---
+
+## What an Issue Names
+
+**Should**
+
+An issue should name only what its problem or its criteria turn on: no other issue,
+branch, skill, section, finding or artifact whose absence would leave every criterion
+stating the same thing. One question settles a name: can the work on this issue start
+before the named thing is done? Where it can, the author should cut the name, since
+whoever takes the issue up, in whatever order the backlog is worked, would otherwise wait
+on that thing or cite what never reaches the tree; where it cannot, the name is a
+dependency and stays.
+
+An issue should carry the circumstances the problem was found under — a review, a
+session, the branch the defect surfaced on — only where they are part of the problem.
+
+A reader should read each name in the issue against the criteria, and should cut a name
+no criterion needs.
+
+| Defective | Corrected |
+|---|---|
+| "Found reviewing PR #<n> on the branch of GH-<n>, in the reviewer's third comment: `<skill>` → <Section> states no limit on the length of a line." | "`<skill>` → <Section> states no limit on the length of a line." |
 
 ---
 
