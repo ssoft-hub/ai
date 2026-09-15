@@ -3,12 +3,16 @@
 .*
 !.gitignore
 !.github/
+!.claude-plugin/
 
 # Node.js
 node_modules/
 
 # Written by the tools when CLAUDE_CONFIG_DIR resolves to this checkout
 session-env/
+
+# Written by claude plugin eval
+evals/results/
 
 # Temporary and backup files
 *.bak

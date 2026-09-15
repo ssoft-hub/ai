@@ -1,0 +1,5 @@
+{
+  "name": "claude-config",
+  "description": "The skill catalog of claude-config: the skills under skills/, with the cases under evals/ measuring whether each skill's rules hold, alone and beside the others",
+  "version": "0.1.0"
+}
