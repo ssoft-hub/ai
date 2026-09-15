@@ -19,8 +19,21 @@ metadata:
 Apply when creating or reviewing tracker issues (GitHub Issues, Jira, Linear, …).
 
 This skill states what an issue must contain. The step of the work each act on it runs
-at belongs to `work-sequence`, and the command that creates it, labels it, or comments on
-it to the CLI skill of the issue tracker.
+at belongs to `work-sequence`, and the command that searches for it, creates it, labels it,
+or comments on it to the CLI skill of the issue tracker.
+
+## One Issue per Concern
+
+**Should**
+
+The author should create an issue only where no open issue carries the same concern,
+which a search of the open issues by the words of the concern establishes before the
+issue is created; the CLI skill of the issue tracker states the command, in its issues
+section. Where an open issue carries the concern, the author should add the ask there as
+an acceptance criterion, with a comment naming what was added. A duplicate that reaches
+the tracker in spite of the search takes the state Lifecycle (below) gives it, `Closed`.
+
+---
 
 ## Title
 
@@ -207,4 +220,4 @@ A reader should be able to reconstruct, from comments alone, which PR/MR impleme
 - `work-sequence` — the step of the work each act on this issue runs at, and the condition behind each lifecycle state.
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
 - `pr-rules` — PR title and description mirror the issue being resolved; its Pre-Merge Checklist gates merge on this issue's checkbox state.
-- The CLI skill of the issue tracker — the commands that create, label, and comment on an issue.
+- The CLI skill of the issue tracker — the commands that search for, create, label, and comment on an issue.
