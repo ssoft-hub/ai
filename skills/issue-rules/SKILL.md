@@ -47,7 +47,7 @@ Type(scope): Subject description
 
 ```
 Feat(hash): Add SipHash-2-4 keyed 64-bit hash
-Fix(auth): Token expiry check uses < instead of <=
+Fix(auth): Compare token expiry with <= instead of <
 Chore: Update CI runner to Ubuntu 24.04
 ```
 
@@ -150,17 +150,20 @@ Every issue gets at most one **type** label, matching the title Type, when one a
 | `Refactor` | `Refactor` |
 
 Title types other than these three (see Types above) carry no label — the title prefix alone is enough.
+The author should spell a type label as the table gives it.
 
 Every issue also gets a few **topic** labels (2-4, not a tag cloud) — named after the
 actual subject matter (component, subsystem, domain concept), not drawn from a fixed
 list. Before creating one, list the tracker's existing labels — the CLI skill of the
 issue tracker states the command, in its issues section — and reuse one covering the
 same topic; create a new topic label only the first time a topic has no match. Topic
-labels grow organically with the project.
+labels grow organically with the project. The topic labels of one project should share one
+capitalisation, the project's own, whichever it is.
 
 ```
 Feat(threat-analysis): Add short-term conflict alert algorithm
-→ Feature, STCA, Safety Nets, Algorithm, ATCS
+→ type label: Feature
+→ topic labels: STCA, Safety Nets, Algorithm, ATCS
 ```
 
 Set labels when the issue is created, not after. The PR carries the same labels — the
