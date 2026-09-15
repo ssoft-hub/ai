@@ -153,3 +153,9 @@ test('a grader name carries one rubric, byte for byte, in every case holding it'
       + 'carries one rubric, and a case needing another rubric gives it another name');
   }
 });
+
+test('a file beside the suites is no suite, so the walk takes directories alone', () => {
+  const guide = path.join(evalsDir, 'README.md');
+  assert.ok(fs.existsSync(guide), `${rel(guide)} states how a case is written`);
+  assert.ok(!suites().includes('README.md'), 'the walk takes no file for a suite');
+});

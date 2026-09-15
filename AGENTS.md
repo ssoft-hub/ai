@@ -10,7 +10,8 @@ which is what Claude Code reads — the working tree is the source, never what i
 ```
 hooks/      One dispatcher per Claude Code event (PreToolUse, PostToolUse, Stop,
             SessionStart, UserPromptSubmit)
-tools/      Atomic tool scripts the dispatchers route to
+tools/      Atomic tool scripts the dispatchers route to, and a script run by hand
+            that no dispatcher routes to
 skills/     Skill definitions loaded by /skill-name slash commands
 agents/     Persona subagent definitions (one markdown file per agent)
 commands/   Slash command definitions (one markdown file per command)
@@ -22,6 +23,11 @@ lib/        Pure helpers shared by install.js and uninstall.js
 templates/  Starting points for a new skill, agent or command; AGENT.md and COMMAND.md
             carry the steps for adding one, and skill-authoring carries them for
             a skill
+evals/      Eval cases per skill, run by `claude plugin eval` against one skill, a
+            list of them or the whole catalog; a run writes to evals/results/
+.claude-plugin/
+            The manifest making this tree the plugin that eval loads; install
+            copies neither it nor evals/
 test/       One test file per unit, run by npm test
 install.js  Bootstrap script — copies files to ~/.claude/
 ```

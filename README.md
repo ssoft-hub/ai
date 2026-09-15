@@ -15,6 +15,7 @@ pipeline of persona agents and commands built on top of them.
 | `agents/` | Persona subagent definitions (one markdown file per agent) |
 | `commands/` | Slash command definitions (one markdown file per command) |
 | `config/` | What install deploys as configuration: `settings.json` (hooks, permissions, statusline), the `claude-config-rules.md` it writes to `~/.claude/` and imports from the `CLAUDE.md` there, and `retired.json` - paths this repo no longer ships, which install warns about but never deletes; plus `skill-contexts.json`, the contexts a skill's `bound-to` draws from, which install never deploys |
+| `evals/` | Eval cases per skill, run by `claude plugin eval` against the skill alone, a list of skills or the whole catalog; the results of a run land under `evals/results/`, untracked |
 
 ## Hooks
 
@@ -207,11 +208,43 @@ test file, since the runner loads each of them as one, the rule that no path
 `bound-to` and what a routing may name or has to state by role under it, the force
 marker under every `##` heading of `templates/SKILL.md`, of `templates/COMMAND.md`, of
 every command and of each skill declaring `rubric: applied`, the rule that a command
-ends with the caller's text and carries no HTML comment, the rule that no colour
+ends with the caller's text and carries no HTML comment, the skills a built eval root
+holds and the roots `tools/eval-plugin.js` refuses to remove (`test/eval-plugin.test.js`),
+the shape of every eval case and the rule that one grader name carries one rubric
+(`test/evals-layout.test.js`), the rule that no colour
 word in `skills/*/SKILL.md` or `AGENTS.md` stands for a state, the proper name of a
 practice aside, and the rule that no skill names a file of the project it is applied in
 or a path of this repository, a `binding` skill, the skill stating how a skill is
 written and a name an outside convention fixes aside.
+
+## Evals
+
+```
+node tools/eval-plugin.js comments                  # a root holding one skill, on stdout
+claude plugin eval <root> --trust-plugin --judge-model <judge> --output-dir evals/results/<label>
+claude plugin eval . --trust-plugin --judge-model <judge> --output-dir evals/results/catalog
+```
+
+`claude plugin eval` (Claude Code 2.1.272 or later) runs each case in two arms, with the
+plugin it is given and without, three times each, and reports the score of each arm and
+their difference, the `delta`. An earlier binary prints that `plugin eval` is in early
+access and exits 0, writing no results directory, so what says a run happened is the
+file `aggregate-result.json` rather than the exit status. The manifest
+`.claude-plugin/plugin.json` makes this tree the plugin; `install.js` copies neither the
+manifest nor `evals/`. The judge of an `llm` grader, `<judge>` in the block above, is the
+strongest model the operator has, the one the agents here run on, and never the cheaper
+one the tool falls back to where the flag is absent; every run here passes the flag, so
+that a change of judge is a change of the measurement. Which model judged a run stands in
+the run, as the `judgeModel` field of `aggregate-result.json`.
+
+```
+evals/<skill>/<case>/prompt.md      the task, below its max_turns and allowed_tools
+evals/<skill>/<case>/graders/*.md   one grader per rule the case exercises
+evals/results/<label>/              a run's aggregate-result.json, and more beside it
+```
+
+How a case is written, how the judge is checked on known answers and how a list of
+skills is built and run: `evals/README.md`.
 
 ## Manual setup
 

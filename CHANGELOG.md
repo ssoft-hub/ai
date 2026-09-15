@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- A skill's effect is measured: `claude plugin eval .` runs the cases under `evals/<skill>/` with the catalog and without it, and `node tools/eval-plugin.js <skill>...` builds a root holding a list of skills for the same cases; the first suites are `comments` and `writing-style`
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
