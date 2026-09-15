@@ -6,6 +6,7 @@ license: Unlicense
 metadata:
   author: ssoft
   tier: narrow
+  rubric: applied
   bound-to:
     - tracker
   tags:
@@ -37,6 +38,10 @@ the tracker in spite of the search takes the state Lifecycle (below) gives it, `
 
 ## Title
 
+**Must**
+
+An issue title must read:
+
 ```
 Type(scope): Subject description
 ```
@@ -55,14 +60,17 @@ Chore: Update CI runner to Ubuntu 24.04
 
 ## Types
 
-The same set as `commit-rules` → Types, which owns what each one means. The only
-difference an issue makes is capitalization:
+**Must**
+
+An issue's type must be one of the types `commit-rules` → Types lists, capitalised:
 
 `Feat`, `Fix`, `Refactor`, `Perf`, `Docs`, `Test`, `Chore`, `Ci`, `Style`
 
 ---
 
 ## Description Template
+
+**Must**
 
 An issue body must carry the sections of the template for its type and no section
 outside them, so that a heading the writer invents is not where the origin of the
@@ -141,7 +149,9 @@ no criterion needs.
 
 ## Labels
 
-Every issue gets at most one **type** label, matching the title Type, when one applies:
+**Should**
+
+Every issue should get at most one **type** label, matching the title Type, when one applies:
 
 | Label | Title Types it covers |
 |-------|------------------------|
@@ -152,12 +162,12 @@ Every issue gets at most one **type** label, matching the title Type, when one a
 Title types other than these three (see Types above) carry no label — the title prefix alone is enough.
 The author should spell a type label as the table gives it.
 
-Every issue also gets a few **topic** labels (2-4, not a tag cloud) — named after the
+Every issue should also get a few **topic** labels (2-4, not a tag cloud) — named after the
 actual subject matter (component, subsystem, domain concept), not drawn from a fixed
-list. Before creating one, list the tracker's existing labels — the CLI skill of the
-issue tracker states the command, in its issues section — and reuse one covering the
-same topic; create a new topic label only the first time a topic has no match. Topic
-labels grow organically with the project. The topic labels of one project should share one
+list. Before creating one, should list the tracker's existing labels — the CLI skill of
+the issue tracker states the command, in its issues section — and reuse one covering the
+same topic; should create a new topic label only the first time a topic has no match.
+Topic labels grow organically with the project. The topic labels of one project should share one
 capitalisation, the project's own, whichever it is.
 
 ```
@@ -166,13 +176,17 @@ Feat(threat-analysis): Add short-term conflict alert algorithm
 → topic labels: STCA, Safety Nets, Algorithm, ATCS
 ```
 
-Set labels when the issue is created, not after. The PR carries the same labels — the
+Should set labels when the issue is created, not after. The PR carries the same labels — the
 type label if the issue has one, plus its topic labels — see `pr-rules` → Pre-Open
 Checklist.
 
 ---
 
 ## Priority
+
+**Should**
+
+An issue should carry one of these levels:
 
 | Level | Meaning |
 |-------|---------|
@@ -187,7 +201,9 @@ Default when unset: **P2**.
 
 ## Milestone
 
-Assign to a milestone when the issue must ship in a specific release. Leave unset for backlog items with no committed date.
+**Should**
+
+Should assign to a milestone when the issue is to ship in a specific release, and leave it unset for a backlog item with no committed date.
 
 ---
 
@@ -224,17 +240,21 @@ issue; one in `Open` with the field set is not.
 
 ## Progress Comments
 
-Track implementation progress in comments, not only checkboxes:
+**Should**
 
-- When a PR/MR is opened against this issue, comment which checklist items it addresses.
-- When a PR/MR merges, comment which items it resolved and update the corresponding checkboxes to match.
-- When items remain open after a merge, comment that a follow-up PR/MR is needed, and link it once it exists.
+Should track implementation progress in comments, not only checkboxes:
+
+- When a PR/MR is opened against this issue, should comment which checklist items it addresses.
+- When a PR/MR merges, should comment which items it resolved and update the corresponding checkboxes to match.
+- When items remain open after a merge, should comment that a follow-up PR/MR is needed, and link it once it exists.
 
 A reader should be able to reconstruct, from comments alone, which PR/MR implemented which requirement.
 
 ---
 
 ## Cross-References
+
+**Recommended**
 
 - `work-sequence` — the step of the work each act on this issue runs at, and the condition behind each lifecycle state.
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
