@@ -5,6 +5,9 @@
 ### Added
 - A skill's effect is measured: `claude plugin eval .` runs the cases under `evals/<skill>/` with the catalog and without it, and `node tools/eval-plugin.js <skill>...` builds a root holding a list of skills for the same cases; the first suites are `comments` and `writing-style`
 - `test/lifecycle-map.test.js` fails an issue state the stage table of `AGENTS.md` names that `issue-rules` -> Lifecycle does not carry, so the map and the skill cannot drift apart over a state
+- `issue-rules` -> What an Issue Names: an issue names only what its problem or its criteria turn on, settled by whether the work can start before the named thing is done; an issue body carries no section outside its template
+- `issue-rules` -> One Issue per Concern: an issue is created only where no open issue carries the concern, found by a search of the open issues; where one does, the ask is added there as a criterion
+- `issue-rules` -> Lifecycle requires an assignee from `In Progress` on, states where a reader reads each state on a tracker whose state field does not carry these states, and leaves whether what a merge delivers has reached a user to `shipping-and-launch`
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
@@ -73,6 +76,9 @@
 
 ### Changed
 - No skill names a file of the project it is applied in, or a path of this repository, as where a convention sits: a rule turning on a project convention sends its reader to what the project states, wherever it states it
+- Every example in `issue-rules` obeys its rule: an imperative title, a label example keeping the type label apart from the topic labels, `Closed` reachable from `Open`, and one capitalisation stated for the topic labels of a project
+- `issue-rules` declares `rubric: applied`: every section carries one of the four binding-force markers
+- `github-cli` and `gitlab-cli` name, beside the labelling command, the command that sets an issue's assignee and the search of the open issues
 - `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository
 - `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form
