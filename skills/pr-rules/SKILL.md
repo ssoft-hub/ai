@@ -25,8 +25,8 @@ moment: `work-sequence` → The Sequence and When a Check Runs.
 
 **Must**
 
-Must follow the PR conventions the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the PR conventions the project states, in a project skill or wherever else it
+keeps its conventions, instead of the rule here.
 
 ## PR Title
 

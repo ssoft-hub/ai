@@ -27,8 +27,8 @@ acceptance criteria, or turning a vague ask into a spec before design starts.
 
 **Must**
 
-Must follow the requirements process the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the requirements process the project states, in a project skill or wherever
+else it keeps its conventions, instead of the rule here.
 
 ---
 

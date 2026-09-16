@@ -74,7 +74,7 @@ meets it. A rule belongs to exactly one line — a second statement is not empha
 a copy that drifts, and the agent reading both has nothing telling it which one wins.
 
 - `architecture` — how modules, services and processes fit together.
-- `changelog` — the `CHANGELOG.md` file.
+- `changelog` — the project's changelog, in the Keep a Changelog format.
 - `ci-cd-and-automation` — the pipeline producing the checks-passed signal.
 - `code-navigation` — where an answer about a symbol comes from.
 - `code-review-and-quality` — what a review looks for.

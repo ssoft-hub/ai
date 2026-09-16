@@ -34,8 +34,8 @@ once.
 
 **Must**
 
-Must follow the planning process or templates the repository's `AGENTS.md` file or a
-project skill defines, instead of the rule here.
+Must follow the planning process or templates the project states, in a project skill or
+wherever else it keeps its conventions, instead of the rule here.
 
 ---
 

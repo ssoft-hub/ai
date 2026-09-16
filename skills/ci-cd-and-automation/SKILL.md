@@ -20,7 +20,7 @@ that decides whether a change can merge or ship.
 
 - The specific checks a gate should run (lint, format, static analysis) are project- and
   language-specific → the coding-conventions skill of the language being written, the
-  hook-script skill of the agent tool, and the project's `AGENTS.md`.
+  hook-script skill of the agent tool, and the checks the project itself declares.
 - Merge itself is still gated on the Pre-Merge Checklist → `pr-rules` skill; this skill is
   about the pipeline that produces the checks-passed signal that checklist requires.
 - Release tagging and version bump automation → `release` skill.
@@ -30,8 +30,8 @@ that decides whether a change can merge or ship.
 
 **Must**
 
-Must follow the CI/CD stack and gates the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the CI/CD stack and gates the project states, in a project skill or wherever
+else it keeps its conventions, instead of the rule here.
 
 ---
 

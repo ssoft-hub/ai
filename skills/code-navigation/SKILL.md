@@ -26,8 +26,8 @@ definition, what a bare name refers to, or whether the symbol has any user left.
 
 **Must**
 
-Must follow the code-navigation conventions the repository's `AGENTS.md` file or a project
-skill defines, instead of the rule here.
+Must follow the code-navigation conventions the project states, in a project skill or
+wherever else it keeps its conventions, instead of the rule here.
 
 ---
 
@@ -74,11 +74,11 @@ the operation that produced it, and a run of the `grep` or `rg` command is not s
 operation. Where the reader holds no such operation, the answer must say so, and the
 reader must not settle for a text search — the rule turning on that answer stands
 unresolved until the reader holds such an operation. The word-boundary form and the
-substring form of one search over this repository:
+substring form of one search over a directory of skill files:
 
 ```sh
-$ grep -rilw "AST" skills/   # this file alone, which prints the term
-$ grep -ril  "AST" skills/   # and every file it adds, where the term sits inside a longer word
+$ grep -rilw "AST" <skills-dir>/   # this file alone, which prints the term
+$ grep -ril  "AST" <skills-dir>/   # and every file it adds, where the term sits inside a longer word
 ```
 
 Neither run answers whether a rule about an AST exists. The word-boundary hit is this

@@ -26,8 +26,8 @@ it to the CLI skill of the issue tracker.
 
 **Must**
 
-Must follow the issue conventions the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the issue conventions the project states, in a project skill or wherever else
+it keeps its conventions, instead of the rule here.
 
 ---
 

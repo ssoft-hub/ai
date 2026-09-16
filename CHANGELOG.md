@@ -70,6 +70,7 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- No skill names a file of the project it is applied in, or a path of this repository, as where a convention sits: a rule turning on a project convention sends its reader to what the project states, wherever it states it
 - `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one
 - The `## Project Overrides` section reads the same in every skill, one sentence differing only in the topic it names, and every skill carries one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository

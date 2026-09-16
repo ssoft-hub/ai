@@ -11,6 +11,11 @@ function readSkill() {
   return fs.readFileSync(skillFile, 'utf8');
 }
 
+// The reader's directory of skill files is not this repository's, so the skill prints a
+// placeholder for it; here it stands for the directory holding this skill.
+const SKILLS_DIR_PLACEHOLDER = '<skills-dir>';
+const skillsDir = path.relative(repoDir, path.dirname(path.dirname(skillFile))).split(path.sep).join('/');
+
 // The two commands the skill prints carry the term and the directory they run over, so
 // the test measures the example the reader is shown rather than a copy of it.
 function printedSearch() {
@@ -20,7 +25,8 @@ function printedSearch() {
   assert.ok(boundary && substring, 'the skill prints no word-boundary and substring pair');
   assert.strictEqual(boundary[1], substring[1], 'the two runs search different terms');
   assert.strictEqual(boundary[2], substring[2], 'the two runs search different directories');
-  return { term: boundary[1], dir: boundary[2].replace(/\/$/, '') };
+  const printed = boundary[2].replace(/\/$/, '');
+  return { term: boundary[1], dir: printed === SKILLS_DIR_PLACEHOLDER ? skillsDir : printed };
 }
 
 function filesUnder(dir) {

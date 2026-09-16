@@ -32,8 +32,8 @@ help is silent or misleading. No rule about *when* an action is allowed lives he
 
 **Must**
 
-Must follow the `gh` conventions the repository's `AGENTS.md` file or a project skill
-defines, instead of the rule here.
+Must follow the `gh` conventions the project states, in a project skill or wherever else
+it keeps its conventions, instead of the rule here.
 
 ---
 
