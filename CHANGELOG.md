@@ -8,7 +8,8 @@
 - `test/lifecycle-map.test.js` fails an issue state the stage table of `AGENTS.md` names that `issue-rules` -> Lifecycle does not carry, so the map and the skill cannot drift apart over a state
 - `issue-rules` -> What an Issue Names: an issue names only what its problem or its criteria turn on, settled by whether the work can start before the named thing is done; an issue body carries no section outside its template
 - `issue-rules` -> One Issue per Concern: an issue is created only where no open issue carries the concern, found by a search of the open issues; where one does, the ask is added there as a criterion
-- `issue-rules` -> Lifecycle requires an assignee from `In Progress` on, states where a reader reads each state on a tracker whose state field does not carry these states, and leaves whether what a merge delivers has reached a user to `shipping-and-launch`
+- `issue-rules` -> Lifecycle states the conditions the work stands in - taken up, offered for review, merged - each read off an artifact rather than off a tracker field, and a project states once which of its tracker's states each condition maps to; the names the skill uses are defaults
+- `issue-rules` -> Lifecycle requires an assignee from the branch on, and leaves whether what a merge delivers has reached a user to `shipping-and-launch`
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
@@ -77,7 +78,7 @@
 
 ### Changed
 - No skill names a file of the project it is applied in, or a path of this repository, as where a convention sits: a rule turning on a project convention sends its reader to what the project states, wherever it states it
-- Every example in `issue-rules` obeys its rule: an imperative title, a label example keeping the type label apart from the topic labels, `Closed` reachable from `Open`, and one capitalisation stated for the topic labels of a project
+- Every example in `issue-rules` obeys its rule: an imperative title, and one capitalisation stated for the topic labels of a project
 - `issue-rules` declares `rubric: applied`: every section carries one of the four binding-force markers
 - `github-cli` and `gitlab-cli` name, beside the labelling command, the command that sets an issue's assignee and the search of the open issues
 - `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one

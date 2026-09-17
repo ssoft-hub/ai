@@ -15,18 +15,8 @@ The rule, from the `issue-rules` skill:
 
 **Must**
 
-An issue title must read:
-
-```
-Type(scope): Subject description
-```
+An issue title must read `Type(scope): Subject description`, where:
 
 - **Type** — capitalized (see Types below).
 - **Scope** — optional; component or module the issue targets.
-- **Subject** — imperative mood, uppercase first letter after the colon, no trailing period, ≤ 80 characters total.
-
-```
-Feat(hash): Add SipHash-2-4 keyed 64-bit hash
-Fix(auth): Compare token expiry with <= instead of <
-Chore: Update CI runner to Ubuntu 24.04
-```
+- **Subject** — imperative mood (`Compare token expiry with <= instead of <`), uppercase first letter after the colon, no trailing period, ≤ 80 characters total.

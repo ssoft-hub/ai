@@ -19,44 +19,23 @@ metadata:
 
 Apply when creating or reviewing tracker issues (GitHub Issues, Jira, Linear, …).
 
-This skill states what an issue must contain. The step of the work each act on it runs
-at belongs to `work-sequence`, and the command that searches for it, creates it, labels it,
-assigns it or comments on it to the CLI skill of the issue tracker.
-
 ## One Issue per Concern
 
 **Should**
 
-The author should create an issue only where no open issue carries the same concern,
-which a search of the open issues by the words of the concern establishes before the
-issue is created; the CLI skill of the issue tracker states the command, in its issues
-section. Where an open issue carries the concern, the author should add the ask there as
-an acceptance criterion, with a comment naming what was added. A duplicate that reaches
-the tracker in spite of the search takes the state Lifecycle (below) gives it, `Closed`.
-
----
+The author should create an issue only where a search of the open issues by the words of
+the concern returns none carrying it. Where an open issue carries the concern, the author
+should add the ask there as an acceptance criterion, with a comment naming what was added.
 
 ## Title
 
 **Must**
 
-An issue title must read:
-
-```
-Type(scope): Subject description
-```
+An issue title must read `Type(scope): Subject description`, where:
 
 - **Type** — capitalized (see Types below).
 - **Scope** — optional; component or module the issue targets.
-- **Subject** — imperative mood, uppercase first letter after the colon, no trailing period, ≤ 80 characters total.
-
-```
-Feat(hash): Add SipHash-2-4 keyed 64-bit hash
-Fix(auth): Compare token expiry with <= instead of <
-Chore: Update CI runner to Ubuntu 24.04
-```
-
----
+- **Subject** — imperative mood (`Compare token expiry with <= instead of <`), uppercase first letter after the colon, no trailing period, ≤ 80 characters total.
 
 ## Types
 
@@ -66,21 +45,17 @@ An issue's type must be one of the types `commit-rules` → Types lists, capital
 
 `Feat`, `Fix`, `Refactor`, `Perf`, `Docs`, `Test`, `Chore`, `Ci`, `Style`
 
----
-
 ## Description Template
 
 **Must**
 
-An issue body must carry the sections of the template for its type and no section
-outside them, so that a heading the writer invents is not where the origin of the
-problem is recorded. `Fix` takes the Bug template; every other type takes Feature /
-improvement. The `## Acceptance criteria` slot of either template must take what a
-criterion states from `requirements` → Acceptance Criteria (Given/When/Then), and this
-skill restates nothing of it. Each item of the `## Test plan` slot must name a check with
-an observable result, produced by the branch or by a reviewer following the item — a
-command that was run, a test that covers the behaviour, steps ending in something a reader
-can see.
+An issue body must carry the sections of the template for its type and no section outside
+them. `Fix` takes the Bug template; every other type takes Feature / improvement. The
+`## Acceptance criteria` slot of either template must take what a criterion states from
+`requirements` → Acceptance Criteria (Given/When/Then). Each item of the `## Test plan`
+slot must name a check with an observable result, produced by the branch or by a reviewer
+following the item — a command that was run, a test that covers the behaviour, steps
+ending in something a reader can see.
 
 ### Feature / improvement
 
@@ -124,8 +99,6 @@ What happens instead.
 OS, version, relevant config.
 ```
 
----
-
 ## What an Issue Names
 
 **Should**
@@ -133,28 +106,17 @@ OS, version, relevant config.
 An issue should name only what its problem or its criteria turn on: no other issue,
 branch, skill, section, finding or artifact whose absence would leave every criterion
 stating the same thing. One question settles a name: can the work on this issue start
-before the named thing is done? Where it can, the author should cut the name, since
-whoever takes the issue up, in whatever order the backlog is worked, would otherwise wait
-on that thing or cite what never reaches the tree; where it cannot, the name is a
-dependency and stays.
-
-An issue should carry the circumstances the problem was found under — a review, a
-session, the branch the defect surfaced on — only where they are part of the problem.
-
-A reader should read each name in the issue against the criteria, and should cut a name
-no criterion needs.
-
-| Defective | Corrected |
-|---|---|
-| "Found reviewing PR #<n> on the branch of GH-<n>, in the reviewer's third comment: `<skill>` → <Section> states no limit on the length of a line." | "`<skill>` → <Section> states no limit on the length of a line." |
-
----
+before the named thing is done? Where it can, the author should cut the name; where it
+cannot, the name is a dependency and stays. An issue should carry the circumstances the
+problem was found under — a review, a session, the branch the defect surfaced on — only
+where they are part of the problem.
 
 ## Labels
 
 **Should**
 
-Every issue should get at most one **type** label, matching the title Type, when one applies:
+Every issue should get at most one **type** label, matching the title Type when one
+applies, spelled as the table gives it:
 
 | Label | Title Types it covers |
 |-------|------------------------|
@@ -162,28 +124,11 @@ Every issue should get at most one **type** label, matching the title Type, when
 | `BUG` | `Fix` |
 | `Refactor` | `Refactor` |
 
-Title types other than these three (see Types above) carry no label — the title prefix alone is enough.
-The author should spell a type label as the table gives it.
-
-Every issue should also get a few **topic** labels (2-4, not a tag cloud) — named after the
-actual subject matter (component, subsystem, domain concept), not drawn from a fixed
-list. Before creating one, should list the tracker's existing labels — the CLI skill of
-the issue tracker states the command, in its issues section — and reuse one covering the
-same topic; should create a new topic label only the first time a topic has no match.
-Topic labels grow organically with the project. The topic labels of one project should share one
-capitalisation, the project's own, whichever it is.
-
-```
-Feat(threat-analysis): Add short-term conflict alert algorithm
-→ type label: Feature
-→ topic labels: STCA, Safety Nets, Algorithm, ATCS
-```
-
-Should set labels when the issue is created, not after. The PR carries the same labels — the
-type label if the issue has one, plus its topic labels — see `pr-rules` → Pre-Open
-Checklist.
-
----
+An issue whose title type is outside the three should carry no type label. Every issue should
+also get 2-4 **topic** labels named after its subject matter — a component, a subsystem, a domain
+concept — and the author should list the tracker's existing labels first and reuse one covering
+the same topic, creating one only where none does. The topic labels of one project should share
+one capitalisation, the project's own. Should set labels when the issue is created, not after.
 
 ## Priority
 
@@ -195,12 +140,8 @@ An issue should carry one of these levels:
 |-------|---------|
 | P0 | Blocker — production broken or security issue |
 | P1 | High — significant user impact, next sprint |
-| P2 | Medium — normal backlog |
+| P2 | Medium — normal backlog, and the level of an issue with none set |
 | P3 | Low — nice to have, no deadline |
-
-Default when unset: **P2**.
-
----
 
 ## Milestone
 
@@ -208,58 +149,46 @@ Default when unset: **P2**.
 
 Should assign to a milestone when the issue is to ship in a specific release, and leave it unset for a backlog item with no committed date.
 
----
-
 ## Lifecycle
 
 **Should**
 
-```
-Open → In Progress → In Review → Done
-  ↘         ↘            ↘
-   Closed (won't fix / duplicate)
-```
+This skill states the conditions the work stands in, each read off an artifact, under a
+name of its own that binds no tracker:
 
-- **Open** — triaged, not started.
-- **In Progress** — branch exists; the assignee field, where the tracker has one, should name the user the `<user>` segment of the branch name carries (`commit-rules` → Branch Naming).
-- **In Review** — the change is offered for review (`work-sequence` → The Sequence).
-- **Done** — the change sits on the target branch after the merge, with every checklist checkbox in the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence). Whether what it delivers has reached a user is no state of the issue: the release carries that, under `shipping-and-launch`.
-- **Closed** — explicitly not going to be fixed, or a duplicate of an open issue; a comment should state which, naming the issue a duplicate repeats.
+| Condition | The artifact it is read off | Name used here |
+|---|---|---|
+| the issue is triaged, and none of the artifacts below exists | the issue | `Open` |
+| the work is taken up | the branch | `In Progress` |
+| the work is offered for review | the offer for review (`work-sequence` → The Sequence) | `In Review` |
+| the change is merged | the change standing in the target branch, with every checkbox of the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence) | `Done` |
+| the work is dropped | the comment stating that the issue is not going to be fixed, or naming the open issue it duplicates | `Closed` |
 
-Closing the issue on the tracker is an act; `Done` and `Closed` are states an issue closed
-on the tracker stands in, and a reader should tell them apart by the artifact below, never
-by the act.
+A project should state once, where it keeps its conventions, which of its tracker's states
+each condition maps to; where a project states none, a reader should read the condition off
+the artifact beside it rather than off a field. Whether what the merge delivers has reached
+a user is no condition of the issue: the release carries that, under `shipping-and-launch`.
 
-A reader should read a state off the tracker's state field where that field carries these
-states, else off the artifact whose existence defines the state — the issue itself, with
-none of the other artifacts existing, for `Open`; the branch for `In Progress`; the offer
-for review for `In Review`; the merge for `Done`; the closing comment for `Closed` — so
-that no state requires a label the project has not declared.
-
-An issue in `In Progress` or `In Review` with the assignee field empty is a defect of the
-issue; one in `Open` with the field set is not.
-
----
+From the branch on, the assignee field, where the tracker has one, should name the user
+the `<user>` segment of the branch name carries (`commit-rules` → Branch Naming); an empty
+field once the branch exists is a defect of the issue, and an empty field before it is not.
 
 ## Progress Comments
 
 **Should**
 
-Should track implementation progress in comments, not only checkboxes:
+Should track implementation progress in comments, not only checkboxes, so that a reader
+can reconstruct from the comments alone which PR/MR implemented which requirement:
 
 - When a PR/MR is opened against this issue, should comment which checklist items it addresses.
 - When a PR/MR merges, should comment which items it resolved and update the corresponding checkboxes to match.
 - When items remain open after a merge, should comment that a follow-up PR/MR is needed, and link it once it exists.
 
-A reader should be able to reconstruct, from comments alone, which PR/MR implemented which requirement.
-
----
-
 ## Cross-References
 
 **Recommended**
 
-- `work-sequence` — the step of the work each act on this issue runs at, and the condition behind each lifecycle state.
+- `work-sequence` — the step of the work each act on this issue runs at, and the artifact each condition of the Lifecycle above is read off.
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
 - `pr-rules` — PR title and description mirror the issue being resolved; its Pre-Merge Checklist gates merge on this issue's checkbox state.
 - The CLI skill of the issue tracker — the commands that search for, create, label, assign, and comment on an issue.

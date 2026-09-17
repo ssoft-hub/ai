@@ -15,29 +15,22 @@ The rule, from the `issue-rules` skill:
 
 **Should**
 
-```
-Open → In Progress → In Review → Done
-  ↘         ↘            ↘
-   Closed (won't fix / duplicate)
-```
+This skill states the conditions the work stands in, each read off an artifact, under a
+name of its own that binds no tracker:
 
-- **Open** — triaged, not started.
-- **In Progress** — branch exists; the assignee field, where the tracker has one, should name the user the `<user>` segment of the branch name carries (`commit-rules` → Branch Naming).
-- **In Review** — the change is offered for review (`work-sequence` → The Sequence).
-- **Done** — the change sits on the target branch after the merge, with every checklist checkbox in the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence). Whether what it delivers has reached a user is no state of the issue: the release carries that, under `shipping-and-launch`.
-- **Closed** — explicitly not going to be fixed, or a duplicate of an open issue; a comment should state which, naming the issue a duplicate repeats.
+| Condition | The artifact it is read off | Name used here |
+|---|---|---|
+| the issue is triaged, and none of the artifacts below exists | the issue | `Open` |
+| the work is taken up | the branch | `In Progress` |
+| the work is offered for review | the offer for review (`work-sequence` → The Sequence) | `In Review` |
+| the change is merged | the change standing in the target branch, with every checkbox of the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence) | `Done` |
+| the work is dropped | the comment stating that the issue is not going to be fixed, or naming the open issue it duplicates | `Closed` |
 
-Closing the issue on the tracker is an act; `Done` and `Closed` are states an issue closed
-on the tracker stands in, and a reader should tell them apart by the artifact below, never
-by the act.
+A project should state once, where it keeps its conventions, which of its tracker's states
+each condition maps to; where a project states none, a reader should read the condition off
+the artifact beside it rather than off a field. Whether what the merge delivers has reached
+a user is no condition of the issue: the release carries that, under `shipping-and-launch`.
 
-A reader should read a state off the tracker's state field where that field carries these
-states, else off the artifact whose existence defines the state — the issue itself, with
-none of the other artifacts existing, for `Open`; the branch for `In Progress`; the offer
-for review for `In Review`; the merge for `Done`; the closing comment for `Closed` — so
-that no state requires a label the project has not declared.
-
-An issue in `In Progress` or `In Review` with the assignee field empty is a defect of the
-issue; one in `Open` with the field set is not.
-
----
+From the branch on, the assignee field, where the tracker has one, should name the user
+the `<user>` segment of the branch name carries (`commit-rules` → Branch Naming); an empty
+field once the branch exists is a defect of the issue, and an empty field before it is not.

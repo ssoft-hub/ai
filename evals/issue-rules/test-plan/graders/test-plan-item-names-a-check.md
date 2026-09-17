@@ -15,15 +15,13 @@ The rule, from the `issue-rules` skill:
 
 **Must**
 
-An issue body must carry the sections of the template for its type and no section
-outside them, so that a heading the writer invents is not where the origin of the
-problem is recorded. `Fix` takes the Bug template; every other type takes Feature /
-improvement. The `## Acceptance criteria` slot of either template must take what a
-criterion states from `requirements` → Acceptance Criteria (Given/When/Then), and this
-skill restates nothing of it. Each item of the `## Test plan` slot must name a check with
-an observable result, produced by the branch or by a reviewer following the item — a
-command that was run, a test that covers the behaviour, steps ending in something a reader
-can see.
+An issue body must carry the sections of the template for its type and no section outside
+them. `Fix` takes the Bug template; every other type takes Feature / improvement. The
+`## Acceptance criteria` slot of either template must take what a criterion states from
+`requirements` → Acceptance Criteria (Given/When/Then). Each item of the `## Test plan`
+slot must name a check with an observable result, produced by the branch or by a reviewer
+following the item — a command that was run, a test that covers the behaviour, steps
+ending in something a reader can see.
 
 ### Feature / improvement
 
@@ -66,5 +64,3 @@ What happens instead.
 ## Environment
 OS, version, relevant config.
 ```
-
----

@@ -18,17 +18,7 @@ The rule, from the `issue-rules` skill:
 An issue should name only what its problem or its criteria turn on: no other issue,
 branch, skill, section, finding or artifact whose absence would leave every criterion
 stating the same thing. One question settles a name: can the work on this issue start
-before the named thing is done? Where it can, the author should cut the name, since
-whoever takes the issue up, in whatever order the backlog is worked, would otherwise wait
-on that thing or cite what never reaches the tree; where it cannot, the name is a
-dependency and stays.
-
-An issue should carry the circumstances the problem was found under — a review, a
-session, the branch the defect surfaced on — only where they are part of the problem.
-
-A reader should read each name in the issue against the criteria, and should cut a name
-no criterion needs.
-
-| Defective | Corrected |
-|---|---|
-| "Found reviewing PR #<n> on the branch of GH-<n>, in the reviewer's third comment: `<skill>` → <Section> states no limit on the length of a line." | "`<skill>` → <Section> states no limit on the length of a line." |
+before the named thing is done? Where it can, the author should cut the name; where it
+cannot, the name is a dependency and stays. An issue should carry the circumstances the
+problem was found under — a review, a session, the branch the defect surfaced on — only
+where they are part of the problem.
