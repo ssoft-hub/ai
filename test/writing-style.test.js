@@ -16,6 +16,10 @@ function corpusFiles() {
   const commands = fs.readdirSync(path.join(repoDir, 'commands'))
     .filter(name => name.endsWith('.md'))
     .map(name => path.join(repoDir, 'commands', name));
+  // The files named outright below would carry every sweep alone, over no skill at all.
+  if (!skills.length || !commands.length)
+    throw new Error(`the corpus holds ${skills.length} skills and ${commands.length} commands:`
+      + ' a sweep over it would inspect the files named outright and report success');
   return [...skills, ...commands,
     path.join(repoDir, 'templates', 'SKILL.md'),
     path.join(repoDir, 'templates', 'COMMAND.md'),
