@@ -157,6 +157,11 @@ states no verdict and is spawned as a script — `hooks/PostToolUse.js` and its 
 Never use `1` — unpredictable behavior. A tool exporting a verdict states these rather than
 writing them: `{ output }` is the exit-`0` channel and `{ block }` the exit-`2` one.
 
+The table binds a tool a dispatcher calls or the hook runner spawns, whose exit code Claude
+Code reads as one of the two meanings above. A tool a person runs from a shell is read by
+the shell instead and takes its convention, where `0` is success and `1` a failure the
+script names on stderr — `tools/eval-plugin.js`, which no event routes to.
+
 ## Reaching the Model
 
 A warning nobody reads is worse than no warning: it looks like a working guard. Which

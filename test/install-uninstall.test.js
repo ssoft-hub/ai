@@ -567,6 +567,28 @@ test('dry-run does not write files', () => {
   } finally { rmTmp(dir); }
 });
 
+test('install copies nothing from evals/ or .claude-plugin/, which serve the eval alone', () => {
+  // A vacuous pass would hide the manifest having been renamed out from under the check;
+  // `evals/` is held by the throw of `test/evals-layout.test.js` when it finds no suite.
+  assert.ok(fs.existsSync(path.join(repoDir, '.claude-plugin')), '.claude-plugin/ exists in the repository');
+  const dir = mkTmp();
+  try {
+    const r = runInstall(dir, ['--dry-run']);
+    assert.strictEqual(r.status, 0, r.stderr);
+    const copied = r.stdout.split(/\r?\n/).filter(line => line.includes(' → '));
+    assert.ok(copied.length > 0, 'the dry run lists what it would copy');
+    for (const line of copied) {
+      const src = line.split(' → ')[0].trim().split(/\s+/).pop().replace(/\\/g, '/');
+      assert.ok(!/^(evals|\.claude-plugin)\//.test(src), `${src} is not installed`);
+    }
+  } finally { rmTmp(dir); }
+});
+
+test('the plugin manifest carries the version package.json carries', () => {
+  const read = f => JSON.parse(fs.readFileSync(path.join(repoDir, f), 'utf8')).version;
+  assert.strictEqual(read(path.join('.claude-plugin', 'plugin.json')), read('package.json'));
+});
+
 test('dry-run takes no backup of a file it would overwrite', () => {
   const dir = mkTmp();
   try {
