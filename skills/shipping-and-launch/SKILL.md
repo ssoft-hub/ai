@@ -24,15 +24,6 @@ this skill for whether the release is actually safe to expose to users and how w
 - A breaking change being shipped → `deprecation-and-migration` skill for how it was
   telegraphed to consumers before this release.
 
-## Project Overrides
-
-**Must**
-
-Must follow the launch process the project states, in a project skill or wherever else it
-keeps its conventions, instead of the rule here.
-
----
-
 ## Readiness Checklist
 
 Before a release goes out, confirm:

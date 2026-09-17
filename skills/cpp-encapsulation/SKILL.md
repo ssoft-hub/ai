@@ -23,15 +23,6 @@ Apply when choosing C++ access specifiers, designing a C++ class's public/protec
 
 Public API structure across headers/modules → `cpp-api-design`. This skill covers access-level choice within a single type.
 
-## Project Overrides
-
-**Must**
-
-Must follow the C++ encapsulation conventions the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## Default Rule
 
 **Private by default.** Every member starts `private`. Widen only when a real caller outside the class needs it.

@@ -27,13 +27,6 @@ Apply when documenting public C++ headers.
 Header structure and namespace rules → `cpp-api-design` skill; the header guard →
 `cpp-coding` skill. Non-Doxygen implementation comments → `comments` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the Doxygen conventions the project states, in a project skill or wherever
-else it keeps its conventions, instead of the rule here.
-
 ## Core Rule — document the type, not its members
 
 One Doxygen block sits **on the type declaration** — the class, struct, or enum. Its **members** (methods, fields, enum values) carry **no** Doxygen: clear names and types speak for them. "Clean" means a clean body, not an undocumented type.

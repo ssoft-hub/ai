@@ -23,15 +23,6 @@ acceptance criteria, or turning a vague ask into a spec before design starts.
   in the domain model, not get re-invented later → `ddd` skill.
 - Breaking settled requirements into shippable work → `project-planning` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the requirements process the project states, in a project skill or wherever
-else it keeps its conventions, instead of the rule here.
-
----
-
 ## Why Write This Down at All
 
 A requirement that lives only in a chat message gets reinterpreted differently by

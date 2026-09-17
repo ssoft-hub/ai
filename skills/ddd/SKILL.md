@@ -23,15 +23,6 @@ language being written. This skill covers domain modelling only.
 
 Reference: Eric Evans, *Domain-Driven Design* (2003). Patterns below are the strategic and tactical core.
 
-## Project Overrides
-
-**Must**
-
-Must follow the domain-modelling conventions the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## Ubiquitous Language
 
 Code speaks the domain language. Developers and domain experts share the same vocabulary.

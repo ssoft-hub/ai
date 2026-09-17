@@ -28,15 +28,6 @@ guide for consumers moving off one.
   `security-and-hardening` skill for diagnosing the vulnerability; this skill for
   retiring the path itself.
 
-## Project Overrides
-
-**Must**
-
-Must follow the deprecation and migration policy the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## Why Announcing Isn't Enough
 
 With enough consumers, every observable behavior of a public symbol becomes depended

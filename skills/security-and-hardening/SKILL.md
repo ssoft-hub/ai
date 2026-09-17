@@ -27,15 +27,6 @@ skill is what to design for before those hooks would ever fire.
 - A vulnerability found in already-shipped code → `deprecation-and-migration` skill for
   how to retire the unsafe path.
 
-## Project Overrides
-
-**Must**
-
-Must follow the security requirements the project states, in a project skill or wherever
-else it keeps its conventions, instead of the rule here.
-
----
-
 ## Trust Boundaries
 
 Identify every point where data crosses from a less-trusted source into code that acts

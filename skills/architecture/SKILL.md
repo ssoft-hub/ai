@@ -34,15 +34,6 @@ competing designs, or writing an Architecture Decision Record (ADR).
   so its qualities can be read at all → `observability-and-instrumentation` skill. The
   ranking is this skill's; the measurement is theirs.
 
-## Project Overrides
-
-**Must**
-
-Must follow the architecture conventions and the ADR location the project states, in a
-project skill or wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## When Architecture Work Is Warranted
 
 Not every change needs an architectural decision. The signal that it does: the
@@ -123,7 +114,7 @@ to protect.
 The list is complete at seven: a property not on it is an instance of one of them, or it
 is a quality this order does not settle, and step 5 below says what to do then. The order
 is itself a fallback: a project stating an order, or a list of operator actions, of its
-own wins, under Project Overrides above.
+own wins.
 
 ### Settling a Conflict Between Two Qualities
 

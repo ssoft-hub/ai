@@ -24,15 +24,6 @@ Apply when investigating a bug, test failure, or unexpected behavior, before pro
 - Writing up what was found for reviewers → `pr-rules` skill (Description Structure).
 - Instrumentation that stays in the code once the bug is closed → `observability-and-instrumentation` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the debugging process the project states, in a project skill or wherever else
-it keeps its conventions, instead of the rule here.
-
----
-
 ## Reproduce Before Fixing
 
 Do not propose a fix for a bug you have not reproduced. A fix for a bug you can't

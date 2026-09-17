@@ -26,15 +26,6 @@ visibility, not test assertions or debug-session-only tracing.
 - A metric showing a performance regression → `performance-optimization` skill for the
   follow-up investigation.
 
-## Project Overrides
-
-**Must**
-
-Must follow the telemetry stack and conventions the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## Define "Working" Before Instrumenting
 
 Telemetry added without a question behind it is noise. Before instrumenting a feature,

@@ -21,13 +21,6 @@ Apply when opening, reviewing, or preparing a PR/MR.
 Where the pull request sits in the order of work, and which check runs at which
 moment: `work-sequence` → The Sequence and When a Check Runs.
 
-## Project Overrides
-
-**Must**
-
-Must follow the PR conventions the project states, in a project skill or wherever else it
-keeps its conventions, instead of the rule here.
-
 ## PR Title
 
 **Must**
