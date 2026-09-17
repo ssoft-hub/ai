@@ -42,3 +42,8 @@ skill or a command binds, and the confirmation required above is owed regardless
 
 These are not the RFC 2119 keywords. There RECOMMENDED is a synonym for SHOULD; here they
 are distinct levels, and `**Recommended**` sits one step below `**Should**`.
+
+## A project's conventions above a skill's rule
+
+A project's own conventions stand above the rule of any skill, wherever the project
+states them.
