@@ -4,6 +4,7 @@
 
 ### Added
 - A skill's effect is measured: `claude plugin eval .` runs the cases under `evals/<skill>/` with the catalog and without it, and `node tools/eval-plugin.js <skill>...` builds a root holding a list of skills for the same cases; the first suites are `comments`, `writing-style` and `issue-rules`
+- `issue-rules` -> Description Template: an item of a test plan names a check with an observable result, produced by the branch or by a reviewer following the item - a command that was run, a test covering the behaviour, steps ending in something a reader can see
 - `test/lifecycle-map.test.js` fails an issue state the stage table of `AGENTS.md` names that `issue-rules` -> Lifecycle does not carry, so the map and the skill cannot drift apart over a state
 - `issue-rules` -> What an Issue Names: an issue names only what its problem or its criteria turn on, settled by whether the work can start before the named thing is done; an issue body carries no section outside its template
 - `issue-rules` -> One Issue per Concern: an issue is created only where no open issue carries the concern, found by a search of the open issues; where one does, the ask is added there as a criterion
