@@ -103,7 +103,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `editing` | Guard against a stale reading of a file, of a tracker or forge artifact, and of a branch head |
 | `github-cli` | `gh` mechanics — issues, PRs, labels, pending review threads, stacks, merges |
 | `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, stacks, merges |
-| `hook-scripts` | Writing Claude Code hooks and tools |
+| `hook-scripts` | Writing this repository's hooks and tools |
 | `issue-rules` | Tracker issue title, description, labels, priority, lifecycle |
 | `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |
 | `observability-and-instrumentation` | Logging, metrics, tracing for production visibility |
@@ -114,7 +114,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
 | `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |
 | `shipping-and-launch` | Release readiness, staged rollout, rollback planning |
-| `skill-authoring` | Writing a skill file — its concern, name, contexts, section markers, rename — and the marker on a command's sections |
+| `skill-authoring` | Writing a skill file — its concern, name, contexts, relation to a project's conventions, what ships with it, section markers, rename — and the marker on a command's sections |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
 | `work-sequence` | The eight steps from a task to a closed issue, and the moment each check runs at |

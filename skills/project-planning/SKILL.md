@@ -30,15 +30,6 @@ once.
 - PR Size discipline and the release checklist are the execution-time tail end of a
   plan made here → `pr-rules`, `release` skills.
 
-## Project Overrides
-
-**Must**
-
-Must follow the planning process or templates the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## Breaking Work Into Increments
 
 Decompose a requirement or architectural decision into pieces that are each

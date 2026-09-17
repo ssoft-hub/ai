@@ -29,13 +29,6 @@ written in, not its shape.
 - PR title/description structure, review comment/reply structure → `pr-rules` skill.
 - Commit message structure → `commit-rules` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the writing-style conventions the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
 ## This Skill Above Any Mode
 
 **Should**

@@ -25,15 +25,6 @@ them here.
 - Performance depth during review → `code-review-and-quality` skill (Performance axis).
 - Production performance regressions surfaced via metrics → `observability-and-instrumentation` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the performance process, budget and tooling the project states, in a project
-skill or wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## Measure Before Optimizing
 
 Do not change code for performance based on intuition about what "should" be slow.

@@ -21,15 +21,6 @@ Framework choice is the project's: a test should use the one it declares. This s
 
 - The fail, pass, refactor order these tests are written in → `test-driven-development` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the C++ test conventions the project states, in a project skill or wherever
-else it keeps its conventions, instead of the rule here.
-
----
-
 ## What to Test
 
 - Every public API function must have tests — private implementation details are not tested directly

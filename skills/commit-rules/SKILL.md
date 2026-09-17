@@ -20,15 +20,6 @@ Apply when writing commit messages or reviewing commits.
 - The step of the work a commit or a branch is made at → `work-sequence` skill.
 - Prose register, and the rule that a body states the result rather than the process → `writing-style` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the commit and branch-naming conventions the project states, in a project
-skill or wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## Format
 
 ```

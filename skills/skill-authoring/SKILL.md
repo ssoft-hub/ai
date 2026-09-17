@@ -28,19 +28,12 @@ what follows, Marking a Section and Choosing the Marker reach a command, and
 The paths here are this repository's, where a skill of this catalog is written; elsewhere
 the rules hold and the paths are that repository's own.
 
+The catalog steps `AGENTS.md` states — where a new skill is indexed, and how it reaches
+the config directory — are additional to the rules here.
+
 What each of the four markers entitles a reader to do is the reader's half of the scale,
 stated in `config/claude-config-rules.md` → Binding force of a section, which
 installs beside every skill. This skill states the author's half.
-
-## Project Overrides
-
-**Must**
-
-Must follow the skill-file and command-marking conventions the project states, in a
-project skill or wherever else it keeps its conventions, instead of the rule here.
-
-The catalog steps `AGENTS.md` states — where a new skill is indexed, and how it reaches
-the config directory — are additional to these.
 
 ## One Concern per Skill
 
@@ -102,6 +95,20 @@ is one of the naming skill's own contexts or an ancestor of one. Every other rou
 a role — the API-design skill of the language being written, the noun taken from that
 context's `role` — and names no skill. `test/skill-contexts.test.js` checks both halves.
 
+## Relation to a Project's Conventions
+
+**Must**
+
+`project-relation` in a skill's frontmatter declares which of the two relations below the
+skill stands in to the project it is applied in, and the skill's body states neither. The
+relation is not the scope: the relation says what a skill's rules yield to, the scope
+where they are owed, and a binding skill states the scope.
+
+| Value | The skill declaring it |
+|---|---|
+| `overrides`, which an absent key reads as | States rules the project displaces with its own conventions, wherever it keeps them. `config/claude-config-rules.md` → A project's conventions above a skill's rule installs beside every skill and states this relation, so no skill repeats it |
+| `binding` | States one repository's own conventions, is applied in that repository alone, and is taken as a fallback by no other project. Its `description` and the `Apply when` line of its body both name that repository, the key standing in frontmatter, which a reader of the body never sees |
+
 ## Creating the File
 
 **Must**
@@ -138,7 +145,7 @@ A commit subject must be at most 72 characters.
 ```
 
 The heading text carries no marker of its own: a cross-reference resolves against the
-heading — `pr-rules` → Project Overrides — and a marker inside it would have to be
+heading — `pr-rules` → Merge Strategy — and a marker inside it would have to be
 reproduced in every such reference to keep it quotable verbatim. Once every section carries
 one, the frontmatter declares `rubric: applied`, indented under `metadata:` where every
 other key the routing reads sits.

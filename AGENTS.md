@@ -108,8 +108,9 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `requirements` — turning an ask into a requirement.
 - `security-and-hardening` — design-time security.
 - `shipping-and-launch` — whether a built release may reach users, and how widely.
-- `skill-authoring` — writing a skill file — its concern, name, contexts, markers,
-  rename — and the marker on a command's sections.
+- `skill-authoring` — writing a skill file — its concern, name, contexts, relation to a
+  project's conventions, what ships with it, markers, rename — and the marker on a
+  command's sections.
 - `submodule-sync` — submodule ref discipline.
 - `test-driven-development` — the order a behaviour is built in, test first.
 - `work-sequence` — the order of work from a task to a closed issue.

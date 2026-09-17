@@ -22,13 +22,6 @@ Apply when editing `CHANGELOG.md` or asked about changelog format.
 
 - What counts as a breaking change → the API-design skill of the language being written.
 
-## Project Overrides
-
-**Must**
-
-Must follow the changelog conventions the project states, in a project skill or wherever
-else it keeps its conventions, instead of the rule here.
-
 ## Format
 
 Keep a Changelog (https://keepachangelog.com/en/1.1.0/) + Semantic Versioning.

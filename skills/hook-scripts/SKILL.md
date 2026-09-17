@@ -1,7 +1,7 @@
 ---
 name: hook-scripts
 version: "1.0.0"
-description: Apply when writing or modifying hook scripts in hooks/ or tools/
+description: Apply when writing or modifying a dispatcher under hooks/ or a tool under tools/ in the claude-config repository
 license: Unlicense
 metadata:
   author: ssoft
@@ -23,15 +23,8 @@ metadata:
 
 # Skill: Claude Code Hook Scripts
 
-Apply when writing or modifying hook scripts in `~/.claude/hooks/` or `~/.claude/tools/`.
-
-## Project Binding
-
-**Must**
-
-Must apply this skill in the `claude-config` repository alone: it states that
-repository's own conventions, and no project with a different layout takes them as a
-fallback.
+Apply when writing or modifying a dispatcher under `hooks/` or a tool under `tools/` in
+the `claude-config` repository.
 
 ## Hard Rules
 
@@ -283,8 +276,7 @@ Scripts are portable global↔project without changes — only the command path 
    `SessionStart` and `UserPromptSubmit` a tool writes the text as the model must read it,
    and on `PreToolUse` and `PostToolUse` the dispatcher wraps what the tool states.
 3. Export the pure logic, cover it in `test/<name>.test.js`, and run `npm test`.
-4. List it under its event in the repository's own tool list (in this repository,
-   `README.md` → Hooks).
+4. List it under its event in `README.md` → Hooks.
 
 Retiring one is that list read backwards: drop the route, delete the tool and its test,
 update every reference to it, and add its installed path (`tools/<name>.js`) to

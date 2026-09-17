@@ -22,13 +22,6 @@ Apply when designing a new C++ API, adding public C++ headers, or reviewing publ
 
 Access-level choice within a single type → `cpp-encapsulation` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the C++ API design conventions the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
 ## Structural Rules
 
 - **Namespace hierarchy**: public symbols in consistent `lib::` or `lib::module::` namespace; the exact namespace is the one the project declares.

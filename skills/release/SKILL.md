@@ -19,13 +19,6 @@ metadata:
 Apply when user says "release", "bump version", "prepare release", or "tag".
 The project declares which files carry version strings.
 
-## Project Overrides
-
-**Must**
-
-Must follow the release process the project states, in a project skill or wherever else it
-keeps its conventions, instead of the rule here.
-
 ## Step 1 — Decide Version (semver)
 
 | Bump | When |

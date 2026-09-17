@@ -20,13 +20,6 @@ Apply when writing a file, a tracker issue body or a PR description, and when a 
 turns on a review thread or the branch head. The section Guard Against a Stale Reading
 names every artifact and what guards it.
 
-## Project Overrides
-
-**Must**
-
-Must follow the guard against a stale reading the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
 ## Guard Against a Stale Reading
 
 **Must**

@@ -28,15 +28,6 @@ help is silent or misleading. No rule about *when* an action is allowed lives he
   the rule that an agent's own review feedback stays unpublished, and the commands that
   publish it on the spot → `pr-rules` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the `gh` conventions the project states, in a project skill or wherever else
-it keeps its conventions, instead of the rule here.
-
----
-
 ## Conventions
 
 **Should**

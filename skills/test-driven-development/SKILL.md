@@ -22,15 +22,6 @@ coverage rules belong to the testing skill of the language being written.
 - Reproducing a bug as a failing test before fixing it → `debugging` skill (Regression Test First).
 - Once the tests pass and the implementation stands, reviewing it → `code-review-and-quality` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the test-first order the project states, in a project skill or wherever else
-it keeps its conventions, instead of the rule here.
-
----
-
 ## The Loop
 
 1. **Fail** — write a test for the next small behavior, run it, watch it fail. A test

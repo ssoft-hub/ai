@@ -22,15 +22,6 @@ definition, what a bare name refers to, or whether the symbol has any user left.
 - What is decided on the answer — an access level, a removal, a review finding, a fix —
   belongs to the skill whose rule asked the question.
 
-## Project Overrides
-
-**Must**
-
-Must follow the code-navigation conventions the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
----
-
 ## Questions a Text Search Does Not Answer
 
 **Must**

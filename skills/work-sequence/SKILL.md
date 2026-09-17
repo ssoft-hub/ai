@@ -18,13 +18,6 @@ metadata:
 
 Apply from the moment a task is taken up until the issue it resolves is closed.
 
-## Project Overrides
-
-**Must**
-
-Must follow the order of work the project states, in a project skill or wherever else it
-keeps its conventions, instead of the rule here.
-
 ## The Sequence
 
 **Should**

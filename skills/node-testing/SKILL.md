@@ -1,7 +1,7 @@
 ---
 name: node-testing
 version: "1.0.0"
-description: Apply when writing or reviewing tests under test/*.test.js for Claude Code hooks, tools, or install/uninstall logic
+description: Apply when writing or reviewing a test under test/ in the claude-config repository
 license: Unlicense
 metadata:
   author: ssoft
@@ -22,30 +22,18 @@ metadata:
 
 # Skill: Node Test Conventions
 
-Apply when writing or reviewing tests under `test/*.test.js` for Claude Code hooks,
-tools, or install/uninstall logic (e.g. `~/.claude/hooks/`, `~/.claude/tools/` —
-see `hook-scripts` skill).
+Apply when writing or reviewing a test under `test/` in the `claude-config` repository.
 
 - Writing the hook/tool itself → `hook-scripts` skill.
 - Tests in another language → the testing skill of that language (different runner,
   different conventions — do not mix the two).
 
-## Project Binding
-
-**Must**
-
-Must apply this skill in the `claude-config` repository alone: it states that
-repository's own conventions, and no project with a different layout takes them as a
-fallback.
-
----
-
 ## Runner and Assertions
 
 Use Node's built-in `node:test` and `node:assert` only — no Jest, Mocha, or other
-third-party test framework. A claude-config-style hooks/tools project typically has
-no npm dependencies (see `hook-scripts` skill); pulling in a test framework would be
-the one exception that breaks that invariant.
+third-party test framework. This repository carries no npm dependency at all (see
+`hook-scripts` skill); pulling in a test framework would be the one exception that
+breaks that invariant.
 
 ```javascript
 'use strict';

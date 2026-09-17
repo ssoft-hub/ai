@@ -83,6 +83,9 @@ function mentions(text, entries) {
 // Indented, because every other key the routing reads sits under `metadata:`.
 const RELATION = /^[ \t]+project-relation:[ \t]*(\S+)[ \t]*$/m;
 
+// A value outside these reads as not-binding, so a typo costs the exemption in silence.
+const RELATIONS = ['overrides', 'binding'];
+
 function frontmatter(text) {
   const body = String(text).replace(/\r\n/g, '\n');
   if (!body.startsWith('---\n')) return '';
@@ -229,6 +232,16 @@ test('no skill names a file of the project it is applied in, or a path of this r
   for (const record of skillRecords()) {
     const own = faults(record, FORBIDDEN);
     if (own.length) found[`skills/${record.name}/SKILL.md`] = own;
+  }
+  assert.deepStrictEqual(found, {});
+});
+
+test('every skill declares a relation the exemption knows', () => {
+  const found = {};
+  for (const record of skillRecords()) {
+    if (!RELATIONS.includes(record.relation)) {
+      found[`skills/${record.name}/SKILL.md`] = record.relation;
+    }
   }
   assert.deepStrictEqual(found, {});
 });

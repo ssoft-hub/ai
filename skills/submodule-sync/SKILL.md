@@ -19,13 +19,6 @@ metadata:
 Apply before superproject commits, before PR, before release, when working across
 submodules.
 
-## Project Overrides
-
-**Must**
-
-Must follow the submodule workflow the project states, in a project skill or wherever else
-it keeps its conventions, instead of the rule here.
-
 ## Correct Workflow
 
 **Must**

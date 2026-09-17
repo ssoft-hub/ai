@@ -26,15 +26,6 @@ around opening/merging the PR the review attaches to → `pr-rules` skill.
 - Security-specific review depth (auth, input validation, secrets) → `security-and-hardening` skill.
 - Performance-specific review depth (complexity, allocations) → `performance-optimization` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the review criteria the project states, in a project skill or wherever else it
-keeps its conventions, instead of the rule here.
-
----
-
 ## Review Axes
 
 Every review checks these, in this order — a change that fails an earlier axis is not

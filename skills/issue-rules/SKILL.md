@@ -22,15 +22,6 @@ This skill states what an issue must contain. The step of the work each act on i
 at belongs to `work-sequence`, and the command that creates it, labels it, or comments on
 it to the CLI skill of the issue tracker.
 
-## Project Overrides
-
-**Must**
-
-Must follow the issue conventions the project states, in a project skill or wherever else
-it keeps its conventions, instead of the rule here.
-
----
-
 ## Title
 
 ```

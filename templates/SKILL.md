@@ -29,10 +29,8 @@ metadata:
   # than a kind of one, so it is not a skill the agent chooses between. Nothing reads
   # it yet — the reminder that will is GH-208.
   always: true
-  # Optional, defaults to overrides, which the Project Overrides section below goes
-  # with. A skill stating the claude-config repository's own conventions, which no
-  # other project takes as a fallback, declares it here and carries a Project Binding
-  # section in place of that one.
+  # Optional, overrides or binding, defaulting to overrides. What each one means:
+  # skill-authoring → Relation to a Project's Conventions.
   # project-relation: binding
   # Optional. Skills that always apply alongside this one; the gate names them too.
   with:
@@ -52,18 +50,6 @@ Apply when <trigger condition — one line, specific, actionable>.
 
 <!-- External reference (optional): authoritative source this skill is based on. -->
 <!-- Reference: <Author>, *<Title>* (<Year>). -->
-
-## Project Overrides
-
-**Must**
-
-Must follow the <topic> the project states, in a project skill or wherever else it keeps
-its conventions, instead of the rule here.
-
-<!-- The sentence above is fixed but for the topic, which names the subject this skill
-     covers, as a noun phrase with no article. -->
-
----
 
 ## <Primary Section>
 

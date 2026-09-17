@@ -26,15 +26,6 @@ that decides whether a change can merge or ship.
 - Release tagging and version bump automation → `release` skill.
 - Secrets used by pipeline jobs (deploy keys, tokens) → `security-and-hardening` skill.
 
-## Project Overrides
-
-**Must**
-
-Must follow the CI/CD stack and gates the project states, in a project skill or wherever
-else it keeps its conventions, instead of the rule here.
-
----
-
 ## What a Pipeline Should Gate
 
 Every change that can merge or ship should pass, at minimum: build, test suite,

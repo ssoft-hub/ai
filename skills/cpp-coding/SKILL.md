@@ -29,13 +29,6 @@ Scope: project-level implementation conventions (not the C++ standard). Public A
 
 Reference: https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#s-philosophy
 
-## Project Overrides
-
-**Must**
-
-Must follow the C++ implementation conventions the project states, in a project skill or
-wherever else it keeps its conventions, instead of the rule here.
-
 ## Philosophy
 
 - **Value semantics over pointers** — prefer values and move semantics; use references for observation, not ownership
