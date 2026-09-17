@@ -35,8 +35,9 @@ matches as a substring and honours no `\b`.
 
 One grader name carries one rubric: a case needing another rubric gives it another name,
 since a case's frontmatter takes no `graders` key and every case holds its own copy of
-the file. `test/evals-layout.test.js` holds every case to the shape above, every quoted
-section to the text the skill carries, and every shared name to one content.
+the file. `test/evals-layout.test.js` holds every case to the shape above, every shared
+name to one content, and a rubric quoting a section of the skill to the whole of that
+section, from its heading to the line before the next, standing last in the grader file.
 
 ## A case that measures nothing
 
