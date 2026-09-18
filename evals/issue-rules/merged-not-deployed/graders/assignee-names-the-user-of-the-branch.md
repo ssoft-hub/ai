@@ -23,7 +23,7 @@ name of its own that binds no tracker:
 | the issue is triaged, and none of the artifacts below exists | the issue | `Open` |
 | the work is taken up | the branch | `In Progress` |
 | the work is offered for review | the offer for review (`work-sequence` → The Sequence) | `In Review` |
-| the change is merged | the change standing in the target branch, with every checkbox of the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence) | `Done` |
+| the change is merged | the change standing in the target branch and meeting every criterion of the issue (One Issue, One Merge above, reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence) | `Done` |
 | the work is dropped | the comment stating that the issue is not going to be fixed, or naming the open issue it duplicates | `Closed` |
 
 A project should state once, where it keeps its conventions, which of its tracker's states

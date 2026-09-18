@@ -27,6 +27,16 @@ The author should create an issue only where a search of the open issues by the 
 the concern returns none carrying it. Where an open issue carries the concern, the author
 should add the ask there as an acceptance criterion, with a comment naming what was added.
 
+## One Issue, One Merge
+
+**Must**
+
+One PR/MR must resolve an issue whole: every acceptance criterion the issue carries is met
+by that one, and the issue closes when it merges. Criteria resolved across two or more
+merges are a defect of the issue, which the author must split before the first PR/MR
+opens, each part carrying an issue of its own and the criteria that part meets. The count
+holds of an issue's merges alone: one PR/MR resolving several issues is no defect.
+
 ## Title
 
 **Must**
@@ -158,7 +168,7 @@ name of its own that binds no tracker:
 | the issue is triaged, and none of the artifacts below exists | the issue | `Open` |
 | the work is taken up | the branch | `In Progress` |
 | the work is offered for review | the offer for review (`work-sequence` → The Sequence) | `In Review` |
-| the change is merged | the change standing in the target branch, with every checkbox of the issue checked (reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence) | `Done` |
+| the change is merged | the change standing in the target branch and meeting every criterion of the issue (One Issue, One Merge above, reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence) | `Done` |
 | the work is dropped | the comment stating that the issue is not going to be fixed, or naming the open issue it duplicates | `Closed` |
 
 A project should state once, where it keeps its conventions, which of its tracker's states
@@ -179,7 +189,7 @@ can reconstruct from the comments alone which PR/MR implemented which requiremen
 
 - When a PR/MR is opened against this issue, should comment which checklist items it addresses.
 - When a PR/MR merges, should comment which items it resolved and update the corresponding checkboxes to match.
-- When items remain open after a merge, should comment that a follow-up PR/MR is needed, and link it once it exists.
+- Where an item stands open when the PR/MR merges, should comment naming the issue that now carries it.
 
 ## Cross-References
 
