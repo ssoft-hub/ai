@@ -38,9 +38,6 @@ What problem does this solve and why now.
 ## Test plan
 - [ ] How to verify criterion one (manual steps or automated test name)
 - [ ] Edge cases to cover
-
-## Out of scope
-What is explicitly not part of this issue.
 ```
 
 ### Bug
