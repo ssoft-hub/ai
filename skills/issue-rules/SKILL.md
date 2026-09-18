@@ -67,11 +67,20 @@ slot must name a check with an observable result, produced by the branch or by a
 following the item — a command that was run, a test that covers the behaviour, steps
 ending in something a reader can see.
 
+Each slot must carry what the table gives it and nothing besides:
+
+| Slot | What it carries |
+|---|---|
+| `## Acceptance criteria` | one condition per criterion, ticked by one observation; a conjunction, a comma or a semicolon joining two conditions a reader would check apart makes two criteria |
+| `## Test plan` | one check per item |
+| `## Steps to reproduce` | one action per step |
+| `## Goal`, `## Problem` | the symptom, its cost and what triggers it, and nothing else: no history of the discovery, no reasoning that led to the requirement, no alternative that was weighed |
+
 ### Feature / improvement
 
 ```markdown
 ## Goal
-What problem does this solve and why now.
+What is wrong today, what it costs, and what triggers it.
 
 ## Acceptance criteria
 - [ ] Criterion one
@@ -79,14 +88,14 @@ What problem does this solve and why now.
 
 ## Test plan
 - [ ] How to verify criterion one (manual steps or automated test name)
-- [ ] Edge cases to cover
+- [ ] How to verify criterion two (manual steps or automated test name)
 ```
 
 ### Bug
 
 ```markdown
 ## Problem
-What is broken and what is the impact.
+What is broken, what it costs, and what triggers it.
 
 ## Steps to reproduce
 1. Step one
@@ -105,6 +114,14 @@ What happens instead.
 ## Environment
 OS, version, relevant config.
 ```
+
+## What a Sentence of the Body States
+
+**Should**
+
+Every sentence of an issue body should state the problem, a criterion, an item of the test
+plan, or a condition of one of those, in the register the `writing-style` skill fixes, and
+the author should cut a sentence stating none of them.
 
 ## What an Issue Names
 
@@ -198,4 +215,5 @@ can reconstruct from the comments alone which PR/MR implemented which requiremen
 - `work-sequence` — the step of the work each act on this issue runs at, and the artifact each condition of the Lifecycle above is read off.
 - `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
 - `pr-rules` — PR title and description mirror the issue being resolved; its Pre-Merge Checklist gates merge on this issue's checkbox state.
+- `writing-style` — prose register in the body of an issue and in its comments.
 - The CLI skill of the issue tracker — the commands that search for, create, label, assign, and comment on an issue.

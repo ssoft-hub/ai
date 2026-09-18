@@ -23,11 +23,20 @@ slot must name a check with an observable result, produced by the branch or by a
 following the item — a command that was run, a test that covers the behaviour, steps
 ending in something a reader can see.
 
+Each slot must carry what the table gives it and nothing besides:
+
+| Slot | What it carries |
+|---|---|
+| `## Acceptance criteria` | one condition per criterion, ticked by one observation; a conjunction, a comma or a semicolon joining two conditions a reader would check apart makes two criteria |
+| `## Test plan` | one check per item |
+| `## Steps to reproduce` | one action per step |
+| `## Goal`, `## Problem` | the symptom, its cost and what triggers it, and nothing else: no history of the discovery, no reasoning that led to the requirement, no alternative that was weighed |
+
 ### Feature / improvement
 
 ```markdown
 ## Goal
-What problem does this solve and why now.
+What is wrong today, what it costs, and what triggers it.
 
 ## Acceptance criteria
 - [ ] Criterion one
@@ -35,14 +44,14 @@ What problem does this solve and why now.
 
 ## Test plan
 - [ ] How to verify criterion one (manual steps or automated test name)
-- [ ] Edge cases to cover
+- [ ] How to verify criterion two (manual steps or automated test name)
 ```
 
 ### Bug
 
 ```markdown
 ## Problem
-What is broken and what is the impact.
+What is broken, what it costs, and what triggers it.
 
 ## Steps to reproduce
 1. Step one
