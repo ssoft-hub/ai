@@ -31,11 +31,25 @@ should add the ask there as an acceptance criterion, with a comment naming what 
 
 **Must**
 
-One PR/MR must resolve an issue whole: every acceptance criterion the issue carries is met
-by that one, and the issue closes when it merges. Criteria resolved across two or more
-merges are a defect of the issue, which the author must split before the first PR/MR
-opens, each part carrying an issue of its own and the criteria that part meets. The count
-holds of an issue's merges alone: one PR/MR resolving several issues is no defect.
+Whether an issue is split into subtasks settles what closes it and how many PR/MR it
+carries:
+
+| The issue | What closes it | PR/MR it carries |
+|---|---|---|
+| an unsplit issue, and a subtask, which is an issue in its own right | the merge of one PR/MR meeting every acceptance criterion it carries | one |
+| a parent issue | the condition Lifecycle below reads off its subtasks | none |
+
+A parent issue's `## Acceptance criteria` carries its subtasks, one per item, and no
+criterion of its own: every criterion of the work stands on the subtask meeting it,
+establishable there from that subtask's branch and PR/MR.
+
+A PR/MR resolves the issue it is attached to whole: a PR/MR merging against an issue
+carrying a criterion it does not meet is the defect, and no occasion to name the issue
+that carries the rest. Where the work turns out to exceed the issue, the author must
+split it into subtasks as soon as that is known, whether or not a PR/MR is already open,
+each subtask carrying the criteria that part meets, and must attach an open PR/MR to the
+subtask it resolves before that PR/MR merges. The count holds of an issue's merges
+alone: one PR/MR resolving several issues is no defect.
 
 ## Title
 
@@ -189,8 +203,10 @@ name of its own that binds no tracker:
 |---|---|---|
 | the issue is triaged, and none of the artifacts below exists | the issue | `Open` |
 | the work is taken up | the branch | `In Progress` |
+| the work on a parent issue is taken up | any subtask of it whose own work is taken up | `In Progress` |
 | the work is offered for review | the offer for review (`work-sequence` → The Sequence) | `In Review` |
 | the change is merged | the change standing in the target branch and meeting every criterion of the issue (One Issue, One Merge above, reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence) | `Done` |
+| the work on a parent issue is complete | its subtasks, every one of them closed | `Done` |
 | the work is dropped | the comment stating that the issue is not going to be fixed, or naming the open issue it duplicates | `Closed` |
 
 A project should state once, where it keeps its conventions, which of its tracker's states
@@ -211,7 +227,6 @@ can reconstruct from the comments alone which PR/MR implemented which requiremen
 
 - When a PR/MR is opened against this issue, should comment which checklist items it addresses.
 - When a PR/MR merges, should comment which items it resolved and update the corresponding checkboxes to match.
-- Where an item stands open when the PR/MR merges, should comment naming the issue that now carries it.
 
 ## Cross-References
 

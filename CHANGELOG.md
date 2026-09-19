@@ -82,6 +82,8 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- `issue-rules` -> One Issue, One Merge: a PR/MR merges only against an issue it closes whole, and work found to exceed its issue is split into subtasks with an open PR/MR reattached to the one it resolves; a parent issue takes no PR/MR, its criteria standing on its subtasks
+- `issue-rules` -> Lifecycle reads a parent issue's condition off its subtasks, no branch, offer for review or merge of its own standing for it: under way once any subtask is taken up, and done once every one of them is closed
 - `issue-rules` -> Description Template: the Feature / improvement template carries no `## Out of scope` section
 - No skill names a file of the project it is applied in, or a path of this repository, as where a convention sits: a rule turning on a project convention sends its reader to what the project states, wherever it states it
 - Every example in `issue-rules` obeys its rule: an imperative title, and one capitalisation stated for the topic labels of a project
@@ -138,6 +140,7 @@
 
 ### Removed
 
+- `issue-rules` -> Progress Comments no longer answers an item standing open at a merge by naming the issue that carries it: the remedy is the split One Issue, One Merge requires
 - The git pre-commit hook is gone, and `node install.js` writes nothing outside the Claude configuration directory. A checkout that installed an earlier version still runs `.git/hooks/pre-commit` until `node uninstall.js`, or a delete by hand, takes it away
 
 ### Fixed

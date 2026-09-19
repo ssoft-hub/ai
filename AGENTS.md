@@ -202,6 +202,10 @@ What the rows do not say on their own:
 - **The Implement row runs once per task.** `/implement` implements one, so a branch
   whose issue holds several runs it several times; it covers neither the Branch, the
   Publish nor the Offer for review row.
+- **A parent issue passes through no row.** The rows carry one issue through one branch,
+  and a parent issue has neither a branch, a pull request nor a merge of its own: each of
+  its subtasks makes a pass of its own through the table, and the condition the parent
+  stands in is read off those subtasks (`issue-rules` → Lifecycle).
 - **`/review` covers two adjacent rows and stops there.** It reports a verdict and
   prepares nothing: the Release row sits four rows below it, behind the merge.
 - **Uncovered stages.** Intake, Scope and issue, Branch, Publish, Offer for review,
