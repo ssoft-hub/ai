@@ -112,7 +112,8 @@ path, an error string, a defective phrase quoted as the defect it is.
 
 A citation carries no such word, naming where a rule stands rather than saying anything
 about it: `<name>` → Section, a name alone in parentheses, or a name opening a list item
-or a table cell.
+or a table cell. The Section names the cited heading whole, never a shortened form of it:
+a reader resolves a citation by matching it against the headings of the file it names.
 
 | Defective | Corrected |
 |---|---|
