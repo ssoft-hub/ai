@@ -210,7 +210,8 @@ marker under every `##` heading of `templates/SKILL.md`, of `templates/COMMAND.m
 every command and of each skill declaring `rubric: applied`, the rule that a command
 ends with the caller's text and carries no HTML comment, the skills a built eval root
 holds and the roots `tools/eval-plugin.js` refuses to remove (`test/eval-plugin.test.js`),
-the shape of every eval case and the rule that one grader name carries one rubric
+the shape of every eval case, the rule that one grader name carries one rubric and the
+rule that a grader's quoted rule is the whole of the section it quotes
 (`test/evals-layout.test.js`), the rule that no colour
 word in `skills/*/SKILL.md` or `AGENTS.md` stands for a state, the proper name of a
 practice aside, and the rule that no skill names a file of the project it is applied in

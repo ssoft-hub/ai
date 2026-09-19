@@ -3,7 +3,18 @@
 ## [Unreleased]
 
 ### Added
-- A skill's effect is measured: `claude plugin eval .` runs the cases under `evals/<skill>/` with the catalog and without it, and `node tools/eval-plugin.js <skill>...` builds a root holding a list of skills for the same cases; the first suites are `comments` and `writing-style`
+- A skill's effect is measured: `claude plugin eval .` runs the cases under `evals/<skill>/` with the catalog and without it, and `node tools/eval-plugin.js <skill>...` builds a root holding a list of skills for the same cases; the first suites are `comments`, `writing-style` and `issue-rules`
+- A grader's rubric quoting a section of a skill quotes the whole of it, from its heading to the line before the next, and stands last in the grader file: `test/evals-layout.test.js` fails a rubric carrying part of a section, and `evals/README.md` states the rule
+- `issue-rules` -> One Issue, One Merge: one PR/MR resolves an issue whole and the issue closes when it merges; work taking a second one is split, each part carrying its own issue. Criteria resolved across two or more merges are a defect, and one PR/MR resolving several issues is ordinary
+- `issue-rules` -> Description Template admits only a criterion establishable at or before the merge that closes the issue, from the branch and the PR/MR; a condition first establishable after that merge goes to whatever owns that moment
+- `issue-rules` -> What a Sentence of the Body States admits in an issue body only a sentence stating the problem, a criterion, an item of the test plan, or a condition of one of those, in the register `writing-style` fixes
+- `issue-rules` -> Description Template bounds what each slot carries: one condition per acceptance criterion, one check per test-plan item, one action per reproduction step, and in `## Goal` or `## Problem` the symptom, its cost and what triggers it, and nothing else
+- `issue-rules` -> Description Template: an item of a test plan names a check with an observable result, produced by the branch or by a reviewer following the item - a command that was run, a test covering the behaviour, steps ending in something a reader can see
+- `test/lifecycle-map.test.js` fails an issue state the stage table of `AGENTS.md` names that `issue-rules` -> Lifecycle does not carry, so the map and the skill cannot drift apart over a state
+- `issue-rules` -> What an Issue Names: an issue names only what its problem or its criteria turn on, settled by whether the work can start before the named thing is done; an issue body carries no section outside its template
+- `issue-rules` -> One Issue per Concern: an issue is created only where no open issue carries the concern, found by a search of the open issues; where one does, the ask is added there as a criterion
+- `issue-rules` -> Lifecycle states the conditions the work stands in - taken up, offered for review, merged - each read off an artifact rather than off a tracker field, and a project states once which of its tracker's states each condition maps to; the names the skill uses are defaults
+- `issue-rules` -> Lifecycle requires an assignee from the branch on, and leaves whether what a merge delivers has reached a user to `shipping-and-launch`
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table for every skill its stage table names in no `Skills` cell, stating each one's stage, trigger, input, output and the artifact its entry and exit turn on; a skill firing at more than one stage declares `cross-cutting` there
@@ -71,7 +82,11 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- `issue-rules` -> Description Template: the Feature / improvement template carries no `## Out of scope` section
 - No skill names a file of the project it is applied in, or a path of this repository, as where a convention sits: a rule turning on a project convention sends its reader to what the project states, wherever it states it
+- Every example in `issue-rules` obeys its rule: an imperative title, and one capitalisation stated for the topic labels of a project
+- `issue-rules` declares `rubric: applied`: every section carries one of the four binding-force markers
+- `github-cli` and `gitlab-cli` name, beside the labelling command, the command that sets an issue's assignee and the search of the open issues
 - `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository
 - `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form

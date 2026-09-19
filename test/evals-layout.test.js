@@ -42,6 +42,30 @@ function graders(caseDir) {
 
 const rel = p => path.relative(repoDir, p).replace(/\\/g, '/');
 
+// A `##` line inside a fenced block opens no section and ends none.
+function section(skill, heading) {
+  const lines = skill.split('\n');
+  let fenced = false;
+  let start = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^ {0,3}```/.test(lines[i])) fenced = !fenced;
+    if (fenced || !lines[i].startsWith('## ')) continue;
+    if (start >= 0) return lines.slice(start, i).join('\n').trim();
+    if (lines[i] === `## ${heading}`) start = i;
+  }
+  return start < 0 ? null : lines.slice(start).join('\n').trim();
+}
+
+// The quote opens at the heading's own line: a `## ` naming the section inside a sentence
+// of the rubric's prose is a mention, and slicing from it would quote half a section.
+function quotedSection(skill, body) {
+  const lines = body.replace(/\r\n/g, '\n').split('\n');
+  const at = lines.findIndex(line => line.startsWith('## '));
+  if (at === -1) return null;
+  const heading = lines[at].slice(3).trim();
+  return { heading, quote: lines.slice(at).join('\n').trim(), section: section(skill, heading) };
+}
+
 test('every suite is named after a skill of the catalog', () => {
   for (const suite of suites())
     assert.ok(fs.existsSync(path.join(repoDir, 'skills', suite, 'SKILL.md')), `${suite} is a skill`);
@@ -103,20 +127,53 @@ test('every pattern a grader carries is quoted in single quotes', () => {
     }
 });
 
-test('an llm rubric quoting a section of the skill quotes it as the skill has it', () => {
+// A missing section fails the equality too, as a quote the walk cut short.
+function assertQuotesWholeSection(grader, skillPath, q) {
+  assert.notStrictEqual(q.section, null,
+    `${grader} quotes "${q.heading}", a heading ${skillPath} carries no section under: `
+    + 'the skill renamed the section, or a `## ` line of the rubric\'s own prose stands above the quote');
+  assert.strictEqual(q.quote, q.section,
+    `${grader} quotes "${q.heading}" from its heading to the line before the next, `
+    + 'and a quote stopping earlier states half a rule');
+}
+
+test('an llm rubric quoting a section of the skill quotes the whole of it', () => {
   let quoted = 0;
   for (const suite of suites()) {
-    const skill = fs.readFileSync(path.join(repoDir, 'skills', suite, 'SKILL.md'), 'utf8').replace(/\r\n/g, '\n');
+    const skillPath = path.join(repoDir, 'skills', suite, 'SKILL.md');
+    const skill = fs.readFileSync(skillPath, 'utf8').replace(/\r\n/g, '\n');
     for (const caseDir of cases(suite)) for (const g of graders(caseDir).filter(g => g.type === 'llm')) {
-      const body = g.body.replace(/\r\n/g, '\n');
-      const heading = body.match(/^## (.+)$/m)?.[1];
-      if (!heading) continue;
+      const q = quotedSection(skill, g.body);
+      if (q === null) continue;
       quoted++;
-      const start = body.indexOf(`## ${heading}`);
-      assert.ok(skill.includes(body.slice(start).trim()), `${rel(caseDir)}/graders/${g.name} quotes "${heading}" as the skill states it`);
+      assertQuotesWholeSection(`${rel(caseDir)}/graders/${g.name}`, rel(skillPath), q);
     }
   }
   assert.ok(quoted > 0, 'a rubric quotes a section');
+});
+
+const QUOTED_SECTION = path.join(__dirname, 'fixtures', 'quoted-section');
+const fixture = name => fs.readFileSync(path.join(QUOTED_SECTION, name), 'utf8').replace(/\r\n/g, '\n');
+const fixtureRubric = name => fixture(name).replace(FRONTMATTER, '').trim();
+
+test('a section runs past a ## heading standing inside a fenced block', () => {
+  const q = quotedSection(fixture('skill.md'), fixtureRubric('quotes-the-whole-section.md'));
+  assert.strictEqual(q.quote, q.section);
+});
+
+test('a quote cut at a fenced heading is a substring of the skill and still no whole section', () => {
+  const skill = fixture('skill.md');
+  const q = quotedSection(skill, fixtureRubric('stops-at-the-fenced-heading.md'));
+  assert.ok(skill.includes(q.quote), 'the cut quote is what a containment check accepts');
+  assert.notStrictEqual(q.quote, q.section);
+});
+
+test('a rubric whose first ## line names no section of the skill reports that heading', () => {
+  const q = quotedSection(fixture('skill.md'), fixtureRubric('shows-a-heading-above-the-quote.md'));
+  assert.throws(
+    () => assertQuotesWholeSection('the fixture rubric', 'the fixture skill', q),
+    /quotes "Out of scope", a heading the fixture skill carries no section under/,
+    'the failure names the heading the skill carries no section under, not a quote cut short');
 });
 
 test('a case prompt allows the Skill tool, or the indicator can never fire', () => {
@@ -158,4 +215,9 @@ test('a file beside the suites is no suite, so the walk takes directories alone'
   const guide = path.join(evalsDir, 'README.md');
   assert.ok(fs.existsSync(guide), `${rel(guide)} states how a case is written`);
   assert.ok(!suites().includes('README.md'), 'the walk takes no file for a suite');
+});
+
+test('a rubric naming the section inline quotes it from the heading line, not from the mention', () => {
+  const q = quotedSection(fixture('skill.md'), fixtureRubric('mentions-the-heading-inline.md'));
+  assert.strictEqual(q.quote, q.section);
 });

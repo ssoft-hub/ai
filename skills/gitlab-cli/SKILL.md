@@ -65,6 +65,9 @@ unrelated objects, `iid` being numbered per type.
 # existing labels
 glab label list
 
+# search the open issues
+glab issue list --search '<words>'
+
 # create - labels comma-separated in one flag
 glab issue create --title '<Type(scope): Subject>' --description '<body>' \
   --label '<type-label>,<topic-label>'
@@ -77,6 +80,9 @@ glab issue note <iid> --message '<comment>'
 
 # relabel afterwards
 glab issue update <iid> --label '<label>' --unlabel '<label>'
+
+# assign - a bare username replaces the assignees, a + prefix adds one
+glab issue update <iid> --assignee <username>
 ```
 
 - A label that does not exist is **created on the fly**, unlike `gh --label`, which

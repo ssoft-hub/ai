@@ -145,7 +145,7 @@ function skillsDeclaringRubric() {
 
 // Extended by the pass that marks the next skill; every name here is checked below.
 const MARKED_SKILLS = ['code-navigation', 'comments', 'editing', 'github-cli',
-  'gitlab-cli', 'pr-rules', 'skill-authoring', 'submodule-sync', 'work-sequence',
+  'gitlab-cli', 'issue-rules', 'pr-rules', 'skill-authoring', 'submodule-sync', 'work-sequence',
   'writing-style'];
 
 function commandFiles() {

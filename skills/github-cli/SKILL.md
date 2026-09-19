@@ -57,6 +57,9 @@ Three pass data to `gh api`, and each has a shape it will not carry:
 # existing labels, before inventing one
 gh label list --limit 100
 
+# search the open issues
+gh issue list --state open --search '<words>'
+
 # read one, fields chosen explicitly
 gh issue view <n> --json number,title,body,labels,milestone,state
 
@@ -69,6 +72,9 @@ gh issue comment <n> --body-file <path>
 
 # relabel afterwards
 gh issue edit <n> --add-label <label> --remove-label <label>
+
+# assign
+gh issue edit <n> --add-assignee <login>
 
 # create a label the repository does not have yet
 gh label create <name> --description '<what it covers>' --color <hex>
