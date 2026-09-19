@@ -32,6 +32,11 @@ Each slot must carry what the table gives it and nothing besides:
 | `## Steps to reproduce` | one action per step |
 | `## Goal`, `## Problem` | the symptom, its cost and what triggers it, and nothing else: no history of the discovery, no reasoning that led to the requirement, no alternative that was weighed |
 
+Every criterion must be establishable at or before the merge that closes the issue, from
+the branch and the PR/MR. A condition first establishable after that merge — after a
+release, after a deployment, after another issue's work, after a user acts — is no
+criterion of this issue and must go to whatever owns that moment.
+
 ### Feature / improvement
 
 ```markdown
