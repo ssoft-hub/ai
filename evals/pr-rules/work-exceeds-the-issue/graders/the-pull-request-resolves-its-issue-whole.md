@@ -15,28 +15,21 @@ A response adding that GH-181 closes when its subtasks close, that it carries no
 
 A response answering only what the pull request description or the commit should say fails this grader: what the rule settles is which issue the pull request closes, and an answer silent about GH-181 leaves the fourth criterion standing on it.
 
-The rule, from the `issue-rules` skill:
+The rule, from the `pr-rules` skill:
 
-## One Issue, One Merge
+## The Issue a Pull Request Resolves
 
 **Must**
 
-Whether an issue is split into subtasks settles what closes it and how many PR/MR it
-carries:
+A pull request resolving no tracked issue, which PR Title admits, is bound by nothing
+here. Where the title carries a tracker ID, the issue that ID names is the one the pull
+request is attached to, and the pull request resolves that issue whole: a pull request
+merging against an issue carrying a criterion it does not meet is the defect, and no
+occasion to name the issue that carries the rest. An unsplit issue and a subtask alike
+take one pull request, and a parent issue takes none (`issue-rules` → What Closes an
+Issue). The count holds of an issue's pull requests alone: one pull request resolving
+several issues is no defect.
 
-| The issue | What closes it | PR/MR it carries |
-|---|---|---|
-| an unsplit issue, and a subtask, which is an issue in its own right | the merge of one PR/MR meeting every acceptance criterion it carries | one |
-| a parent issue | the condition Lifecycle below reads off its subtasks | none |
-
-A parent issue's `## Acceptance criteria` carries its subtasks, one per item, and no
-criterion of its own: every criterion of the work stands on the subtask meeting it,
-establishable there from that subtask's branch and PR/MR.
-
-A PR/MR resolves the issue it is attached to whole: a PR/MR merging against an issue
-carrying a criterion it does not meet is the defect, and no occasion to name the issue
-that carries the rest. Where the work turns out to exceed the issue, the author must
-split it into subtasks as soon as that is known, whether or not a PR/MR is already open,
-each subtask carrying the criteria that part meets, and must attach an open PR/MR to the
-subtask it resolves before that PR/MR merges. The count holds of an issue's merges
-alone: one PR/MR resolving several issues is no defect.
+Where the work turns out to exceed the issue, the issue is split into subtasks first
+(`issue-rules` → What Closes an Issue), and an open pull request must be attached to the
+subtask it resolves before it merges.

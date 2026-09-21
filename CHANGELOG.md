@@ -3,18 +3,22 @@
 ## [Unreleased]
 
 ### Added
-- A skill's effect is measured: `claude plugin eval .` runs the cases under `evals/<skill>/` with the catalog and without it, and `node tools/eval-plugin.js <skill>...` builds a root holding a list of skills for the same cases; the first suites are `comments`, `writing-style` and `issue-rules`
+- `claude plugin eval .` runs a skill's cases under `evals/<skill>/`, with the catalog and without
+- `node tools/eval-plugin.js <skill>...` builds an eval root holding a list of skills
 - A grader's rubric quoting a section of a skill quotes the whole of it, from its heading to the line before the next, and stands last in the grader file: `test/evals-layout.test.js` fails a rubric carrying part of a section, and `evals/README.md` states the rule
-- `issue-rules` -> One Issue, One Merge: one PR/MR resolves an issue whole and the issue closes when it merges; work taking a second one is split, each part carrying its own issue. Criteria resolved across two or more merges are a defect, and one PR/MR resolving several issues is ordinary
-- `issue-rules` -> Description Template admits only a criterion establishable at or before the merge that closes the issue, from the branch and the PR/MR; a condition first establishable after that merge goes to whatever owns that moment
-- `issue-rules` -> What a Sentence of the Body States admits in an issue body only a sentence stating the problem, a criterion, an item of the test plan, or a condition of one of those, in the register `writing-style` fixes
-- `issue-rules` -> Description Template bounds what each slot carries: one condition per acceptance criterion, one check per test-plan item, one action per reproduction step, and in `## Goal` or `## Problem` the symptom, its cost and what triggers it, and nothing else
-- `issue-rules` -> Description Template: an item of a test plan names a check with an observable result, produced by the branch or by a reviewer following the item - a command that was run, a test covering the behaviour, steps ending in something a reader can see
+- `issue-rules` -> What Closes an Issue: one delivery meeting every criterion it carries
+- `issue-rules` -> Description Template: a criterion establishable at or before the issue closes
+- `issue-rules` -> What a Sentence of the Body States: the problem, a criterion, or a condition
+- `issue-rules` -> Description Template bounds what each slot of an issue body carries
+- `pr-rules` -> Description Structure: an item of a test plan names a check with a result
 - `test/lifecycle-map.test.js` fails an issue state the stage table of `AGENTS.md` names that `issue-rules` -> Lifecycle does not carry, so the map and the skill cannot drift apart over a state
 - `issue-rules` -> What an Issue Names: an issue names only what its problem or its criteria turn on, settled by whether the work can start before the named thing is done; an issue body carries no section outside its template
 - `issue-rules` -> One Issue per Concern: an issue is created only where no open issue carries the concern, found by a search of the open issues; where one does, the ask is added there as a criterion
-- `issue-rules` -> Lifecycle states the conditions the work stands in - taken up, offered for review, merged - each read off an artifact rather than off a tracker field, and a project states once which of its tracker's states each condition maps to; the names the skill uses are defaults
-- `issue-rules` -> Lifecycle requires an assignee from the branch on, and leaves whether what a merge delivers has reached a user to `shipping-and-launch`
+- `issue-rules` -> Lifecycle: each condition is read off an artifact, not off a tracker field
+- `issue-rules` -> Lifecycle: the assignee stands from the condition `In Progress` on
+- `issue-rules` -> Lifecycle leaves whether the work has reached a user to `shipping-and-launch`
+- `pr-rules`: a pull request states which issue it resolves, and when each comment is owed
+- `work-sequence` names the artifact each condition of the work is read off
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table stating, for the skills it names, the input, the output and the artifacts entry and exit turn on, its `Stage` cell naming the stage whose output that skill produces; a skill whose output no single stage produces declares `cross-cutting` there
@@ -56,7 +60,7 @@
 - `commit-trailer-guard` tool: blocks a `git commit` carrying a banned AI-attribution trailer (`Co-Authored-By`, `Generated-by`)
 - `SessionStart` hook: `submodule-status-check` flags a submodule whose checked-out commit differs from the recorded one, is uninitialized, or is in conflict, in the superproject or in a nested module; `session-env-prune` drops skill-gate state a week after that session's last gated call
 - `background-call-counter` tool: the `Stop` notification waits until every call started with `run_in_background` has finished, instead of firing while one is still running
-- `issue-rules` skill: title format (`Type(scope): Subject`), description templates for features and bugs (Goal, Acceptance criteria, Test plan), labels, priority levels (P0-P3), and lifecycle states
+- `issue-rules` skill: title, types, templates, labels, priority levels and lifecycle states
 - Skills: `comments` (non-Doxygen comment style), `cpp-encapsulation` (public/protected/private access-specifier discipline)
 - Skills: `debugging` (root-cause investigation before a fix), `code-review-and-quality` (the review axes: correctness, readability, architecture, security, performance), `test-driven-development` (fail-pass-refactor)
 - Skills: `security-and-hardening` (trust boundaries, input validation, secrets, least privilege), `performance-optimization` (profile-measure-optimize), `observability-and-instrumentation` (logging, metrics, tracing)
@@ -83,8 +87,7 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
-- `issue-rules` -> One Issue, One Merge: a PR/MR merges only against an issue it closes whole, and work found to exceed its issue is split into subtasks with an open PR/MR reattached to the one it resolves; a parent issue takes no PR/MR, its criteria standing on its subtasks
-- `issue-rules` -> Lifecycle reads a parent issue's condition off its subtasks, no branch, offer for review or merge of its own standing for it: under way once any subtask is taken up, and done once every one of them is closed
+- `issue-rules` -> Lifecycle: a parent issue's condition is read off its subtasks
 - `issue-rules` -> Description Template: the Feature / improvement template carries no `## Out of scope` section
 - No skill names a file of the project it is applied in, or a path of this repository, as where a convention sits: a rule turning on a project convention sends its reader to what the project states, wherever it states it
 - Every example in `issue-rules` obeys its rule: an imperative title, and one capitalisation stated for the topic labels of a project
@@ -114,13 +117,12 @@
 - `AGENTS.md` -> Adding a skill: a pre-flight step requires confirming the concern is not already covered by an existing skill or a separate plugin, and does not overlap an adjacent skill
 - `uninstall` reverts `settings.json` by subtracting only the hooks and permissions `install` added, so settings written afterwards by hand or by another tool are preserved
 - Re-running `install` performs a clean upgrade: files a previous install created but the current repository no longer ships are pruned, and a hook whose launcher command changed is replaced instead of duplicated
-- `pr-rules` -> Pre-Merge Checklist gates the merge on the linked issue and on the PR's own test plan: every checkbox reflecting current state, each checked one verifiable from what shipped, and each unchecked one out of scope or carrying a linked follow-up
-- `issue-rules`: `Done` requires every checklist checkbox in the issue to be checked, and Progress Comments requires an issue comment recording which PR/MR resolves which item
+- `pr-rules` -> Pre-Merge Checklist gates the merge on the issue's checkboxes and the test plan
 - `pr-rules` -> Pre-Open Checklist requires the PR to carry the issue's labels, the type label if any plus the topic ones; `issue-rules` -> Labels states when to set and revisit them
 - `bash-safety` prompts for confirmation before any `git push`, not only `--force`, so no push runs without an explicit yes - including under `bypassPermissions`, which the settings `ask` list cannot cover
 - `comments`: the default is no comment - reserve one for a critical, non-obvious fact a reader would otherwise get wrong; a warning-signs self-check names the common rationalizations
 - `cpp-doxygen`: one block documents the type on its declaration and members carry no Doxygen; longer type prose moves to the `.cpp` via `@class`/`@struct`/`@enum`, and the `#ifdef DOXYGEN` guard is a last resort for a re-exported type
-- `pr-rules`: the PR description opens with a `## Problem` section stating what is wrong today and what triggered the work, so the motivation no longer overlaps `## Summary`; `## Test plan` items are checkboxes matching the `issue-rules` templates
+- `pr-rules`: the PR description opens with a `## Problem` section
 - `pr-rules`: an agent no longer publishes its own review feedback. Where a draft mechanism exists it waits there for a human to submit; where none exists nothing is posted and the wording goes to the human. The issue comments `work-sequence` requires are unaffected
 - `pr-rules`: Merge Strategy states that the human authorises each merge, matching the rule review feedback already follows
 - `code-reviewer` agent: states an approving verdict in its report instead of approving the PR, and points at `pr-rules` for where review feedback may be published at all
@@ -141,7 +143,6 @@
 
 ### Removed
 
-- `issue-rules` -> Progress Comments no longer answers an item standing open at a merge by naming the issue that carries it: the remedy is the split One Issue, One Merge requires
 - The git pre-commit hook is gone, and `node install.js` writes nothing outside the Claude configuration directory. A checkout that installed an earlier version still runs `.git/hooks/pre-commit` until `node uninstall.js`, or a delete by hand, takes it away
 
 ### Fixed

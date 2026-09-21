@@ -75,7 +75,7 @@ glab issue create --title '<Type(scope): Subject>' --description '<body>' \
 # read
 glab issue view <iid>
 
-# progress comment
+# comment
 glab issue note <iid> --message '<comment>'
 
 # relabel afterwards

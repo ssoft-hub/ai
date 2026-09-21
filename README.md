@@ -108,7 +108,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `node-testing` | Conventions for this repo's `test/*.test.js` (node:test) |
 | `observability-and-instrumentation` | Logging, metrics, tracing for production visibility |
 | `performance-optimization` | Profile-measure-optimize workflow for a reported performance problem |
-| `pr-rules` | PR title, description, review comments, merge strategy |
+| `pr-rules` | The issue a PR resolves, its title, description, review comments, merge strategy |
 | `project-planning` | Scoping, estimation, milestones, risk, status updates, and the launch of independent work at once |
 | `release` | Semver release workflow |
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
@@ -117,7 +117,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `skill-authoring` | Writing a skill file — its concern, name, contexts, relation to a project's conventions, what ships with it, section markers, rename — and the marker on a command's sections |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
-| `work-sequence` | The eight steps from a task to a closed issue, and the moment each check runs at |
+| `work-sequence` | The eight steps from a task to a closed issue, the moment each check runs at, and the artifact `In Progress`, `In Review` and `Done` are read off where the work is carried on a branch and offered for review |
 | `writing-style` | Prose register and vocabulary in any human language, above any mode the session runs in |
 
 ## Agents

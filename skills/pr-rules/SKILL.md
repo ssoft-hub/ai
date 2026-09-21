@@ -32,6 +32,23 @@ Type and subject both start with uppercase; the whole title is at most 120 chara
 | a tracked issue | `TRACKER-N: Subject` — the tracker ID replaces `Type(scope)` | `PROJ-42: Add SipHash-2-4 keyed 64-bit hash` |
 | no tracked issue | `Type(scope): Subject` | `Fix(wrapper): Correct noexcept propagation through executor chain` |
 
+## The Issue a Pull Request Resolves
+
+**Must**
+
+A pull request resolving no tracked issue, which PR Title admits, is bound by nothing
+here. Where the title carries a tracker ID, the issue that ID names is the one the pull
+request is attached to, and the pull request resolves that issue whole: a pull request
+merging against an issue carrying a criterion it does not meet is the defect, and no
+occasion to name the issue that carries the rest. An unsplit issue and a subtask alike
+take one pull request, and a parent issue takes none (`issue-rules` → What Closes an
+Issue). The count holds of an issue's pull requests alone: one pull request resolving
+several issues is no defect.
+
+Where the work turns out to exceed the issue, the issue is split into subtasks first
+(`issue-rules` → What Closes an Issue), and an open pull request must be attached to the
+subtask it resolves before it merges.
+
 ## Description Structure
 
 **Must**
@@ -44,7 +61,7 @@ PR to split (PR Size), not a description to extend.
 | `## Problem` | the symptom, its cost and the trigger; the linked issue's Goal restated in one or two sentences; no solution. A change with no problem to state says so in one line. A table, a diagram or an example may carry the symptom, the cost or the trigger, within the budget (`writing-style` → Show the Example, Not a Description of It) | up to five lines |
 | `## Summary` | what changed, user-visible, one bullet per logical change | up to five bullets, one line each |
 | `## Implementation` | one bullet per decision, each naming the file or symbol it changed and the constraint that decided it | up to six bullets |
-| `## Test plan` | `- [ ]` per item, naming the command that was run or the test that covers it; a box is checked only once that run has passed (`issue-rules` → Description Template) | one line per item |
+| `## Test plan` | `- [ ]` per item, naming a check with an observable result, produced by the branch or by a reviewer following the item — a command that was run, a test that covers the behaviour, steps ending in something a reader can see; a box is checked only once that run has passed | one line per item |
 
 ## No Figures That Go Stale
 
@@ -61,8 +78,7 @@ commit invalidates such a number, and the run and the diff carry it and keep it 
 | the hash of a commit on the branch under review | a released version, a tag, or the merge commit on the target branch |
 
 A figure belonging to the change stays: a measured regression it exists to fix, a
-documented limit, a version. A `## Test plan` item names the test itself, which the reader
-runs.
+documented limit, a version. A `## Test plan` item names the test itself.
 
 ## Review Comments
 
@@ -127,8 +143,8 @@ The one exception is an explicit instruction naming the act on that artifact
 ("approve it", "post that reply now"), and it does not carry to the next PR. It is per
 draft, not per pull request: a call that sends every draft the caller holds needs an
 instruction covering each of them, and the single-draft form is what an instruction
-naming one reply admits. The issue comments `work-sequence` requires are published as
-usual (`issue-rules` → Progress Comments).
+naming one reply admits. A comment on an issue is no review wording, and this section
+does not reach one.
 
 Report at the end of a review pass: that feedback is waiting, where it is, what it
 covers, and whether the draft was opened by this pass or reused. The draft mechanics
@@ -150,10 +166,9 @@ Conditions on the branch, each naming the moment it is established at
 - [ ] Commit trailers conform to `commit-rules` — at the Publish step
 - [ ] `CHANGELOG.md` updated — every user-visible change documented — at the Publish step
 
-The pull request's own four properties are established at the Offer for review step
-instead:
+What the Offer for review step establishes instead:
 
-- The status of the checks reported on it, which the pipeline answers rather than a local run (`ci-cd-and-automation`)
+- The status of the checks reported on the pull request, which the pipeline answers rather than a local run (`ci-cd-and-automation`)
 - A description carrying all four sections, `## Problem` included — see Description Structure
 - A test-plan box checked only where the run it names has passed
 - The issue's labels — type label if any, plus topic labels — see `issue-rules` → Labels
@@ -163,17 +178,16 @@ instead:
 **Must**
 
 Gates the merge, where the Pre-Open Checklist gates opening the PR. Run it against the
-issue linked in the PR title and against the PR's own test plan; neither alone is
-enough. Its items are read off the issue and the pull request rather than run, so none
-of them names a moment.
+issue linked in the PR title and against the test plan of the pull request; neither
+alone is enough. Its items are read off the issue and the pull request rather than run,
+so none of them names a moment.
 
 - [ ] Every check reported on the pull request has passed on the commit it now points at (`ci-cd-and-automation`)
-- [ ] Every checklist checkbox in the issue reflects actual current state, not the state at issue-creation time
+- [ ] Every acceptance criterion of the issue is checked
 - [ ] Each checkbox now checked is verifiable from what shipped in this PR or an earlier merged PR
 - [ ] Every unchecked item either is out of scope for this PR or has a linked follow-up PR/MR
 - [ ] Every module reference the branch records satisfies the merge order the module-sync skill of the version control system fixes
 - [ ] Every test-plan box in the PR description is checked, or the item is named out of scope with a reason
-- [ ] A comment is added to the issue recording which PR/MR resolves which item (`issue-rules` → Progress Comments)
 - [ ] No review thread of the pull request stands unresolved, unless `editing` → Guard Against a Stale Reading admits the merge
 
 The head guard the CLI skill of the hosting platform names does not cover the
@@ -224,7 +238,7 @@ is split before review.
 **Recommended**
 
 - `work-sequence` — the order of work the Offer for review step belongs to, and the moment each check runs at.
-- `issue-rules` — the issue this PR resolves: title, templates, labels, lifecycle, progress comments.
+- `issue-rules` — the issue this PR resolves: title, templates, labels, lifecycle.
 - `commit-rules` — commit message format and branch naming on the PR's branch.
 - `code-review-and-quality` — what a review looks for, where this skill states how a finding is worded.
 - `editing` — the head-SHA read Merge Strategy turns on, the thread-list read it owes before the merge command, and the thread state the Pre-Merge Checklist reads.

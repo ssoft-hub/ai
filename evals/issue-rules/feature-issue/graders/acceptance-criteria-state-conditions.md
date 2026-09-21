@@ -18,24 +18,21 @@ The rule, from the `issue-rules` skill:
 An issue body must carry the sections of the template for its type and no section outside
 them. `Fix` takes the Bug template; every other type takes Feature / improvement. The
 `## Acceptance criteria` slot of either template must take what a criterion states from
-`requirements` → Acceptance Criteria (Given/When/Then). Each item of the `## Test plan`
-slot must name a check with an observable result, produced by the branch or by a reviewer
-following the item — a command that was run, a test that covers the behaviour, steps
-ending in something a reader can see.
+`requirements` → Acceptance Criteria (Given/When/Then). The body must carry no plan of
+the checks that establish those criteria.
 
 Each slot must carry what the table gives it and nothing besides:
 
 | Slot | What it carries |
 |---|---|
 | `## Acceptance criteria` | one condition per criterion, ticked by one observation; a conjunction, a comma or a semicolon joining two conditions a reader would check apart makes two criteria |
-| `## Test plan` | one check per item |
 | `## Steps to reproduce` | one action per step |
 | `## Goal`, `## Problem` | the symptom, its cost and what triggers it, and nothing else: no history of the discovery, no reasoning that led to the requirement, no alternative that was weighed |
 
-Every criterion must be establishable at or before the merge that closes the issue, from
-the branch and the PR/MR. A condition first establishable after that merge — after a
-release, after a deployment, after another issue's work, after a user acts — is no
-criterion of this issue and must go to whatever owns that moment.
+Every criterion must be establishable at or before the issue closes, from what the work
+delivers. A condition first establishable after that — after a release, after a
+deployment, after another issue's work, after a user acts — is no criterion of this
+issue and must go to whatever owns that moment.
 
 ### Feature / improvement
 
@@ -46,10 +43,6 @@ What is wrong today, what it costs, and what triggers it.
 ## Acceptance criteria
 - [ ] Criterion one
 - [ ] Criterion two
-
-## Test plan
-- [ ] How to verify criterion one (manual steps or automated test name)
-- [ ] How to verify criterion two (manual steps or automated test name)
 ```
 
 ### Bug
@@ -68,9 +61,10 @@ What should happen.
 ## Actual behaviour
 What happens instead.
 
-## Test plan
-- [ ] Regression test that would have caught this bug
-- [ ] Steps a reviewer can run to confirm the fix
+## Acceptance criteria
+- [ ] A test covering the steps above fails against the behaviour as it stood before the change
+- [ ] That test passes against the change
+- [ ] Further criterion of the fix
 
 ## Environment
 OS, version, relevant config.
