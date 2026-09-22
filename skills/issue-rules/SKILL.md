@@ -27,29 +27,23 @@ The author should create an issue only where a search of the open issues by the 
 the concern returns none carrying it. Where an open issue carries the concern, the author
 should add the ask there as an acceptance criterion, with a comment naming what was added.
 
-## One Issue, One Merge
+## What Closes an Issue
 
 **Must**
 
-Whether an issue is split into subtasks settles what closes it and how many PR/MR it
-carries:
+Whether an issue is split into subtasks settles what closes it:
 
-| The issue | What closes it | PR/MR it carries |
-|---|---|---|
-| an unsplit issue, and a subtask, which is an issue in its own right | the merge of one PR/MR meeting every acceptance criterion it carries | one |
-| a parent issue | the condition Lifecycle below reads off its subtasks | none |
+| The issue | What closes it |
+|---|---|
+| an unsplit issue, and a subtask, which is an issue in its own right | one delivery of the work meeting every acceptance criterion it carries |
+| a parent issue | the condition Lifecycle below reads off its subtasks |
 
 A parent issue's `## Acceptance criteria` carries its subtasks, one per item, and no
 criterion of its own: every criterion of the work stands on the subtask meeting it,
-establishable there from that subtask's branch and PR/MR.
+establishable there from what that subtask delivers.
 
-A PR/MR resolves the issue it is attached to whole: a PR/MR merging against an issue
-carrying a criterion it does not meet is the defect, and no occasion to name the issue
-that carries the rest. Where the work turns out to exceed the issue, the author must
-split it into subtasks as soon as that is known, whether or not a PR/MR is already open,
-each subtask carrying the criteria that part meets, and must attach an open PR/MR to the
-subtask it resolves before that PR/MR merges. The count holds of an issue's merges
-alone: one PR/MR resolving several issues is no defect.
+Where the work turns out to exceed the issue, the author must split it into subtasks as
+soon as that is known, each subtask carrying the criteria that part meets.
 
 ## Title
 
@@ -63,11 +57,23 @@ An issue title must read `Type(scope): Subject description`, where:
 
 ## Types
 
-**Must**
+**Should**
 
-An issue's type must be one of the types `commit-rules` → Types lists, capitalised:
+An issue's type should be one of these, each against what an issue of that type covers:
 
-`Feat`, `Fix`, `Refactor`, `Perf`, `Docs`, `Test`, `Chore`, `Ci`, `Style`
+| Type | What the issue covers |
+|---|---|
+| `Feat` | functionality a user does not have yet |
+| `Fix` | behaviour that departs from what the software states it does |
+| `Refactor` | the shape of the code or the text, with nothing a user sees changed |
+| `Perf` | a measured cost — time, memory, size — that the work brings down |
+| `Docs` | what a reader is told, in documentation or in a comment |
+| `Test` | behaviour no test reaches yet |
+| `Chore` | the build, the tooling, a dependency or a module reference |
+| `Ci` | the pipeline running the project's checks |
+| `Style` | formatting alone, with no logic and no wording changed |
+
+A project should add the type its own work needs where none of these names it.
 
 ## Description Template
 
@@ -76,24 +82,21 @@ An issue's type must be one of the types `commit-rules` → Types lists, capital
 An issue body must carry the sections of the template for its type and no section outside
 them. `Fix` takes the Bug template; every other type takes Feature / improvement. The
 `## Acceptance criteria` slot of either template must take what a criterion states from
-`requirements` → Acceptance Criteria (Given/When/Then). Each item of the `## Test plan`
-slot must name a check with an observable result, produced by the branch or by a reviewer
-following the item — a command that was run, a test that covers the behaviour, steps
-ending in something a reader can see.
+`requirements` → Acceptance Criteria (Given/When/Then). The body must carry no plan of
+the checks that establish those criteria.
 
 Each slot must carry what the table gives it and nothing besides:
 
 | Slot | What it carries |
 |---|---|
 | `## Acceptance criteria` | one condition per criterion, ticked by one observation; a conjunction, a comma or a semicolon joining two conditions a reader would check apart makes two criteria |
-| `## Test plan` | one check per item |
 | `## Steps to reproduce` | one action per step |
 | `## Goal`, `## Problem` | the symptom, its cost and what triggers it, and nothing else: no history of the discovery, no reasoning that led to the requirement, no alternative that was weighed |
 
-Every criterion must be establishable at or before the merge that closes the issue, from
-the branch and the PR/MR. A condition first establishable after that merge — after a
-release, after a deployment, after another issue's work, after a user acts — is no
-criterion of this issue and must go to whatever owns that moment.
+Every criterion must be establishable at or before the issue closes, from what the work
+delivers. A condition first establishable after that — after a release, after a
+deployment, after another issue's work, after a user acts — is no criterion of this
+issue and must go to whatever owns that moment.
 
 ### Feature / improvement
 
@@ -104,10 +107,6 @@ What is wrong today, what it costs, and what triggers it.
 ## Acceptance criteria
 - [ ] Criterion one
 - [ ] Criterion two
-
-## Test plan
-- [ ] How to verify criterion one (manual steps or automated test name)
-- [ ] How to verify criterion two (manual steps or automated test name)
 ```
 
 ### Bug
@@ -126,9 +125,10 @@ What should happen.
 ## Actual behaviour
 What happens instead.
 
-## Test plan
-- [ ] Regression test that would have caught this bug
-- [ ] Steps a reviewer can run to confirm the fix
+## Acceptance criteria
+- [ ] A test covering the steps above fails against the behaviour as it stood before the change
+- [ ] That test passes against the change
+- [ ] Further criterion of the fix
 
 ## Environment
 OS, version, relevant config.
@@ -138,9 +138,9 @@ OS, version, relevant config.
 
 **Should**
 
-Every sentence of an issue body should state the problem, a criterion, an item of the test
-plan, or a condition of one of those, in the register the `writing-style` skill fixes, and
-the author should cut a sentence stating none of them.
+Every sentence of an issue body should state the problem, a criterion, or a condition of
+one of those, in the register the `writing-style` skill fixes, and the author should cut a
+sentence stating none of them.
 
 ## What an Issue Names
 
@@ -201,39 +201,34 @@ name of its own that binds no tracker:
 
 | Condition | The artifact it is read off | Name used here |
 |---|---|---|
-| the issue is triaged, and none of the artifacts below exists | the issue | `Open` |
-| the work is taken up | the branch | `In Progress` |
+| the issue is triaged, and no condition below it holds | the issue | `Open` |
+| the work is taken up | what the project names for that condition | `In Progress` |
 | the work on a parent issue is taken up | any subtask of it whose own work is taken up | `In Progress` |
-| the work is offered for review | the offer for review (`work-sequence` → The Sequence) | `In Review` |
-| the change is merged | the change standing in the target branch and meeting every criterion of the issue (One Issue, One Merge above, reconciled at the Pre-merge issue check step, `work-sequence` → The Sequence) | `Done` |
+| the work is offered for review | what the project names for that condition | `In Review` |
+| the work is delivered and every acceptance criterion of the issue is met by it | what the work delivered, read against those criteria | `Done` |
 | the work on a parent issue is complete | its subtasks, every one of them closed | `Done` |
 | the work is dropped | the comment stating that the issue is not going to be fixed, or naming the open issue it duplicates | `Closed` |
 
-A project should state once, where it keeps its conventions, which of its tracker's states
-each condition maps to; where a project states none, a reader should read the condition off
-the artifact beside it rather than off a field. Whether what the merge delivers has reached
-a user is no condition of the issue: the release carries that, under `shipping-and-launch`.
+A project should state once, where it keeps its conventions, which artifact it names for
+the conditions the table leaves to it, and which of its tracker's states each condition
+maps to; a reader should read a condition off its artifact rather than off a field. Where
+a project's order of work is the one `work-sequence` → The Sequence states,
+`work-sequence` → The Artifact Each Condition Is Read Off names those artifacts for it.
 
-From the branch on, the assignee field, where the tracker has one, should name the user
-the `<user>` segment of the branch name carries (`commit-rules` → Branch Naming); an empty
-field once the branch exists is a defect of the issue, and an empty field before it is not.
+Where the project has named none, a reader should read the condition off what the work
+itself produced by that point.
 
-## Progress Comments
+Whether what the work delivered has reached a user is no condition of the issue: the
+release carries that, under `shipping-and-launch`.
 
-**Should**
-
-Should track implementation progress in comments, not only checkboxes, so that a reader
-can reconstruct from the comments alone which PR/MR implemented which requirement:
-
-- When a PR/MR is opened against this issue, should comment which checklist items it addresses.
-- When a PR/MR merges, should comment which items it resolved and update the corresponding checkboxes to match.
+From the condition `In Progress` on, the assignee field, where the tracker has one, should
+name the person carrying the work; an empty field from that condition on is a defect of the
+issue, and an empty field before it is not.
 
 ## Cross-References
 
 **Recommended**
 
-- `work-sequence` — the step of the work each act on this issue runs at, and the artifact each condition of the Lifecycle above is read off.
-- `commit-rules` — branch naming convention references the issue identifier (`TRACKER-N`).
-- `pr-rules` — PR title and description mirror the issue being resolved; its Pre-Merge Checklist gates merge on this issue's checkbox state.
+- `work-sequence` — the step of the work each act on this issue runs at, and the artifact `In Progress`, `In Review` and `Done` are read off under a project's order of work.
 - `writing-style` — prose register in the body of an issue and in its comments.
 - The CLI skill of the issue tracker — the commands that search for, create, label, assign, and comment on an issue.

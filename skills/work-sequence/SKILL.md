@@ -29,11 +29,11 @@ named beside it.
 | Step | Achieves | Runs when | Stated by |
 |---|---|---|---|
 | Scope and issue | the change has a tracked issue in the repository it belongs to, a module's in that module's own repository | the task is taken up | `issue-rules` |
-| Branch | the work has a branch of its own, named | before the first commit | `commit-rules` → Branch Naming |
+| Branch | the work has a branch of its own, named | once the issue carries at least one acceptance criterion, before the first commit | `commit-rules` → Branch Naming |
 | Commits | the change is recorded on that branch | a round of edits closes | `commit-rules` |
 | Publish | the branch stands where a reviewer reads it | the local remarks are exhausted | `pr-rules` → Pre-Open Checklist |
 | Offer for review | the change is offered for review | the Publish step has run | `pr-rules` |
-| Pre-merge issue check | the tracked issue is reconciled against what the change delivers, with a comment there naming which items it resolves | the review has passed | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments |
+| Pre-merge issue check | the tracked issue is reconciled against what the change delivers | the review has passed | `pr-rules` → Pre-Merge Checklist |
 | Integrate | the change sits on the target branch | the Pre-merge issue check clears | `pr-rules` → Merge Strategy |
 | Close issue | the issue's state matches what the change delivered | the Integrate step has run | `issue-rules` → Lifecycle |
 
@@ -41,6 +41,26 @@ named beside it.
   Publish step's condition is the same on every pass.
 - A step reaching the tracker runs through the CLI skill of the issue tracker; the offer
   for review, through the CLI skill of the hosting platform.
+
+## The Artifact Each Condition Is Read Off
+
+**Should**
+
+The conditions are those of `issue-rules` → Lifecycle, which leaves to the project the
+artifact `In Progress` and `In Review` are read off, and names the artifact of `Done`
+itself — what the work delivered, read against the criteria. Where the work is carried on
+a branch and offered for review, a reader should read each condition below off what the
+steps above produce:
+
+| Condition | The artifact it is read off |
+|---|---|
+| `In Progress` | the branch the Branch step produces |
+| `In Review` | the offer for review the Offer for review step produces |
+| `Done` | the change standing in the target branch, which the Integrate step puts there |
+
+The person carrying the work, whom `issue-rules` → Lifecycle puts in the assignee field,
+is, where the work is carried on a branch, the one the `<user>` segment of the branch
+name carries (`commit-rules` → Branch Naming).
 
 ## When a Check Runs
 
@@ -65,7 +85,7 @@ project declares is the project's own; the pipeline that runs them on a server i
 
 **Recommended**
 
-- `issue-rules` — the issue's title, description, labels, lifecycle and progress comments.
+- `issue-rules` — the issue's title, description, labels and lifecycle.
 - `commit-rules` — the branch name and the commit message.
 - `pr-rules` — what the offer for review carries: its title, description, review comments, two checklists and merge strategy.
 - `ci-cd-and-automation` — the pipeline running a project's checks on a server.

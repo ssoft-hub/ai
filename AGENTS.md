@@ -102,7 +102,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `node-testing` — conventions for the tests under `test/`.
 - `observability-and-instrumentation` — telemetry for production visibility.
 - `performance-optimization` — the process around one performance problem.
-- `pr-rules` — the pull request, from opening it to merging it.
+- `pr-rules` — the pull request, from the issue it resolves through opening it to merging it.
 - `project-planning` — stakeholder-facing planning, and whether independent work runs at the same time.
 - `release` — the version number and the mechanical steps to ship it.
 - `requirements` — turning an ask into a requirement.
@@ -113,14 +113,18 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
   command's sections.
 - `submodule-sync` — submodule ref discipline.
 - `test-driven-development` — the order a behaviour is built in, test first.
-- `work-sequence` — the order of work from a task to a closed issue.
+- `work-sequence` — the order of work from a task to a closed issue, and, where the work is carried on a branch and offered for review, the artifact `In Progress`, `In Review` and `Done` are read off.
 - `writing-style` — prose register and vocabulary in any human language, above any mode the session runs in.
 
-Two pairs restate each other on purpose, because no task loads both: `cpp-testing` /
-`node-testing` (a task edits one language's tests, and `node-testing` says not to mix the
-conventions) and `github-cli` / `gitlab-cli` (a repository has one host). Their shared
-principles are stated in each one's own runner and command vocabulary; routing a JS test
-task through a `cpp-` prefixed skill for one line would cost more than the duplication.
+Three pairs restate each other on purpose, each for a reason of its own. `cpp-testing` /
+`node-testing` are never loaded together, a task editing one language's tests and
+`node-testing` saying not to mix the conventions; their shared principles are stated in
+each one's own runner and command vocabulary, and routing a JS test task through a
+`cpp-` prefixed skill for one line would cost more than the duplication. `github-cli` /
+`gitlab-cli` are never loaded together either, a repository having one host.
+`issue-rules` → Types and `commit-rules` → Types are loaded together and still stand
+apart, each governing its own artifact — an issue title and a commit subject — so a
+project may carry different sets in the two.
 
 `## The Caller's Text` is copied byte for byte into every command and restated in
 `config/claude-config-rules.md`: the boundary between an instruction and the text under
@@ -166,9 +170,9 @@ stage with no command or persona of its own says so rather than naming the neare
 | Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
 | Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
 | Security audit | `/review`, or `/review-loop` to iterate → `security-auditor` | `In Review` | `security-and-hardening`, `pr-rules` |
-| Pre-merge issue check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `issue-rules` → Progress Comments, `github-cli` / `gitlab-cli` |
+| Pre-merge issue check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `github-cli` / `gitlab-cli` |
 | Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
-| Close issue | — | → `Done`, read off the merge (`issue-rules` → Lifecycle) | `issue-rules` → Lifecycle, `github-cli` / `gitlab-cli` |
+| Close issue | — | → `Done` (`work-sequence` → The Artifact Each Condition Is Read Off) | `issue-rules` → Lifecycle, `work-sequence` → The Artifact Each Condition Is Read Off, `github-cli` / `gitlab-cli` |
 | Release | — (`release-manager` directly) | `Done` since the merge, which the release moves no further | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
 
 Where each skill of the catalog stands, the table above, keyed on `Stage`, being the stage
@@ -206,14 +210,12 @@ not who produces that artifact or where it is used.
 No row of the stage table assigns an issue-state transition to a role: `issue-rules` →
 Lifecycle defines each state by a condition rather than by an act with an actor. The acts
 reserved to the human are the merge (`pr-rules` → Merge Strategy 2) and submitting review
-feedback (Pending by Default); the issue comments `work-sequence` requires are the one
-kind an agent publishes freely.
+feedback (Pending by Default).
 
 What the stage rows do not say on their own:
 
 - **The Spec row may run before the Scope and issue row.** `/spec` names no tracker, so
-  a spec may precede the issue or be written against one that exists. An issue without a
-  test plan, and acceptance criteria for a feature, is not ready to implement against.
+  a spec may precede the issue or be written against one that exists.
 - **The Implement row runs once per task.** `/implement` implements one, so a branch
   whose issue holds several runs it several times; it covers neither the Branch, the
   Publish nor the Offer for review row.

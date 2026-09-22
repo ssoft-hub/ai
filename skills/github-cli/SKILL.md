@@ -67,7 +67,7 @@ gh issue view <n> --json number,title,body,labels,milestone,state
 gh issue create --title '<Type(scope): Subject>' --body-file <path> \
   --label <type-label> --label <topic-label>
 
-# progress comment
+# comment
 gh issue comment <n> --body-file <path>
 
 # relabel afterwards
