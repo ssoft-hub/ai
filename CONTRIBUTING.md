@@ -47,5 +47,5 @@ repository indexes one and how it deploys it.
 
 ## Tests
 
-Run `npm test` before opening a PR. Conventions for the files under `test/` are in
-`skills/node-testing/SKILL.md`.
+Run `npm test` before opening a PR. This repository's test conventions are in
+`AGENTS.md` -> Tests, and the general Node rules in `skills/node-testing/SKILL.md`.

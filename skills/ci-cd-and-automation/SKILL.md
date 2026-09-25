@@ -29,22 +29,20 @@ that decides whether a change can merge or ship.
 ## What a Pipeline Should Gate
 
 Every change that can merge or ship should pass, at minimum: build, test suite,
-lint/format, and any static analysis the project declares. A gate that's easy to bypass
-(a flag, a manual override used routinely) is not a gate — it's documentation of intent.
+lint/format, and any static analysis the project declares. The gate should admit no
+routinely used bypass, neither a flag nor a manual override.
 
 ## Reproducible Locally
 
 A developer should be able to run the same checks the pipeline runs, locally, and get
-the same result — a check that only exists in CI and can't be reproduced locally forces
-a slow push-and-wait debugging loop for anything that fails there. Prefer a single script
-or command both the pipeline and a developer invoke (see this repo's own
-`npm test` as an example of the pattern).
+the same result. Prefer a single script or command both the pipeline and a developer
+invoke.
 
 ## Fast Feedback First
 
-Order pipeline stages from fastest/cheapest to slowest/most expensive (lint before
-build, unit tests before integration tests, single-platform build before the full
-matrix) so a broken change fails in seconds, not after a 20-minute matrix build.
+Order pipeline stages from fastest/cheapest to slowest/most expensive: lint before build,
+then each level `testing` → Levels of Verification defines, cheapest first, and a
+single-platform build before the full matrix.
 
 A stage should launch its independent jobs at once by default. Which jobs qualify, what
 bounds the degree, and how the launch squares with the ordering above are stated in
@@ -53,16 +51,14 @@ bounds the degree, and how the launch squares with the ordering above are stated
 ## Matrix Coverage
 
 Run the test matrix across every combination the project actually ships to (compiler
-versions, OS, architecture) — see this repo's own workflow (`.github/workflows/`) running
-`npm test` on multiple Node versions as a minimal example. A matrix entry that's
-perpetually failing and ignored is worse than not having it — either fix it or remove it.
+versions, OS, architecture). The project should fix or remove a matrix entry that stays
+failing and ignored.
 
 ## What Blocks vs What Warns
 
 Distinguish a hard gate (build failure, test failure, lint error) from a warning
 (coverage dipped slightly, a non-critical static-analysis note) explicitly in the
-pipeline configuration. A pipeline where warnings and failures look the same in the UI
-trains contributors to ignore both.
+pipeline configuration.
 
 ## Secrets in Pipelines
 
@@ -72,10 +68,15 @@ job that needs it, never share one broad credential across every job in the pipe
 
 ## Flaky Checks
 
-A check that fails intermittently without a code change is a defect in the check, not
-noise to route around with retries until it passes. Quarantine it (mark known-flaky,
-tracked with an issue) rather than letting an intermittently failing build normalize
-ignoring CI failures generally.
+A check whose verdict differs between runs of one commit on one platform, a test
+included, is a defect of that check. The project should fix it, remove it, or disable it
+under an issue naming it, and should not re-run it until it passes, by hand or by a
+configured retry.
+
+A verdict differing between the platforms the project supports should be investigated
+under `debugging` first. It is a defect of the check only where its assertion rests on a
+value the language or the platform leaves to the implementation:
+`testing` → No Assertion on an Implementation-Defined Value.
 
 ## Feeding a Pipeline Failure Back to an Agent
 
@@ -83,9 +84,7 @@ When CI fails under an agent-driven workflow, feed the agent the specific failur
 output — not just "CI failed" — and let it apply `debugging` to root-cause it before
 pushing again: a lint failure gets auto-fixed and re-run, a type/compile error gets
 traced to its cited location, a test failure goes through the full debugging skill, not
-a guess. Re-pushing without first reproducing the failure locally just moves the same
-guess-and-check loop into the pipeline, which is slower per iteration than reproducing
-it locally first.
+a guess. The agent should reproduce the failure locally before pushing again.
 
 ## Keeping the Pipeline Fast
 
@@ -93,22 +92,15 @@ Once a pipeline exceeds a comfortable wait (rule of thumb: ~10 minutes), apply t
 order of impact before adding more hardware: cache dependencies between runs; skip jobs a
 change can't affect (e.g. skip a full matrix build for a docs-only change); shard a large
 test suite across runners; move slow, non-blocking checks to a scheduled run instead of
-every push. Reach for a larger/faster runner last — it hides the cost instead of removing
-it.
-
-The parallel split of independent jobs is the default arrangement rather than a remedy on
-this list; the section Fast Feedback First states it.
+every push. Reach for a larger/faster runner last.
 
 ## Someone Owns a Failing Build
 
 When the pipeline breaks on the shared branch, whoever is responsible for keeping it
-passing (not necessarily whoever caused it) fixes or reverts immediately — waiting for the
-original author, or assuming someone else will handle it, lets a broken baseline
-accumulate further broken changes on top of it.
+passing (not necessarily whoever caused it) fixes or reverts immediately.
 
 ## Automation Beyond CI
 
 The same "reproducible, fast-feedback, explicit gate" principles apply to any automated
-check that gates a workflow — an agent's own hooks, which the hook-script skill of the
-agent tool covers, are automation in this same sense, just running locally instead of in
-a remote pipeline.
+check that gates a workflow, an agent's own hooks included (the hook-script skill of the
+agent tool).

@@ -1,39 +1,30 @@
 ---
 name: node-testing
 version: "1.0.0"
-description: Apply when writing or reviewing a test under test/ in the claude-config repository
+description: Apply when writing, reviewing or adding a test in JavaScript on Node.js
 license: Unlicense
 metadata:
   author: ssoft
   tier: domain
   bound-to:
     - node
-    - claude-code
-  reminder: false
-  paths:
-    - "**/test/*.test.js"
-  project-relation: binding
-  with:
-    - "test-driven-development"
   tags:
     - testing
     - node
 ---
 
-# Skill: Node Test Conventions
+# Skill: Node Testing
 
-Apply when writing or reviewing a test under `test/` in the `claude-config` repository.
+Apply when writing, reviewing or adding a test in JavaScript on Node.js.
 
-- Writing the hook/tool itself → `hook-scripts` skill.
-- Tests in another language → the testing skill of that language (different runner,
-  different conventions — do not mix the two).
+- The principles a test holds to whatever the language — its level and what a unit test
+  may reach, its shape, its boundary cases, its data and environment, its determinism,
+  the mutation check and when a suite may be trusted → `testing` skill.
+- Tests in another language → the testing skill of that language.
 
 ## Runner and Assertions
 
-Use Node's built-in `node:test` and `node:assert` only — no Jest, Mocha, or other
-third-party test framework. This repository carries no npm dependency at all (see
-`hook-scripts` skill); pulling in a test framework would be the one exception that
-breaks that invariant.
+A test should use the modules `node:test` and `node:assert`.
 
 ```javascript
 'use strict';
@@ -41,120 +32,63 @@ const { test } = require('node:test');
 const assert = require('node:assert');
 ```
 
-## Flat Tests, Descriptive Names
+## Test Names
 
-Write flat `test('description', fn)` calls rather than nesting in `describe` blocks.
-A test file like `bash-safety.test.js` reads as a flat list of behaviors
-checked, which is itself a spec for the regex/logic under test — nesting buries that
-spec under an extra layer of indirection for no benefit at this file size.
+The rule is `testing` → The Shape of a Test. A test should state the behaviour in the
+description string the call `test()` takes as its first argument: `'rejects an empty
+name'`, not `'test case 1'` or `'parseName'`.
 
 ```javascript
-test('blocks rm -rf /', () => {
-  assert.strictEqual(check('rm -rf /').action, 'block');
-});
-
-test('warns on rm -r foo/', () => {
-  assert.strictEqual(check('rm -r foo/').action, 'warn');
+test('rejects an empty name', () => {
+  assert.throws(() => parseName(''), /empty/);
 });
 ```
 
-Name the test after the behavior, not the input — `'blocks rm -rf /'`, not
-`'test case 1'` or `'check function'`. A failing test name should tell you what broke
-without opening the file.
+## Calling the Logic Directly
 
-Only reach for `describe` if a file's tests genuinely split into unrelated concerns
-that would otherwise be hard to scan — most tool/hook test files won't need it.
-
-## One Behavior Per Test
-
-Each `test()` checks one input → one expected outcome. Don't fold multiple unrelated
-assertions into a single test — when it fails, you want the test name to already tell
-you which case broke, not "one of these five assertions."
-
-## Testing Pure Logic Directly
-
-Prefer exporting the pure logic from the tool (`exports.check`, etc.) and calling it
-directly in the test, rather than spawning the tool as a subprocess:
+A test should call the logic a module exports, and should spawn the module as a
+subprocess only to check its exit code or its stdin and stdout contract:
 
 ```javascript
-const { check } = require('../tools/bash-safety');
-assert.strictEqual(check('rm -rf /').action, 'block');
+const { parseName } = require('../src/name');
+assert.strictEqual(parseName(' ada '), 'ada');
 ```
-
-**Why:** a direct call is faster, gives you a real stack trace on failure, and tests
-the logic in isolation from the stdin-JSON plumbing. Reserve `spawnSync` for the cases
-that actually need it — verifying exit codes, or the stdin → stdout/stderr contract a
-dispatcher relies on:
 
 ```javascript
 const { spawnSync } = require('node:child_process');
-const r = spawnSync('node', [path.join(toolsDir, 'my-tool.js')], {
-  input: JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'rm -rf /' } }),
-  encoding: 'utf8', stdio: 'pipe',
-});
-assert.strictEqual(r.status, 2);
+const r = spawnSync(process.execPath, [cliPath], { input: ' ada\n', encoding: 'utf8' });
+assert.strictEqual(r.status, 0);
 ```
 
-## Filesystem Fixtures
+## Temporary Directories
 
-Any test that touches the filesystem (install/uninstall, manifest writes) must run
-against a temp directory, never the real `~/.claude/`. Use the `CLAUDE_CONFIG_DIR`
-env override (the same one the hooks themselves resolve against — see `hook-scripts`
-skill) to redirect the script under test into an isolated temp dir:
+The rule for a test touching the file system is `testing` → Crossing a Boundary. A test
+should create its directory with `fs.mkdtempSync` under `os.tmpdir()` and remove it in a
+`finally` block. A directory made for the whole file should be removed in `after()`.
 
 ```javascript
-function mkTmp() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'claude-config-test-'));
-}
-function rmTmp(dir) {
-  try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
-}
-
-test('install creates files and manifest on empty dir', () => {
-  const dir = mkTmp();
+test('writes the state file', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'state-test-'));
   try {
-    const r = spawnSync('node', [installJs], {
-      cwd: repoDir,
-      env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
-      encoding: 'utf8',
-    });
-    assert.strictEqual(r.status, 0, `install failed: ${r.stderr}`);
-    assert.ok(fs.existsSync(path.join(dir, '.claude-config-manifest.json')));
-  } finally { rmTmp(dir); }
+    save(dir, { count: 1 });
+    assert.ok(fs.existsSync(path.join(dir, 'state.json')));
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 ```
-
-Always clean up in a `finally` block — a failed assertion must not leave a stray temp
-directory behind, and must not skip cleanup either.
-
-## What to Cover
-
-- The regex/logic boundary cases a hook or tool relies on (e.g. every `rm` variant
-  `bash-safety` is supposed to catch, plus near-misses it should *not* flag).
-- The stdin-JSON contract: malformed JSON should not crash the process (exit 0, not
-  throw).
-- For install/uninstall: round-trip — install then uninstall restores the directory
-  to its pre-install state byte-for-byte, including the case where files already
-  existed before install (backup/restore path).
 
 ## Running
 
-```bash
-npm test
-# equivalent to:
-node --test
+The `test` script should pass no path and no glob, `node --test` finding the tests itself,
+since the shell and not node expands a glob and `cmd.exe` expands none.
+
+```json
+"scripts": { "test": "node --test" }
 ```
 
-Pass no path. `node --test` walks the tree itself: anywhere under a directory named
-`test` it loads every `.js`, `.cjs` and `.mjs` file whatever its name, and elsewhere the
-files matching `*.test.js`, `*-test.js`, `*_test.js`, `test-*.js` or `test.js`. Every
-script under `test/` therefore has to stand alone as a test file — a shared helper put
-there is loaded and run as one, giving a passing test nobody wrote, or a failing suite when
-its top-level code throws. That is why the fixture helpers above are repeated in each
-file, and `test/test-layout.test.js` holds the directory to it. A fixture that is data
-rather than a test carries an extension the runner does not load, so it is read by the
-test that needs it and never run as one.
-
-A glob written into the script is expanded by the shell instead: `cmd.exe`, which npm
-runs a script through on Windows, does not expand one, and node does so itself only from
-version 22 — so on node 18 and 20 a script carrying a glob finds no test file at all.
+Anywhere under a directory named `test`, `node --test` loads every `.js`, `.cjs` and
+`.mjs` file whatever its name, and `.ts`, `.cts`, `.mts` where type stripping is on, and
+elsewhere the files named `*.test`, `*-test`, `*_test`, `test-*` or `test` with one of
+those extensions; a helper or a data fixture should stand outside such a directory or
+carry an extension it does not load.

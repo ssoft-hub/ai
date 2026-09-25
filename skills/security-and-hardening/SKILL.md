@@ -17,9 +17,7 @@ metadata:
 
 Apply when code accepts external input, crosses a trust boundary (network, file,
 subprocess, IPC, config), or handles secrets/credentials. This skill covers design-time
-decisions; mechanical, write-time enforcement of some of the same concerns is handled by
-the `secret-guard` and `bash-safety` hooks where the agent tool carries them — this
-skill is what to design for before those hooks would ever fire.
+decisions.
 
 - Memory-safety idioms that also happen to prevent whole classes of vulnerability →
   the coding-conventions skill of the language being written.
@@ -176,8 +174,8 @@ operands refute it the same way.
 ## Secrets and Credentials
 
 - Never hardcode a credential, API key, or private key in source, config committed to
-  the repo, logs, or test fixtures — see `secret-guard` for the mechanical check this
-  backs up. Load secrets from environment or a secrets manager at runtime.
+  the repo, logs, or test fixtures. Load secrets from environment or a secrets manager
+  at runtime.
 - Do not log a secret even at debug level — a debug log that's rotated to disk or
   shipped to a log aggregator is a leak, not a diagnostic aid (see
   `observability-and-instrumentation`).
@@ -199,7 +197,7 @@ operands refute it the same way.
 ## Dependencies
 
 - Pin dependency versions; an unpinned transitive dependency can introduce a
-  vulnerability between builds without any change to this repo's own code.
+  vulnerability between builds without any change to the project's own code.
 - Prefer well-maintained libraries with a security-disclosure process over
   unmaintained ones, even at a convenience cost.
 - A package-manager audit reports known advisories — it does not prove the rest of a

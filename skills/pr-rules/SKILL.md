@@ -73,7 +73,7 @@ commit invalidates such a number, and the run and the diff carry it and keep it 
 
 | Left out | Named instead |
 |---|---|
-| a test total, a pass count, a coverage percentage, a timing | the command producing it, `npm test` |
+| a test total, a pass count, a coverage percentage, a timing | the command producing it |
 | a count of changed files, lines or commits | nothing: the diff shows them |
 | the hash of a commit on the branch under review | a released version, a tag, or the merge commit on the target branch |
 

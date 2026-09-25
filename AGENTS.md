@@ -90,7 +90,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `cpp-coding` — C++ implementation conventions.
 - `cpp-doxygen` — Doxygen blocks on public C++ headers.
 - `cpp-encapsulation` — the access level of each member of one C++ type.
-- `cpp-testing` — the structure of a C++ test.
+- `cpp-testing` — the test-framework syntax, shown in GoogleTest.
 - `ddd` — modelling inside one bounded context.
 - `debugging` — the investigation that precedes a fix.
 - `deprecation-and-migration` — retiring a public path.
@@ -99,7 +99,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `gitlab-cli` — `glab` mechanics.
 - `hook-scripts` — writing this repository's hooks and tools.
 - `issue-rules` — what a tracker issue contains.
-- `node-testing` — conventions for the tests under `test/`.
+- `node-testing` — the runner, layout and running of a test on Node.js.
 - `observability-and-instrumentation` — telemetry for production visibility.
 - `performance-optimization` — the process around one performance problem.
 - `pr-rules` — the pull request, from the issue it resolves through opening it to merging it.
@@ -113,18 +113,15 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
   command's sections.
 - `submodule-sync` — submodule ref discipline.
 - `test-driven-development` — the order a behaviour is built in, test first.
+- `testing` — the level of a test, its isolation, data and environment, the boundary it crosses, its layout, its determinism, and when a suite may be trusted.
 - `work-sequence` — the order of work from a task to a closed issue, and, where the work is carried on a branch and offered for review, the artifact `In Progress`, `In Review` and `Done` are read off.
 - `writing-style` — prose register and vocabulary in any human language, above any mode the session runs in.
 
-Three pairs restate each other on purpose, each for a reason of its own. `cpp-testing` /
-`node-testing` are never loaded together, a task editing one language's tests and
-`node-testing` saying not to mix the conventions; their shared principles are stated in
-each one's own runner and command vocabulary, and routing a JS test task through a
-`cpp-` prefixed skill for one line would cost more than the duplication. `github-cli` /
-`gitlab-cli` are never loaded together either, a repository having one host.
-`issue-rules` → Types and `commit-rules` → Types are loaded together and still stand
-apart, each governing its own artifact — an issue title and a commit subject — so a
-project may carry different sets in the two.
+Two pairs restate each other on purpose, each for a reason of its own. `github-cli` /
+`gitlab-cli` are never loaded together, a repository having one host. `issue-rules` →
+Types and `commit-rules` → Types are loaded together and still stand apart, each
+governing its own artifact — an issue title and a commit subject — so a project may
+carry different sets in the two.
 
 `## The Caller's Text` is copied byte for byte into every command and restated in
 `config/claude-config-rules.md`: the boundary between an instruction and the text under
@@ -165,10 +162,10 @@ stage with no command or persona of its own says so rather than naming the neare
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
 | Scope and issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
 | Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
+| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `testing`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
 | Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
 | Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
-| Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
+| Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `testing`, `cpp-testing`, `node-testing`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
 | Security audit | `/review`, or `/review-loop` to iterate → `security-auditor` | `In Review` | `security-and-hardening`, `pr-rules` |
 | Pre-merge issue check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `github-cli` / `gitlab-cli` |
 | Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
@@ -196,7 +193,7 @@ states a trigger.
 | `deprecation-and-migration` | cross-cutting | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
 | `editing` | cross-cutting | the artifact as it stands before the write | the artifact as it stands after the write | a reading of the artifact, per `editing` → Guard Against a Stale Reading | the checks a round of edits runs, per `work-sequence` → When a Check Runs |
 | `hook-scripts` | Implement | the event or tool the change routes to | a dispatcher or tool file matching the Dispatcher or Tool Skeleton | the feature branch named per `commit-rules` → Branch Naming | the test file `node-testing` covers for the tool, `test/<name>.test.js` |
-| `node-testing` | Implement | the pure logic exported by the hook or tool under test | a test file asserting that logic's behaviour | the tool's exported logic, per `hook-scripts` → Tool Skeleton | the file `test/<name>.test.js` covering that logic, run at the moment `work-sequence` → When a Check Runs gives it |
+| `node-testing` | Implement | the logic a Node module exports | a test file asserting that logic's behaviour | the module file carrying those exports | the test file covering that logic, run at the moment `work-sequence` → When a Check Runs gives it |
 | `observability-and-instrumentation` | cross-cutting | the question an on-call engineer needs answered | a structured log line, metric or trace answering it, and the answer read off one in a running system | the non-functional requirement `requirements` → Functional vs Non-Functional records | the Readiness Checklist item `shipping-and-launch` → Readiness Checklist for monitoring |
 | `performance-optimization` | Implement | a profiler or benchmark baseline for the hot path | a measured before/after comparison for the fix | the symptom and cost the bug template of `issue-rules` → Description Template asks for | the second measurement `performance-optimization` → Measure the Fix requires, read against the baseline |
 | `skill-authoring` | Implement | the skill or command file and its frontmatter | a skill or command file matching the rubric, or its removal | the tracked issue's title naming the skill, per `issue-rules` → Title | the `### Added`, `### Changed` or `### Removed` entry `changelog` → Subsections requires |
@@ -254,8 +251,18 @@ what the manifest lets `uninstall.js` put back are stated in `README.md` → Ins
 npm test
 ```
 
-One `test/<name>.test.js` per unit, on node's built-in runner; the conventions are in
-`skills/node-testing/SKILL.md` and what the suite covers in `README.md` → Tests.
+One `test/<name>.test.js` per unit; the Node rules are in `skills/node-testing/SKILL.md`,
+what the suite covers in `README.md` → Tests. This repository's conventions, above that
+skill:
+
+| Subject | Convention |
+|---|---|
+| Test calls | flat `test('description', fn)` calls, nested in `describe` only where a file's tests split into unrelated concerns |
+| A helper shared by test files | repeated in each file, every script under `test/` being a test file |
+| A temporary directory | the script under test redirected into it through `CLAUDE_CONFIG_DIR`, never the real `~/.claude/` |
+| Coverage of a hook or a tool | every variant its regex or logic catches, and the near-misses it lets through |
+| Malformed stdin JSON | a test feeds it and asserts exit 0 |
+| Install and uninstall | a test checks that the round trip restores the directory byte for byte, files present before install included |
 
 A test over a skill holds a relation between two artifacts with different authors — a
 frontmatter key against the context vocabulary, a section's marker against the modals

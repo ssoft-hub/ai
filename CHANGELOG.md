@@ -19,6 +19,7 @@
 - `issue-rules` -> Lifecycle leaves whether the work has reached a user to `shipping-and-launch`
 - `pr-rules`: a pull request states which issue it resolves, and when each comment is owed
 - `work-sequence` names the artifact each condition of the work is read off
+- [skills] `testing`: a test's rules in any language, from its level to when a suite may be trusted
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table stating, for the skills it names, the input, the output and the artifacts entry and exit turn on, its `Stage` cell naming the stage whose output that skill produces; a skill whose output no single stage produces declares `cross-cutting` there
@@ -56,7 +57,7 @@
 - Portable `config/settings.json` using `CLAUDE_CONFIG_DIR` / `os.homedir()`, with no hardcoded user paths
 - `install.js` bootstrap with JSON-merge for `~/.claude/settings.json`, preserving existing machine-specific settings
 - `templates/SKILL.md` template for consistent skill authoring
-- Skills: `architecture` (ADRs, design tradeoffs, the seven qualities in priority order), `node-testing` (`test/*.test.js` conventions), `project-planning` (scoping, estimation, milestones), `requirements` (user stories, acceptance criteria)
+- Skills: `architecture` (ADRs, design tradeoffs, the seven qualities in priority order), `node-testing` (the runner, layout and running of a Node.js test), `project-planning` (scoping, estimation, milestones), `requirements` (user stories, acceptance criteria)
 - `commit-trailer-guard` tool: blocks a `git commit` carrying a banned AI-attribution trailer (`Co-Authored-By`, `Generated-by`)
 - `SessionStart` hook: `submodule-status-check` flags a submodule whose checked-out commit differs from the recorded one, is uninitialized, or is in conflict, in the superproject or in a nested module; `session-env-prune` drops skill-gate state a week after that session's last gated call
 - `background-call-counter` tool: the `Stop` notification waits until every call started with `run_in_background` has finished, instead of firing while one is still running

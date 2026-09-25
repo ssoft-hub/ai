@@ -16,42 +16,31 @@ metadata:
 # Skill: Test-Driven Development
 
 Apply when implementing a feature or bug fix, before writing implementation code. This
-skill governs the order of work — fail, pass, refactor. Test structure, naming, and
-coverage rules belong to the testing skill of the language being written.
+skill governs the order of work — fail, pass, refactor.
 
+- The level a test sits at, its layout, its data, its determinism, and the mutation check on a passing test → `testing` skill.
 - Reproducing a bug as a failing test before fixing it → `debugging` skill (Regression Test First).
 - Once the tests pass and the implementation stands, reviewing it → `code-review-and-quality` skill.
 
 ## The Loop
 
 1. **Fail** — write a test for the next small behavior, run it, watch it fail. A test
-   that passes before the implementation exists is testing nothing — it proves the test
-   itself is wrong, not that the feature works.
+   that passes before the implementation exists is a defect of that test.
 2. **Pass** — write the minimum implementation that makes the test pass. Do not
    implement behavior the current test doesn't require yet; that comes in its own
    fail step.
 3. **Refactor** — with the tests passing, clean up duplication or naming introduced
    by the minimal implementation, re-running tests after each change. Never refactor
-   with a failing test in the suite — a failing baseline makes it impossible to tell
-   whether a refactor broke something.
+   with a failing test in the suite.
 
 Repeat in small increments. A fail step that requires ten new tests before anything
 passes again is too large a step — split it.
 
-## Why Test First, Not Test After
-
-A test written after the implementation tends to confirm what the code already does,
-including its bugs — the author unconsciously writes the assertion to match the
-observed behavior. A test written first specifies the intended behavior independently,
-so it can catch the implementation being wrong, not just being different.
-
 ## One Behavior Per Fail Step
 
-Each fail-pass cycle targets one new behavior or boundary case, matching the
-one-behaviour-per-test rule of the testing skill of the language being written. Do not
-write five tests up front and then implement until all
-five pass — that reintroduces the "test after" problem for tests 2 through 5, which sit
-failing for longer than necessary and stop guiding the implementation step by step.
+Each fail-pass cycle targets one new behavior or boundary case, matching `testing` → The
+Shape of a Test. Do not write five tests up front and then implement
+until all five pass.
 
 ## Minimal Implementation
 
@@ -67,27 +56,23 @@ the next fail step should add a test that forces generalization.
 
 ## Refactor Is Not Optional
 
-Skipping refactor because "it works" accumulates the duplication and awkward naming
-that minimal implementations produce step by step. Refactor after every pass step, even
-when the change is small — a passing suite is the only safe time to do it.
+Refactor after every pass step, even when the change is small.
 
 ## Prefer the Real Thing Over a Test Double
 
 When a fail step needs a collaborator that isn't the unit under test, reach for the
 least artificial option that keeps the test fast and deterministic, in this order: the
 real implementation, then an in-memory fake, then a stub returning canned data, and
-only last a mock that asserts *which* calls were made. A test built around call-sequence
-assertions breaks the moment the implementation is refactored, even when the observable
-behavior hasn't changed — assert on outcomes, not on how the outcome was reached. Reach
-for a mock only when the real collaborator is slow, non-deterministic, or has a side
-effect the test can't afford — what that excludes at the unit-test boundary belongs to
-the testing skill of the language being written.
+only last a mock that asserts *which* calls were made. Reach for a mock only when the
+real collaborator is slow, non-deterministic, or has a side effect the test can't
+afford — what that excludes at the unit-test boundary is `testing` → Levels of
+Verification.
 
 ## When TDD Doesn't Fit
 
 Exploratory spikes, throwaway prototypes, and pure UI/layout work where behavior isn't
 yet known are not test-first — write the test once the intended behavior is decided,
 before that code is treated as production. Do not retrofit tests after the fact and
-call it TDD; that is the coverage the testing skill of the language being written asks
-for, applied after the code was already written, which is a legitimate but different
-practice.
+call it TDD; that is the coverage `testing` and the testing skill of the language being
+written ask for, applied after the code was already written, which is a legitimate but
+different practice.

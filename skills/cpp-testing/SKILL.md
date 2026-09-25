@@ -13,23 +13,26 @@ metadata:
     - testing
 ---
 
-# Skill: C++ Unit Testing
+# Skill: C++ Testing
 
 Apply when writing, reviewing, or adding tests to C++ code.
 
-Framework choice is the project's: a test should use the one it declares. This skill covers principles only.
+The examples below are GoogleTest's, and a project on another framework substitutes that
+framework's own macros.
 
 - The fail, pass, refactor order these tests are written in → `test-driven-development` skill.
+- The levels of verification, and what a unit test may reach → `testing` → Levels of Verification.
+- One behaviour per test and the name stating it, the three phases and what the action may not arrange, what an assertion rests on, and the interface a test reaches the unit through → `testing` → The Shape of a Test.
+- Test data and the environment, the boundary a test crosses, the mutation check on a passing test, and when a suite may be trusted → `testing` skill.
 
 ## What to Test
 
-- Every public API function must have tests — private implementation details are not tested directly
-- Test behaviour, not implementation: if internal refactoring breaks a test, the test was wrong
+- Every public API function must have tests
 - Every bug fix gets a regression test (`debugging` → Regression Test First)
 
 ## Test Structure — AAA
 
-Each test follows three clearly separated phases:
+The three phases, written with the macro `TEST` of GoogleTest:
 
 ```cpp
 TEST(Money, AdditionProducesSumInSameCurrency) {
@@ -45,18 +48,10 @@ TEST(Money, AdditionProducesSumInSameCurrency) {
 }
 ```
 
-Never merge phases. "Arrange" sets up state. "Act" calls exactly one thing. "Assert" checks outcome.
-
-## One Reason to Fail
-
-Each test checks one behaviour — one logical assertion. Multiple `EXPECT_*` are allowed only when they together verify a single concept.
-
-- Bad: a test that checks addition, subtraction, and formatting in one body
-- Good: three separate tests, each failing for a distinct reason
-
-When a test fails, the name alone must tell the reader what broke.
-
 ## Test Names as Documentation
+
+GoogleTest states the behaviour in the suite and test names of the macro `TEST`, and
+asserts it with `EXPECT_*` or `ASSERT_*`.
 
 Name = `Subject_Condition_ExpectedOutcome`:
 
@@ -67,39 +62,41 @@ Money_DefaultConstructed_HasZeroAmount
 Container_InsertBeyondCapacity_GrowsAutomatically
 ```
 
-No `Test` prefix, no `test_` prefix — the framework already marks it as a test.
+No `Test` prefix, no `test_` prefix.
 
-## Boundary Cases Are Mandatory
+## Boundary Cases in C++
 
-For every function, write tests for:
+The obligation to cover a boundary and the kinds of boundary there are: `testing` →
+Boundary Cases. What each kind is in C++:
 
 | Boundary | Examples |
 |----------|---------|
-| Empty / zero | empty string, 0, empty range |
-| Minimum / maximum | `INT_MIN`, `INT_MAX`, single-element container |
-| Off-by-one | size == capacity, index == last |
+| Empty or zero | empty string, 0, empty range |
+| Minimum or maximum | `INT_MIN`, `INT_MAX`, single-element container |
+| Off by one | size == capacity, index == last |
 | Invalid input | null pointer, negative where positive expected |
 | Exact threshold | values at `==`, `<`, `>` of a documented limit |
 
-If the function documents a precondition, test the boundary just inside and just outside it.
+## Implementation-Defined Values in C++
 
-## Test Isolation
+The rule and what an assertion checks instead: `testing` → No Assertion on an
+Implementation-Defined Value. Its instances in C and C++:
 
-- Tests must not share mutable state — each test starts from a clean, deterministic state
-- No global variables mutated across tests; use fixtures (setup/teardown) instead
-- No order dependency — tests must pass in any execution order
+- `sizeof` of a built-in type other than the `char` types
+- pointer width, `sizeof(void*)`
+- byte order, `std::endian::native`
+- the signedness of the type `char`, in place of which an assertion should check that
+  the range the requirement states is representable
 
-## Unit Test Scope
+## Isolation and Determinism in C++
 
-Unit tests are fast and isolated:
+The clock a test reads, and what holds between two runs of one test:
+`testing` → Determinism and Independence Between Runs.
 
-- No network, no disk I/O, no database — mock or stub infrastructure at the boundary
-- No `sleep` or time-based waits — use injectable clocks or time abstractions
-- Each test completes in milliseconds
+The order to reach for a fake, a stub or a mock in place of a collaborator:
+`test-driven-development` → Prefer the Real Thing Over a Test Double.
 
-## Do Not
+The means C++ and GoogleTest give for the clock and for independence between runs:
 
-- Do not test private members directly — redesign if they need testing
-- Do not copy production code into tests to "validate" it — test through the public interface
-- Do not suppress or ignore failing tests — fix or explicitly skip with a documented reason
-- Do not write tests that always pass (assertion-free tests)
+- A fixture class deriving from `::testing::Test`, with `SetUp` and `TearDown`, in place of a variable at namespace scope
+- An injected clock in place of `std::this_thread::sleep_for`

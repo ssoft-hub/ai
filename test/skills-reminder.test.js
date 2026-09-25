@@ -33,7 +33,12 @@ test('trigger keeps a long description whole', () => {
 });
 
 test('buildSkillList returns empty array for missing directory', () => {
-  assert.deepStrictEqual(buildSkillList(path.join(os.tmpdir(), 'does-not-exist-xyz')), []);
+  const tmp = mkTmp();
+  try {
+    assert.deepStrictEqual(buildSkillList(path.join(tmp, 'missing')), []);
+  } finally {
+    rmTmp(tmp);
+  }
 });
 
 test('buildSkillList includes every skill directory with a SKILL.md', () => {
@@ -109,7 +114,12 @@ test('buildSkillList orders process before domain before narrow', () => {
 });
 
 test('buildContext returns null when no skills found', () => {
-  assert.strictEqual(buildContext(path.join(os.tmpdir(), 'does-not-exist-xyz')), null);
+  const tmp = mkTmp();
+  try {
+    assert.strictEqual(buildContext(path.join(tmp, 'missing')), null);
+  } finally {
+    rmTmp(tmp);
+  }
 });
 
 test('buildContext lists one skill per line under the header', () => {

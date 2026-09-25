@@ -15,6 +15,13 @@ function mkTmp() {
 function rmTmp(dir) {
   try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
 }
+function within(ms, promise, what) {
+  let timer;
+  const expiry = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${what}: not reached within ${ms} ms`)), ms);
+  });
+  return Promise.race([promise, expiry]).finally(() => clearTimeout(timer));
+}
 
 test('get returns 0 when file missing', () => {
   const dir = mkTmp();
@@ -118,22 +125,30 @@ test('concurrent increments from separate processes all land', async () => {
   const started = [];
   try {
     const input = JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'npm test', run_in_background: true } });
+    // Loaded ahead of the tool, so its line on stderr says the child's runtime is up.
+    const preload = path.join(dir, 'ready.js');
+    fs.writeFileSync(preload, "process.stderr.write('ready\\n');\n");
+    const ready = [];
     const finished = [];
     for (let i = 0; i < calls; i++) {
-      const child = spawn('node', [toolPath], {
-        stdio: ['pipe', 'ignore', 'ignore'],
+      const child = spawn('node', ['--require', preload, toolPath], {
+        stdio: ['pipe', 'ignore', 'pipe'],
         env: { ...process.env, CLAUDE_CONFIG_DIR: dir },
       });
       // A child that exits before the write makes it an EPIPE, which with no handler here
       // takes the runner down instead of failing this test.
       child.stdin.on('error', () => {});
       started.push(child);
+      ready.push(new Promise((resolve, reject) => {
+        child.stderr.once('data', resolve);
+        child.once('exit', () => reject(new Error('a child exited before it was ready')));
+      }));
       finished.push(new Promise(resolve => child.on('exit', resolve)));
     }
-    // Started first and fed together, so the counts overlap instead of following startup order.
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Every child up before any is fed, so the counts overlap instead of following startup order.
+    await within(10000, Promise.all(ready), 'every child up');
     for (const child of started) child.stdin.end(input);
-    await Promise.all(finished);
+    await within(10000, Promise.all(finished), 'every child done');
 
     assert.strictEqual(get(dir), calls);
   } finally {

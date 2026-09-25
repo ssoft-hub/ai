@@ -22,10 +22,13 @@ this file:
    against the spec rather than an anticipated caller.
 5. `code-navigation` skill — where an answer about a symbol's callers or definition comes
    from.
-6. `cpp-testing` skill — the structure of the tests the loop produces.
-7. `work-sequence` skill — When a Check Runs, for which checks a round of edits runs and
+6. `testing` skill — the level, the layout and the data of the tests the loop produces.
+7. `cpp-testing` skill where the language is C++, `node-testing` skill where it is
+   JavaScript on Node.js, and the testing skill of the language being written otherwise
+   — the runner syntax and the naming scheme those tests are written with.
+8. `work-sequence` skill — When a Check Runs, for which checks a round of edits runs and
    which of them belong to a later moment.
-8. `project-planning` skill — Running Independent Work in Parallel, for each launch that
+9. `project-planning` skill — Running Independent Work in Parallel, for each launch that
    section names.
 
 If a step in the spec is ambiguous or missing, stop and surface the gap rather than
