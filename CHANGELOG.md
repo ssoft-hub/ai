@@ -121,7 +121,7 @@
 - `pr-rules` -> Pre-Merge Checklist gates the merge on the issue's checkboxes and the test plan
 - `pr-rules` -> Pre-Open Checklist requires the PR to carry the issue's labels, the type label if any plus the topic ones; `issue-rules` -> Labels states when to set and revisit them
 - `bash-safety` prompts for confirmation before any `git push`, not only `--force`, so no push runs without an explicit yes - including under `bypassPermissions`, which the settings `ask` list cannot cover
-- `comments`: the default is no comment - reserve one for a critical, non-obvious fact a reader would otherwise get wrong; a warning-signs self-check names the common rationalizations
+- [skills] `comments` admits only a comment a tool acts on or one without which the code is unclear
 - `cpp-doxygen`: one block documents the type on its declaration and members carry no Doxygen; longer type prose moves to the `.cpp` via `@class`/`@struct`/`@enum`, and the `#ifdef DOXYGEN` guard is a last resort for a re-exported type
 - `pr-rules`: the PR description opens with a `## Problem` section
 - `pr-rules`: an agent no longer publishes its own review feedback. Where a draft mechanism exists it waits there for a human to submit; where none exists nothing is posted and the wording goes to the human. The issue comments `work-sequence` requires are unaffected

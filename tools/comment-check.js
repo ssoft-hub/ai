@@ -82,6 +82,15 @@ function check(toolInput, filePath) {
   return { added };
 }
 
+function reminder(filePath, added) {
+  if (!added.length) return '';
+  return `comment-check reminder — ${added.length} new comment${added.length === 1 ? '' : 's'} in ${filePath}:\n` +
+    added.map(l => `  ${l.trim()}`).join('\n') + '\n' +
+    'Must keep a comment only where `comments` -> Two Kinds of Comment admits it: a service ' +
+    'comment, or a clarifying comment that passes the deletion test and the checkable claim. ' +
+    'Must delete each comment that section does not admit.\n';
+}
+
 if (require.main === module) {
   let raw = '';
   process.stdin.setEncoding('utf8');
@@ -92,16 +101,9 @@ if (require.main === module) {
 
     const filePath = data.tool_input?.file_path ?? data.tool_input?.path ?? data.tool_input?.notebook_path ?? '';
     const { added } = check(data.tool_input, filePath);
-    if (added.length) {
-      process.stdout.write(
-        `comment-check reminder — ${added.length} new comment${added.length === 1 ? '' : 's'} in ${filePath}:\n` +
-        added.map(l => `  ${l.trim()}`).join('\n') + '\n' +
-        'Check each against the `comments` skill: default is no comment; keep only one ' +
-        'that states a fact the code cannot say itself.\n'
-      );
-    }
+    process.stdout.write(reminder(filePath, added));
     process.exit(0);
   });
 }
 
-module.exports = { syntaxFor, isPlainCommentLine, addedCommentLines, extractEdits, check };
+module.exports = { syntaxFor, isPlainCommentLine, addedCommentLines, extractEdits, check, reminder };

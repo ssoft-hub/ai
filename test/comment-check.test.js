@@ -1,7 +1,75 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { syntaxFor, isPlainCommentLine, addedCommentLines, extractEdits, check } = require('../tools/comment-check');
+const fs = require('fs');
+const path = require('path');
+const { syntaxFor, isPlainCommentLine, addedCommentLines, extractEdits, check, reminder } = require('../tools/comment-check');
+
+const skill = fs.readFileSync(path.join(__dirname, '..', 'skills', 'comments', 'SKILL.md'), 'utf8')
+  .replace(/\r\n/g, '\n');
+
+function sections(text) {
+  const found = new Map();
+  let fenced = false;
+  let current = null;
+  for (const line of text.split('\n')) {
+    if (/^\s*```/.test(line)) fenced = !fenced;
+    if (!fenced && line.startsWith('## ')) {
+      current = line.slice(3).trim();
+      found.set(current, []);
+    } else if (current) found.get(current).push(line);
+  }
+  return new Map([...found].map(([heading, lines]) => [heading, lines.join('\n')]));
+}
+
+function citedSection(text) {
+  return [...sections(skill)].find(([heading]) => text.includes(`\`comments\` -> ${heading}`));
+}
+
+const sampleReminder = reminder('foo.cpp', ['int x = 5; // why 5']);
+
+test('the reminder cites a section the comments skill carries', () => {
+  assert.ok(citedSection(sampleReminder), `no section of the comments skill is cited in:\n${sampleReminder}`);
+});
+
+function tables(body) {
+  const found = [];
+  let rows = null;
+  for (const line of body.split('\n')) {
+    if (!line.trim().startsWith('|')) { rows = null; continue; }
+    if (!rows) found.push(rows = []);
+    rows.push(line.trim().replace(/^\||\|$/g, '').split('|').map(cell => cell.trim()));
+  }
+  return found.map(([header, , ...data]) => ({ header, data }));
+}
+
+test('the reminder names every term the section it cites defines in a table', () => {
+  const [heading, body] = citedSection(sampleReminder) ?? [];
+  const terms = tables(body ?? '').flatMap(t => t.data.map(row => row[0]));
+  assert.ok(terms.length > 0, `${heading} defines no term in a table, so nothing was compared`);
+  for (const term of terms)
+    assert.ok(sampleReminder.toLowerCase().includes(term.toLowerCase()), `the reminder names "${term}" of ${heading}`);
+});
+
+test('the reminder lists every added comment on a line of its own', () => {
+  const added = ['a; // one', 'b; // two'];
+  const lines = reminder('foo.cpp', added).split('\n').map(line => line.trim());
+  for (const comment of added) assert.ok(lines.includes(comment), `the reminder lists ${comment}`);
+});
+
+test('the reminder names a single added comment in the singular', () => {
+  const [header] = reminder('foo.cpp', ['a; // one']).split('\n');
+  assert.doesNotMatch(header, /\bcomments\b/);
+});
+
+test('the reminder names two added comments in the plural', () => {
+  const [header] = reminder('foo.cpp', ['a; // one', 'b; // two']).split('\n');
+  assert.match(header, /\bcomments\b/);
+});
+
+test('the reminder is empty when no comment was added', () => {
+  assert.strictEqual(reminder('foo.cpp', []), '');
+});
 
 const cFamily = syntaxFor('x.cpp');
 const hash = syntaxFor('x.py');
