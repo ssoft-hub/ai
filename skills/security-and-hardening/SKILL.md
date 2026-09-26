@@ -206,6 +206,9 @@ operands refute it the same way.
   priority than a moderate finding on a path that runs on every request. Document the
   reason and set a review date whenever a fix is deferred rather than applied.
 
+Where the reason and review date of a deferred fix go: `artifact-placement` → Where the
+Place Comes From.
+
 ## When a Vulnerability Is Found
 
 Run it through `debugging` skill like any other defect — reproduce, root-cause,
@@ -213,3 +216,5 @@ regression test. What is specific to a vulnerability: fix the class of weakness 
 than the exploit string that revealed it, and document that class. A silently patched
 security bug leaves the next instance of the same weakness, in a different location,
 undiscovered.
+
+Where the record of the class goes: `artifact-placement` → Where the Place Comes From.

@@ -20,6 +20,7 @@
 - `pr-rules`: a pull request states which issue it resolves, and when each comment is owed
 - `work-sequence` names the artifact each condition of the work is read off
 - [skills] `testing`: a test's rules in any language, from its level to when a suite may be trusted
+- [skills] `artifact-placement`: the requirement a produced artifact's location meets, not a path
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table stating, for the skills it names, the input, the output and the artifacts entry and exit turn on, its `Stage` cell naming the stage whose output that skill produces; a skill whose output no single stage produces declares `cross-cutting` there
