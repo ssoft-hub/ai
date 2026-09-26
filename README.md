@@ -28,7 +28,7 @@ pipeline of persona agents and commands built on top of them.
 
 **`PostToolUse`** — runs after a tool call, on two routes read off the payload the same way: a path arriving with the content written to it, or one of `Edit` / `Write` / `MultiEdit` / `NotebookEdit` naming a path with no content field, reaches the write tools; a call marked `run_in_background: true` reaches the counter. A path named for reading reaches nothing. The three lint tools run only on C++ files (`.h`, `.hpp`, `.cpp`, `.cc`, `.cxx`):
 - `background-call-counter.js` — counts a call started in the background, whichever tool made it, as work the `Stop` notification below must wait for. Such a call returns the moment it is launched, so this runs while the work is still going; a call refused at any gate never reaches this hook, and is never counted
-- `comment-check.js` — runs on every file whose comment syntax it knows (`//`, `/* */`, `#`, `--`, `;`, `%`, `<!-- -->`), no config file needed; reminds to check any newly added non-doc comment against the `comments` skill
+- `comment-check.js` — runs on every file whose comment syntax it knows (`//`, `/* */`, `#`, `--`, `;`, `%`, `<!-- -->`), no config file needed; reminds to check any newly added non-doc comment against the two kinds the `comments` skill admits
 - `clang-format.js` — formats in-place; requires `.clang-format` in this repository (searched from the edited file up to the git root, never into a parent repo) — skips silently if missing, or if `clang-format` isn't in PATH
 - `clang-tidy.js` — runs static analysis; requires `.clang-tidy` (uses `compile_commands.json` when found)
 - `cppcheck.js` — runs `cppcheck --enable=warning,style,performance,portability --std=c++20 --error-exitcode=1 …`; requires `.cppcheck`, passed as `--suppressions-list`
@@ -90,7 +90,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `ci-cd-and-automation` | CI/CD pipeline design and quality gates |
 | `code-navigation` | Where an answer about a symbol comes from, and what a text search does not answer |
 | `code-review-and-quality` | Review substance — correctness, readability, architecture, security, performance |
-| `comments` | Code comment style in any language, Doxygen aside (brief, general, no fix narration) |
+| `comments` | Which comments source, markup, build and config files admit, doc blocks aside |
 | `commit-rules` | Conventional Commits format and branch naming |
 | `cpp-api-design` | C++ public API structure and hygiene |
 | `cpp-coding` | C++ implementation conventions |

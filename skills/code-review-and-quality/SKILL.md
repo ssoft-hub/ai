@@ -51,8 +51,9 @@ wrong):
 
 ## Readability
 
-- Naming should make the reviewer's next question unnecessary — if a comment is needed
-  to explain what a variable holds, the name is wrong (see `comments` skill).
+- Naming should make the reviewer's next question unnecessary. The reviewer should ask
+  for the change that replaces a comment a name or a type makes unneeded, per `comments` →
+  A Comment a Name or a Type Replaces.
 - A function doing more than one thing at one level of abstraction is a readability
   defect, not just a style preference — it hides which of the several things broke.
 - Flag surprising control flow (early returns buried in the middle of a long function,

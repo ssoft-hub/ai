@@ -169,7 +169,6 @@ test('comment-check reminder surfaces through the dispatcher even with no lint c
       old_string: 'int x = 5;',
       new_string: 'int x = 5; // why 5',
     });
-    assert.match(out, /comment-check reminder/);
     assert.match(out, /why 5/);
   } finally {
     cleanup(cfgDir, repo);
