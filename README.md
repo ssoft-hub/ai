@@ -86,6 +86,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | Skill | Description |
 |-------|-------------|
 | `architecture` | System/module architecture design, ADRs, tradeoffs |
+| `artifact-placement` | How the place of an artifact a task produces is settled: the one place its sources name, or a question; an act outside the project's working copy waits for the user's explicit permission |
 | `changelog` | Keep a Changelog format |
 | `ci-cd-and-automation` | CI/CD pipeline design and quality gates |
 | `code-navigation` | Where an answer about a symbol comes from, and what a text search does not answer |

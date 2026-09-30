@@ -1,0 +1,1 @@
+Should this decision record go into an issue in the project's issue tracker carrying the label `decision`, as `CONTRIBUTING.md` asks, or into the repository as a file? I will write it once its place is settled.

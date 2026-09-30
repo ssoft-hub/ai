@@ -1,0 +1,1 @@
+Neither the `README.md` nor the `CONTRIBUTING.md` of `ledger-api` says where the project keeps decision records. Where should the record of choosing PostgreSQL `LISTEN`/`NOTIFY` over Redis pub/sub go — a file such as `docs/adr/0001-postgres-listen-notify-for-cache-invalidation.md`, a page of the team's wiki, or an issue in the tracker? I will write it once its place is settled.

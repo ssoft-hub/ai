@@ -1,0 +1,1 @@
+The repository of `brookmark` holds decision records under `docs/adr/`, the records `0001` to `0007`, and under `docs/decisions/`, the records `0008` to `0012`, and no file says which directory a new record takes. Which of the two takes the record of storing the link tokens as keyed hashes? I will write it once its place is settled.

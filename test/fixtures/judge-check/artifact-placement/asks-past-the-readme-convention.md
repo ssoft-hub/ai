@@ -1,0 +1,1 @@
+The request adds the benchmark results of 0.6 to the `README.md`, and the `CONTRIBUTING.md` of `driftgauge` states that the `README.md` carries installation and usage alone. Where should the results table go, given that convention? I will add it once its place is settled.

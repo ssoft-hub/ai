@@ -46,4 +46,5 @@ are distinct levels, and `**Recommended**` sits one step below `**Should**`.
 ## A project's conventions above a skill's rule
 
 A project's own conventions stand above the rule of any skill, wherever the project
-states them.
+states them. A skill's rule requiring a question to the user is the exception: it stands,
+and no convention of a project removes that question.

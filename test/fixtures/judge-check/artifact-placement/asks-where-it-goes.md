@@ -1,0 +1,1 @@
+Where should the decision record for this choice go? Neither the `README.md` nor the `CONTRIBUTING.md` of `ledger-api` says where the project keeps decision records, so I will write it once its place is settled.

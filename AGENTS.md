@@ -80,6 +80,7 @@ meets it. A rule belongs to exactly one line — a second statement is not empha
 a copy that drifts, and the agent reading both has nothing telling it which one wins.
 
 - `architecture` — how modules, services and processes fit together.
+- `artifact-placement` — settling where an artifact a task produces goes, source code included — the one place its sources name, or a question — and the permission an act outside the project's working copy waits for.
 - `changelog` — the project's changelog, in the Keep a Changelog format.
 - `ci-cd-and-automation` — the pipeline producing the checks-passed signal.
 - `code-navigation` — where an answer about a symbol comes from.
@@ -159,10 +160,10 @@ stage with no command or persona of its own says so rather than naming the neare
 | Stage | Command / persona | Issue state | Skills |
 |-------|-------------------|-------------|--------|
 | Intake | — | not created yet | `requirements`, `project-planning` |
-| Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design` |
+| Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design`, `artifact-placement` |
 | Scope and issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
 | Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `testing`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
+| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `testing`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`, `artifact-placement`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
 | Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
 | Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
 | Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `testing`, `cpp-testing`, `node-testing`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
@@ -189,6 +190,7 @@ states a trigger.
 
 | Skill | Stage | Input | Output | Entry criterion | Exit criterion |
 |-------|-------|-------|--------|------------------|-----------------|
+| `artifact-placement` | cross-cutting | the artifact a task produces, source code included, and what its sources state about its place | the place the artifact goes, the question where it goes, or the question asking permission for an act outside the project's working copy | the sources `artifact-placement` → Where the Place Comes From reads | the place settled or the question asked, per `artifact-placement` → Where the Place Comes From; the permission question, per `artifact-placement` → Acting on the Place |
 | `code-navigation` | cross-cutting | the symbol, at the file path, line and character it stands at, or the name a workspace-wide query carries | the set of sites the operation returns | the source `code-navigation` → Where the Answer Comes From names for the language | the answer naming the operation that produced it, per `code-navigation` → Naming the Operation |
 | `deprecation-and-migration` | cross-cutting | the public symbol or path being retired | a deprecation marker, a migration guide, and a removal-tracking issue | the breaking-change classification `cpp-api-design` → Breaking Changes gives the symbol | the removal issue's milestone, set per `issue-rules` → Milestone |
 | `editing` | cross-cutting | the artifact as it stands before the write | the artifact as it stands after the write | a reading of the artifact, per `editing` → Guard Against a Stale Reading | the checks a round of edits runs, per `work-sequence` → When a Check Runs |

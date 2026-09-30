@@ -25,6 +25,11 @@ than guessing at the requirements.
 Invoke the `implementer` subagent to implement the task named in the caller's text, by
 TDD, from the specification `/spec` has already produced.
 
+| The subagent returns | This command must |
+|---|---|
+| a question about an artifact's place | put it to the user, and pass every answer the user has given on the task so far into each later invocation, quoted as the user's words beside the question it answers, since a new invocation holds nothing of an earlier one |
+| a request for permission for an act | put it to the user, and on the permission take the act itself with the content and the place returned, passing no permission to the subagent; pass each act taken and its result — an issue's id, a page's address — into each later invocation, stated as done; on the user's refusal, take no act and pass the refusal into each later invocation as the user's answer to that request |
+
 ## Boundary
 
 **Must**
