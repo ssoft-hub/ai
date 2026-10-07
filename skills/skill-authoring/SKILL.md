@@ -44,6 +44,17 @@ concern one of them carries is a rule for that skill, not a new skill. A new ski
 own one concern its neighbours state no rule about, and neither of two adjacent skills
 should restate the other.
 
+## A Narrow Skill on a Wider One
+
+**Should**
+
+A skill narrowed to a tool, a language or a platform, where a wider skill states the
+concern it serves, should take the steps of that wider skill, their names and their
+conditions as given, should cite them by name, and should state only what the tool, the
+language or the platform adds to them. It should contradict none of them and
+rename none; a difference between the two is either a refinement the narrow skill states
+as one, or a defect of one of them.
+
 ## Naming
 
 **Should**

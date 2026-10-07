@@ -103,6 +103,7 @@
 - [skills] Made `pr-rules` take the merge method from the project, else ask the user for it
 - [skills] Made `commit-rules` ask for a branch's user name or issue where no source gave either
 - [skills] Let `release` admit the old version in released changelog sections after a bump
+- [skills] Made `skill-authoring` rest a narrow skill on the steps and names of the wider one
 - `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository
 - `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form
