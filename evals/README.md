@@ -43,10 +43,14 @@ the file. `test/evals-layout.test.js` holds every case to the shape above, every
 name to one content, and a rubric quoting a section of the skill to the whole of that
 section, from its heading to the line before the next, standing last in the grader file.
 
-## A case that measures nothing
+## A case both arms pass
 
-A case both arms pass in every run measures nothing, so the author should rewrite it
-until the arm without the skill fails at least once in three runs.
+A case both arms pass in every run shows no effect of the skill, and stays in the suite
+as a check against a regression: an edit of the skill that leads the model astray where
+it had managed alone shows on such a case and on no other. A report should read the
+effect off the cases the arm without the skill fails at least once in three runs, and a
+regression off every case the arm with the skill fails after an edit, having passed
+before it.
 
 ## What a score counts
 

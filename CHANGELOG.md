@@ -91,6 +91,7 @@
 - `work-sequence` skill: the eight steps from a task to a closed issue, each with its condition and the skill owning what it produces. Read it rather than `pr-rules` for the order of work and for the moment a check runs at; `pr-rules` now states the pull request alone
 
 ### Changed
+- [evals] A case both arms pass stays in the suite as a check against a regression
 - `issue-rules` -> Lifecycle: a parent issue's condition is read off its subtasks
 - `issue-rules` -> Description Template: the Feature / improvement template carries no `## Out of scope` section
 - No skill names a file of the project it is applied in, or a path of this repository, as where a convention sits: a rule turning on a project convention sends its reader to what the project states, wherever it states it
