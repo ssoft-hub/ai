@@ -159,7 +159,7 @@ Conditions on the branch, each naming the moment it is established at
 (`work-sequence` → When a Check Runs):
 
 - [ ] Every check the change touches passes — at a round of edits
-- [ ] Branch is rebased onto the current target branch (no stale merge base) — at the Publish step
+- [ ] The branch carries the current tip of the target branch — at the Publish step
 - [ ] Every check the project declares passes over the branch as it stands — at the Publish step
 - [ ] Every commit in the branch builds independently (no broken intermediate state) — at the Publish step
 - [ ] Every line of the pre-PR check in the module-sync skill of the version control system passes — at the Publish step
@@ -201,29 +201,32 @@ review-thread box: a thread opened after the thread list was last read moves no 
 2. **The human authorises the merge.** An agent merges on an explicit instruction
    naming this PR, which does not carry to the next one: the authorisation is per pull
    request, so a command merging several needs an instruction naming each of them.
-3. **Rebase before merge.** `git rebase <target>`, then merge from the current target
-   tip; the rebase moves the head, so the branch returns to the Publish step and the
-   checks of that moment run again (`work-sequence` → When a Check Runs). The merge is
-   guarded with the head SHA read afterwards (`editing` → Guard Against a Stale Reading).
-4. **`--no-ff` only.** No fast-forward merge, no squash merge.
-5. **Merge subject:** `Merge PR #<pr-number>: <pr subject>`, the PR subject verbatim
-   and never re-prefixed with `type(scope):`, so a tracker ID in the title leaves both
-   identifiers in place (`Merge PR #7: PROJ-42: Add SipHash...`).
-6. **Merge subject length:** at most 120 characters, superseding the 72-character rule
-   in `commit-rules` for merge commits only.
-7. **Merge body required.** What was integrated and why, never empty (`commit-rules`).
+3. **A moved head.** Must run the checks of the Publish step again wherever the head
+   of the branch moves before the merge (`work-sequence` → When a Check Runs), and must
+   guard the merge with the head SHA read after that move (`editing` → Guard Against a
+   Stale Reading). Must merge only a branch carrying the current tip of the target;
+   elsewhere the branch returns to the Publish step.
+4. **The merge method.** Must merge by the method the project states: a merge commit, a
+   fast-forward, a squash or a rebase. Where it states none, must ask the user which,
+   among the methods the target admits, and must run no merge before the answer. The
+   command of each method: the workflow skill of the version control system.
+5. **Merge subject:** where a merge commit is recorded, its subject must be
+   `Merge PR #<pr-number>: <pr subject>`, the PR subject verbatim and never re-prefixed
+   with `type(scope):`, so a tracker ID in the title leaves both identifiers in place
+   (`Merge PR #7: PROJ-42: Add SipHash...`).
+6. **Merge subject length:** where a merge commit is recorded, its subject must be at most
+   120 characters, superseding the 72-character rule in `commit-rules` for merge commits
+   only.
+7. **Merge body required.** Where a merge commit is recorded, its body must state what
+   was integrated and why, never empty (`commit-rules`).
 8. **Trailers:** the ban in `commit-rules` holds; `Co-authored-by` injected by the
    forge when committer differs from author is allowed.
-9. **Cleanup before the Publish step.** Squash fixups (`commit-rules` → Fixup Commits)
-   before the branch is sent, never at merge time: a rewrite afterwards takes a
-   force-push and owes every check that step ran.
-10. **Rewrite squashed commit bodies** per `commit-rules` → Fixup / Squash Merges.
-11. **Read the thread list before the merge command.** Immediately before it, read the review
-    threads again and match them against the list read when the review was addressed
-    (`editing` → Guard Against a Stale Reading).
+9. **Read the thread list before the merge command.** Immediately before it, read the
+   review threads again and match them against the list read when the review was
+   addressed (`editing` → Guard Against a Stale Reading).
 
-The command performing the merge, and the repository settings it depends on, belong to
-the CLI skill of the hosting platform.
+The command of a merge on the forge, and the repository settings it depends on, belong
+to the CLI skill of the hosting platform.
 
 ## PR Size
 
@@ -239,10 +242,11 @@ is split before review.
 
 - `work-sequence` — the order of work the Offer for review step belongs to, and the moment each check runs at.
 - `issue-rules` — the issue this PR resolves: title, templates, labels, lifecycle.
-- `commit-rules` — commit message format and branch naming on the PR's branch.
+- `commit-rules` — the message format of every commit on the PR's branch.
 - `code-review-and-quality` — what a review looks for, where this skill states how a finding is worded.
 - `editing` — the head-SHA read Merge Strategy turns on, the thread-list read it owes before the merge command, and the thread state the Pre-Merge Checklist reads.
 - `writing-style` — prose register in the description and in the review threads.
 - `ci-cd-and-automation` — the pipeline answering the checks reported on the pull request.
+- The workflow skill of the version control system — the commands behind the rebase, the send, the merge and the removal of the merged branch.
 - The module-sync skill of the version control system — the pre-PR check and the merge order the checklists gate on.
 - The CLI skill of the hosting platform — the commands behind the steps that reach this platform, and the draft mechanics behind Pending by Default.

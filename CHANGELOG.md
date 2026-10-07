@@ -21,6 +21,7 @@
 - `work-sequence` names the artifact each condition of the work is read off
 - [skills] `testing`: a test's rules in any language, from its level to when a suite may be trusted
 - [skills] `artifact-placement`: the agent asks where an artifact goes unless one place is named
+- [skills] `git-workflow`: the git commands from a branch to its published tag
 - `code-navigation` skill: the questions a text search does not answer about a symbol - its callers, implementations, definition, a bare name's referent and the symbol's remaining users - the rule that an answer names the operation producing it, and `test/code-navigation.test.js` over the example
 - Independent work runs at the same time: `project-planning` states when two units are independent, the lowest bound the contended resources put on the degree of parallelism, and when one check runs alone before the rest; a pipeline arranges its jobs so by default
 - The lifecycle map in `AGENTS.md` carries a second table stating, for the skills it names, the input, the output and the artifacts entry and exit turn on, its `Stage` cell naming the stage whose output that skill produces; a skill whose output no single stage produces declares `cross-cutting` there
@@ -96,6 +97,11 @@
 - Every example in `issue-rules` obeys its rule: an imperative title, and one capitalisation stated for the topic labels of a project
 - `issue-rules` declares `rubric: applied`: every section carries one of the four binding-force markers
 - `github-cli` and `gitlab-cli` name, beside the labelling command, the command that sets an issue's assignee and the search of the open issues
+- [skills] Moved git commands of `commit-rules`, `release`, `pr-rules`, CLI skills to `git-workflow`
+- [skills] Made `git-workflow` tag the merge commit, where one is recorded, with an annotated tag
+- [skills] Made `pr-rules` take the merge method from the project, else ask the user for it
+- [skills] Made `commit-rules` ask for a branch's user name or issue where no source gave either
+- [skills] Let `release` admit the old version in released changelog sections after a bump
 - `code-reviewer`, `implementer` and `spec-architect` load `code-navigation` and declare the `LSP` tool its operations belong to, so a rule about a symbol's callers reaches an operation wherever the environment offers one
 - `/review-loop` asks where every pass runs rather than assuming a working directory: it makes no place of its own, moves nothing aside, and states no step that needs a repository
 - `pr-rules` → Pending by Default states its exception per draft: a call sending every draft the caller holds needs an instruction covering each, where one naming a single reply admits the single-draft form

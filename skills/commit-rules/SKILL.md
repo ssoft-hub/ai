@@ -19,6 +19,7 @@ Apply when writing commit messages or reviewing commits.
 
 - The step of the work a commit or a branch is made at → `work-sequence` skill.
 - Prose register, and the rule that a body states the result rather than the process → `writing-style` skill.
+- The commands making a branch, making a commit, correcting one already made and rewriting what is already recorded → the workflow skill of the version control system.
 
 ## Format
 
@@ -102,10 +103,20 @@ issues. Both go after the explanatory paragraph, not instead of it.
 <user>/<type>/<TRACKER-N>/<subject>
 ```
 
-- **user** — git username (always; marks personal branches).
-- **type** — same values as commit types (`feat`, `fix`, `chore`, …).
-- **TRACKER-N** — issue identifier from the tracker (`PROJ-42`, `GH-7`, …). Omit the segment entirely when there is no tracked issue.
-- **subject** — kebab-case, imperative, concise.
+| Segment | What it holds | Where it comes from |
+|---|---|---|
+| `user` | the user's name, which marks the branch personal | the request, the thread or the configuration of the version control system |
+| `type` | one value of the Types table | the change |
+| `TRACKER-N` | the identifier of the issue the work resolves — `PROJ-42`, `GH-7` | the request, the thread or the project's rules |
+| `subject` | kebab-case, imperative, concise | the change |
+
+- Where no source gives the user's name, must ask the user what to do, and must not
+  supply a user name no source gives.
+- Where it is not known whether the work needs an issue, must settle it by the project's
+  rules, must ask where they do not settle it, and must not supply an identifier no
+  source gives.
+- Where the work has no issue, must drop the `TRACKER-N` segment whole, its slash
+  included.
 
 ```
 <user>/feat/PROJ-42/add-siphash
@@ -116,57 +127,17 @@ issues. Both go after the explanatory paragraph, not instead of it.
 
 ## Consistency Rules
 
-- **Check branch before committing** — confirm you are on a feature branch, not `main`.
-  Direct commits to `main` are blocked by the pre-commit hook.
+- **Check the branch before the first commit of a round** — the commit goes to a working
+  branch, never to a shared one: `main`, `master` or what the project declares.
+- **No correction commit in a branch offered for review** — a correction of an earlier
+  commit of the same branch, a rename or a move included, is folded into the commit it
+  corrects before the branch is offered, so each commit reads as correct from the start.
 - **Repository must be consistent at every commit** — docs, tests, and implementation
   must not diverge within a single commit. A commit that adds a feature must also
   update any documentation or tests that reference it.
 - **Do not describe a result before it exists** — a commit that only adds tests for
   feature X must not say "add feature X". The subject must match what is actually
   committed, not what will be committed later.
-
----
-
-## Fixup Commits
-
-When correcting an earlier commit on the same branch, use `--fixup` instead of a free-form commit:
-
-```bash
-git commit --fixup=<hash>          # code-only fix; target's message is left untouched
-git commit --fixup=amend:<hash>    # fix also changes what the message must say
-git commit --fixup=reword:<hash>   # message-only correction, no code change
-git rebase -i --autosquash <base>  # squashes fixups automatically before merge
-```
-
-Plain `--fixup` never opens an editor: `rebase --autosquash` folds the code silently and
-keeps the target commit's original message exactly as it was, even when the fix makes
-that message no longer describe the code. Use `amend:` (or `reword:` for a message-only
-correction) whenever the fixup changes what the commit should say about itself — it
-opens the editor immediately, pre-filled with the target's message, and the edited
-result replaces the target's message during autosquash. `amend:`/`reword:` require
-git ≥ 2.32; on an older git, amend the target commit's message by hand after autosquash
-instead.
-
-Use `--fixup` when the change belongs to a specific earlier commit — reviewer sees the correction attached to its target, not floating. Use a normal commit only when the change is logically independent.
-
-## Fixup / Squash Merges
-
-Squash fixup commits before the Publish step, not at merge time (`work-sequence` →
-The Sequence).
-
-Before running `rebase -i --autosquash`, check whether any fixup changes what its target
-commit's body claims. If so, that fixup must be `--fixup=amend:<hash>`, not plain
-`--fixup` — otherwise the merged commit keeps describing the pre-fix behaviour.
-
-After autosquash completes, re-read each final message (`git log -1 <hash>`) against the
-diff it now covers (`git show <hash>`) and amend anything that drifted. The merged
-commit must read as if it was written that way from the start.
-
-## No Correction Commits Within a PR
-
-A PR branch must not contain correction commits (fixups, renames, moves) for mistakes introduced earlier in the same branch. If a commit is wrong, rewrite history — do not layer a fix on top.
-
-**Rule:** If a correction belongs to an earlier commit in the same PR, rebase and amend that commit. A reviewer should see each commit as correct from the start, not as a sequence of mistake + fix.
 
 ---
 

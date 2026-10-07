@@ -29,9 +29,9 @@ named beside it.
 | Step | Achieves | Runs when | Stated by |
 |---|---|---|---|
 | Scope and issue | the change has a tracked issue in the repository it belongs to, a module's in that module's own repository | the task is taken up | `issue-rules` |
-| Branch | the work has a branch of its own, named | once the issue carries at least one acceptance criterion, before the first commit | `commit-rules` → Branch Naming |
+| Branch | the work has a branch of its own, named | once the issue carries at least one acceptance criterion, before the first commit | `commit-rules` → Branch Naming, and the workflow skill of the version control system for the command that makes the branch |
 | Commits | the change is recorded on that branch | a round of edits closes | `commit-rules` |
-| Publish | the branch stands where a reviewer reads it | the local remarks are exhausted | `pr-rules` → Pre-Open Checklist |
+| Publish | the branch stands where a reviewer reads it | the local remarks are exhausted | `pr-rules` → Pre-Open Checklist, and the workflow skill of the version control system for the command that sends the branch |
 | Offer for review | the change is offered for review | the Publish step has run | `pr-rules` |
 | Pre-merge issue check | the tracked issue is reconciled against what the change delivers | the review has passed | `pr-rules` → Pre-Merge Checklist |
 | Integrate | the change sits on the target branch | the Pre-merge issue check clears | `pr-rules` → Merge Strategy |
@@ -87,6 +87,7 @@ project declares is the project's own; the pipeline that runs them on a server i
 
 - `issue-rules` — the issue's title, description, labels and lifecycle.
 - `commit-rules` — the branch name and the commit message.
+- The workflow skill of the version control system — the command each step above runs, and the order they run in.
 - `pr-rules` — what the offer for review carries: its title, description, review comments, two checklists and merge strategy.
 - `ci-cd-and-automation` — the pipeline running a project's checks on a server.
 - `changelog` — the entry a branch carries before it is published.

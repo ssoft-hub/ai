@@ -37,8 +37,10 @@ install.js  Bootstrap script — copies files to ~/.claude/
 - Node built-ins only: no npm package in a hook, a tool, `install.js` or a test.
 - `install.js`, `lib/` and `test/` follow the same two hard rules a hook or a tool does,
   built-ins and no hardcoded user path — `skills/hook-scripts/SKILL.md` → Hard Rules.
-- Commit and branch format: `skills/commit-rules/SKILL.md`. Direct commits to `main` are
-  blocked — work on a feature branch.
+- Commit and branch format: `skills/commit-rules/SKILL.md`; the git commands of the work
+  sequence: `skills/git-workflow/SKILL.md`, the submodule commands staying with
+  `skills/submodule-sync/SKILL.md`. Direct commits to `main` are blocked — work on a
+  feature branch.
 
 ## Hook architecture
 
@@ -96,6 +98,7 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `debugging` — the investigation that precedes a fix.
 - `deprecation-and-migration` — retiring a public path.
 - `editing` — the guard against a stale reading of a file, of a tracker or forge artifact, and of the branch head at a merge.
+- `git-workflow` — the git commands carrying a change from its branch to its released tag, in the order they run, and the searches and diffs read on the way.
 - `github-cli` — `gh` mechanics.
 - `gitlab-cli` — `glab` mechanics.
 - `hook-scripts` — writing this repository's hooks and tools.
@@ -103,9 +106,9 @@ a copy that drifts, and the agent reading both has nothing telling it which one 
 - `node-testing` — the runner, layout and running of a test on Node.js.
 - `observability-and-instrumentation` — telemetry for production visibility.
 - `performance-optimization` — the process around one performance problem.
-- `pr-rules` — the pull request, from the issue it resolves through opening it to merging it.
+- `pr-rules` — the pull request, from the issue it resolves through opening it to the decision to merge, and the merge method.
 - `project-planning` — stakeholder-facing planning, and whether independent work runs at the same time.
-- `release` — the version number and the mechanical steps to ship it.
+- `release` — the version number and what holds before it is frozen.
 - `requirements` — turning an ask into a requirement.
 - `security-and-hardening` — design-time security.
 - `shipping-and-launch` — whether a built release may reach users, and how widely.
@@ -162,16 +165,16 @@ stage with no command or persona of its own says so rather than naming the neare
 | Intake | — | not created yet | `requirements`, `project-planning` |
 | Spec | `/spec` → `spec-architect` | `Open`, once it exists | `requirements`, `ddd`, `architecture`, `cpp-api-design`, `artifact-placement` |
 | Scope and issue | — | `Open` | `issue-rules`, `github-cli` / `gitlab-cli` |
-| Branch | — | → `In Progress` | `commit-rules` → Branch Naming |
-| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `testing`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`, `artifact-placement`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` per commit |
-| Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules` |
+| Branch | — | → `In Progress` | `commit-rules` → Branch Naming, `git-workflow` → Commands by Step |
+| Implement | `/implement` → `implementer` | `In Progress` | `work-sequence` → When a Check Runs, `test-driven-development`, `testing`, `cpp-coding`, `ddd`, `cpp-encapsulation`, `cpp-testing`, `hook-scripts`, `node-testing`, `artifact-placement`; `debugging` on a fix; `performance-optimization` on a reported performance problem; `deprecation-and-migration` when retiring a public path; `skill-authoring` on a skill or a command file; `project-planning` → Running Independent Work in Parallel on each launch that section names; `commit-rules` and `git-workflow` per commit |
+| Publish | — | `In Progress` | `work-sequence` → When a Check Runs, `submodule-sync`, `changelog`, `commit-rules`, `git-workflow` → Rebasing onto the Target, `git-workflow` → Sending the Branch |
 | Offer for review | — | → `In Review` | `pr-rules`, `ci-cd-and-automation`, `github-cli` / `gitlab-cli` |
-| Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `testing`, `cpp-testing`, `node-testing`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`; `changelog` when the change touches `CHANGELOG.md` |
+| Review | `/review`, or `/review-loop` to iterate → `code-reviewer` | `In Review` | `code-review-and-quality`, `testing`, `cpp-testing`, `node-testing`, `cpp-api-design`, `cpp-encapsulation`, `comments` / `cpp-doxygen`, `pr-rules`, `git-workflow` → Reading One Round of Review; `changelog` when the change touches `CHANGELOG.md` |
 | Security audit | `/review`, or `/review-loop` to iterate → `security-auditor` | `In Review` | `security-and-hardening`, `pr-rules` |
 | Pre-merge issue check | — | `In Review` | `pr-rules` → Pre-Merge Checklist, `github-cli` / `gitlab-cli` |
-| Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `github-cli` / `gitlab-cli` |
+| Integrate | — | `In Review` | `pr-rules` → Merge Strategy, `commit-rules`, `git-workflow` → Merging, `git-workflow` → Removing the Merged Branch, `github-cli` / `gitlab-cli` |
 | Close issue | — | → `Done` (`work-sequence` → The Artifact Each Condition Is Read Off) | `issue-rules` → Lifecycle, `work-sequence` → The Artifact Each Condition Is Read Off, `github-cli` / `gitlab-cli` |
-| Release | — (`release-manager` directly) | `Done` since the merge, which the release moves no further | `changelog`, `release`, `shipping-and-launch`, `submodule-sync` |
+| Release | — (`release-manager` directly) | `Done` since the merge, which the release moves no further | `changelog`, `release`, `shipping-and-launch`, `submodule-sync`, `git-workflow` → Tagging a Release |
 
 Where each skill of the catalog stands, the table above, keyed on `Stage`, being the stage
 table, and the one keyed on `Skill` the criteria table:
