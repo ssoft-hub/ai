@@ -12,11 +12,14 @@ version of them.
 ## Commits and branches
 
 Conventional Commits. The message format, the type vocabulary, the body and the branch
-name pattern are owned by `skills/commit-rules/SKILL.md` - read it before the first
-commit rather than copying the shape of a nearby one.
+name pattern are owned by `skills/commit-rules/SKILL.md`, and the git commands of the work
+sequence by `skills/git-workflow/SKILL.md`, the submodule commands by
+`skills/submodule-sync/SKILL.md` - read the first two before the first commit rather than
+copying the shape of a nearby one.
 
-One of its rules is enforced rather than left to the reader: the `commit-trailer-guard`
-tool blocks a `git commit` an agent runs with an AI-attribution trailer in the message.
+One rule of `commit-rules` is enforced rather than left to the reader: the
+`commit-trailer-guard` tool blocks a `git commit` an agent runs with an AI-attribution
+trailer in the message.
 
 ## Hook and tool scripts
 

@@ -102,6 +102,7 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `debugging` | Root-cause investigation before proposing a fix |
 | `deprecation-and-migration` | Retiring a public API and writing a migration guide |
 | `editing` | Guard against a stale reading of a file, of a tracker or forge artifact, and of a branch head |
+| `git-workflow` | The git commands from branch to tag — branch, commit, fixup, rebase, push, merge, branch removal, version search, tag, review diff |
 | `github-cli` | `gh` mechanics — issues, PRs, labels, pending review threads, stacks, merges |
 | `gitlab-cli` | `glab` mechanics — issues, MRs, labels, draft notes, stacks, merges |
 | `hook-scripts` | Writing this repository's hooks and tools |
@@ -111,11 +112,11 @@ skills that always apply alongside it, and optional `reminder: false` for a skil
 | `performance-optimization` | Profile-measure-optimize workflow for a reported performance problem |
 | `pr-rules` | The issue a PR resolves, its title, description, review comments, merge strategy |
 | `project-planning` | Scoping, estimation, milestones, risk, status updates, and the launch of independent work at once |
-| `release` | Semver release workflow |
+| `release` | Semver version decision and the gates before it is frozen |
 | `requirements` | Requirements gathering, user stories, acceptance criteria |
 | `security-and-hardening` | Trust boundaries, input validation, secrets, least privilege |
 | `shipping-and-launch` | Release readiness, staged rollout, rollback planning |
-| `skill-authoring` | Writing a skill file — its concern, name, contexts, relation to a project's conventions, what ships with it, section markers, rename — and the marker on a command's sections |
+| `skill-authoring` | Writing a skill file — its concern, a narrow skill resting on a wider one, name, contexts, relation to a project's conventions, what ships with it, section markers, rename — and the marker on a command's sections |
 | `submodule-sync` | Git submodule sync discipline |
 | `test-driven-development` | Fail-pass-refactor workflow, before writing implementation code |
 | `testing` | The level of a test, its isolation, data and environment, the boundary it crosses, its layout, its determinism, and when a suite may be trusted |

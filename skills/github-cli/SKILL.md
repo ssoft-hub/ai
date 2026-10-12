@@ -98,7 +98,7 @@ gh pr create --base <target> --title '<title>' --body-file <path> \
 # read
 gh pr view <n> --json number,title,body,state,mergeable,labels
 
-# merge commit, no fast-forward, no squash
+# merge, here as a merge commit - the flag follows the merge method, below the table
 gh pr merge <n> --merge -t "<subject>" -b "<body>" --delete-branch
 
 # the asynchronous merge, for the stacked case under Stacks
@@ -114,7 +114,14 @@ gh api repos/{owner}/{repo}/pulls/<n>/merge-async/<uuid>
 |---|---|
 | `--merge` | the `--no-ff` equivalent: always a two-parent merge commit, whose subject and body are `-t`/`-b` |
 | `--rebase` | ignores `-t`/`-b`; the commits it replays keep the branch's own messages |
+| `--squash` | one commit on the base carrying the whole branch, whose subject and body are `-t`/`-b` |
 | `--delete-branch` | deletes the local and the remote head branch, and no base branch. Where an open pull request targets that head branch, the caller should read Stacks before passing the flag |
+
+Should pass the flag of the merge method `pr-rules` → Merge Strategy 4 settles:
+`--merge` for a merge commit, `--squash` for a squash, `--rebase` for a rebase. `gh pr
+merge` carries no fast-forward flag, its `--help` listing `--merge`, `--rebase` and
+`--squash` alone, so a fast-forward runs locally, as the workflow skill of the version
+control system gives it, and only where the target accepts a direct push.
 
 The merge runs server-side against the pushed branch, so a commit amended locally and not
 pushed takes no part in it, and `GitHub <noreply@github.com>` commits the merge rather
@@ -145,8 +152,8 @@ then what is left takes one command each:
 
 | What is left | What it takes |
 |---|---|
-| the local head branch | the same `gh pr merge <n> --merge --delete-branch` again, after either refusal: it answers `! Pull request <owner>/<repo>#<n> was already merged` with an exit status of 0, switches a tree still holding the head branch onto the base branch, deletes the head branch, and reaches no remote branch. `git branch -d <name>` deletes it too, and, run from the base branch, answers `error: the branch '<name>' is not fully merged` until that branch carries the merge |
-| the remote head branch | `git push origin --delete <name>`, which answers `error: unable to delete '<name>': remote ref does not exist` where the branch went with the merge |
+| the local head branch | the same `gh pr merge <n> --merge --delete-branch` again, after either refusal: it answers `! Pull request <owner>/<repo>#<n> was already merged` with an exit status of 0, switches a tree still holding the head branch onto the base branch, deletes the head branch, and reaches no remote branch. The local removal the workflow skill of the version control system states deletes it too, under the refusals stated there |
+| the remote head branch | `git push <remote> --delete <name>`, `<remote>` being the remote the branch was sent to, which answers `error: unable to delete '<name>': remote ref does not exist` where the branch went with the merge |
 
 `merge-async` is a second merge endpoint `gh` exposes no command for, and the one a
 registered stack takes — see Stacks. The synchronous merge above is the default path.
@@ -209,8 +216,8 @@ Registration decides how the bottom is merged, and what becomes of the rest:
 
 `merge-async` merges the one pull request named. `gh stack merge` merges it and every one
 below, and the authorisation that needs is `pr-rules` → Merge Strategy 2; it also takes the
-merge method last used unless `--merge` is given, which is a squash or a rebase where that
-ran last, both forbidden by `pr-rules` → Merge Strategy 4.
+merge method last used unless a method flag is given, so the call should name the flag of
+the method settled for this merge.
 
 The cascading rebase moves every head above the merged pull request and leaves every tree,
 so read the head sha again with `gh pr view <n> --json headRefOid` — full, per Pull
